@@ -1,4 +1,4 @@
-namespace Backend.API
+namespace InventoryTracker.API
 {
     public class WeatherForecast
     {

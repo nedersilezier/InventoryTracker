@@ -19,7 +19,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/openapi/v1.json", "Backend API");
+        options.SwaggerEndpoint("/openapi/v1.json", "InventoryTracker API");
     });
 }
 
