@@ -1,10 +1,11 @@
-﻿using System;
+﻿using InventoryTracker.Domain.Common;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace InventoryTracker.Domain.Entities
 {
-    public class Stock
+    public class Stock : AuditableEntity
     {
         public Guid StockId { get; set; }
 

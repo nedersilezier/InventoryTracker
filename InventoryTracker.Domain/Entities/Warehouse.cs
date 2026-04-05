@@ -16,5 +16,6 @@ namespace InventoryTracker.Domain.Entities
         public Address Address { get; set; } = default!;
 
         public bool IsActive { get; set; } = true;
+        public ICollection<Stock> Stocks { get; set; } = new List<Stock>();
     }
 }

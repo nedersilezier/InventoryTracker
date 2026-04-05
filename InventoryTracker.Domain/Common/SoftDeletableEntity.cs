@@ -8,6 +8,6 @@ namespace InventoryTracker.Domain.Common
     {
         public DateTime? DeletedAt { get; set; }
         public string? DeletedBy { get; set; }
-        public bool IsDeleted { get; set; }
+        public bool IsDeleted { get; set; } = false;
     }
 }
