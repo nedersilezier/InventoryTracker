@@ -35,7 +35,18 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+
+// Seed initial data
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    var configuration = services.GetRequiredService<IConfiguration>();
+
+    await IdentitySeeder.SeedAsync(roleManager, userManager, configuration);
+}
 
 app.Run();
