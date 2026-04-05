@@ -1,6 +1,6 @@
 @InventoryTracker.API_HostAddress = http://localhost:5080
 
-GET {{Backend.API_HostAddress}}/weatherforecast/
+GET {{InventoryTracker.API_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###

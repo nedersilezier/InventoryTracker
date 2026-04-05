@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="Backend.API/InventoryTracker.API.csproj" />
+  <Project Path="InventoryTracker.API/InventoryTracker.API.csproj" />
   <Project Path="InventoryTracker.Application/InventoryTracker.Application.csproj" />
   <Project Path="InventoryTracker.Domain/InventoryTracker.Domain.csproj" />
   <Project Path="InventoryTracker.Infrastructure/InventoryTracker.Infrastructure.csproj" />

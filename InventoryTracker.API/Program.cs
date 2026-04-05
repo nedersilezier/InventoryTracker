@@ -9,6 +9,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
+using InventoryTracker.Application;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,6 +77,11 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
         };
     });
+
+// Configure MediatR
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(InventoryTracker.Application.AssemblyReference).Assembly));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
