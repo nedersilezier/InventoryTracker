@@ -31,7 +31,7 @@ namespace InventoryTracker.Infrastructure.Persistence.Configurations.Common
         {
             builder.ConfigureAuditable();
 
-            builder.Property(x => x.IsDeleted)
+            builder.Property(x => x.IsActive)
                 .IsRequired();
 
             builder.Property(x => x.DeletedAt)
@@ -40,8 +40,6 @@ namespace InventoryTracker.Infrastructure.Persistence.Configurations.Common
             builder.Property(x => x.DeletedBy)
                 .IsRequired(false)
                 .HasMaxLength(150);
-
-            builder.HasQueryFilter(x => !x.IsDeleted);
         }
     }
 }

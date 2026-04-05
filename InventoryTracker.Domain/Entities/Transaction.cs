@@ -22,6 +22,8 @@ namespace InventoryTracker.Domain.Entities
         public Guid? DestinationWarehouseId { get; set; }
         public Warehouse? DestinationWarehouse { get; set; }
 
+        public string? SourceWarehouseNameSnapshot { get; set; }
+        public string? DestinationWarehouseNameSnapshot { get; set; }
         public DateTime TransactionDate { get; set; }
 
         public string? ReferenceNumber { get; set; }

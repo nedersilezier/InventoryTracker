@@ -14,7 +14,6 @@ namespace InventoryTracker.Domain.Entities
         public string UnitOfMeasure { get; set; } = "pcs";
         public decimal CreditValue { get; set; }
         public decimal Weight { get; set; }
-        public bool IsActive { get; set; }
         public ICollection<TransactionItem> TransactionItems { get; set; } = new List<TransactionItem>();
         public ICollection<Stock> Stocks { get; set; } = new List<Stock>();
     }

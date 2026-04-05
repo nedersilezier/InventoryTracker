@@ -26,6 +26,14 @@ namespace InventoryTracker.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(50);
 
+            builder.Property(x => x.SourceWarehouseNameSnapshot)
+                .IsRequired(false)
+                .HasMaxLength(150);
+
+            builder.Property(x => x.DestinationWarehouseNameSnapshot)
+                .IsRequired(false)
+                .HasMaxLength(150);
+
             builder.Property(x => x.TransactionDate)
                 .IsRequired();
 

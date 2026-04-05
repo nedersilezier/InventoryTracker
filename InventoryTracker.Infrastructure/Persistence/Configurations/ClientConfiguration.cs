@@ -32,9 +32,6 @@ namespace InventoryTracker.Infrastructure.Persistence.Configurations
                 .IsRequired(false)
                 .HasMaxLength(50);
 
-            builder.Property(x => x.IsActive)
-                .IsRequired();
-
             builder.HasIndex(x => x.ClientCode)
                 .IsUnique();
 

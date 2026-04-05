@@ -15,17 +15,30 @@ namespace InventoryTracker.Infrastructure.Persistence.Configurations
             builder.ToTable("TransactionItems");
 
             builder.HasKey(x => x.TransactionItemId);
+            
+            builder.Property(x => x.NameSnapshot)
+                .IsRequired()
+                .HasMaxLength(150);
+
+            builder.Property(x => x.SKUSnapshot)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            builder.Property(x => x.UnitOfMeasureSnapshot)
+                .IsRequired()
+                .HasMaxLength(20);
 
             builder.Property(x => x.Quantity)
                 .IsRequired()
                 .HasColumnType("decimal(18,2)");
 
-            builder.Property(x => x.UnitCreditValue)
+            builder.Property(x => x.UnitCreditValueSnapshot)
                 .IsRequired()
                 .HasColumnType("decimal(10,2)");
 
             builder.Property(x => x.TotalCreditValue)
-                .HasComputedColumnSql("[Quantity] * [UnitCreditValue]", stored: true);
+                .HasComputedColumnSql("[Quantity] * [UnitCreditValueSnapshot]", stored: true)
+                .HasPrecision(18, 4);
 
             builder.HasOne(x => x.Transaction)
                 .WithMany(x => x.TransactionItems)

@@ -24,9 +24,6 @@ namespace InventoryTracker.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasMaxLength(50);
 
-            builder.Property(x => x.IsActive)
-                .IsRequired();
-
             builder.HasIndex(x => x.Code)
                 .IsUnique();
 
@@ -38,3 +35,4 @@ namespace InventoryTracker.Infrastructure.Persistence.Configurations
             builder.ConfigureSoftDeletable();
         }
     }
+}

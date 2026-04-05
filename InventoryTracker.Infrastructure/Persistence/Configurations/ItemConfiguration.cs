@@ -40,9 +40,6 @@ namespace InventoryTracker.Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasColumnType("decimal(10,2)");
 
-            builder.Property(x => x.IsActive)
-                .IsRequired();
-
             builder.HasIndex(x => x.SKU)
                 .IsUnique();
 
