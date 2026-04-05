@@ -1,5 +1,9 @@
+using InventoryTracker.API.Services;
+using InventoryTracker.Application;
+using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Infrastructure.Identity;
 using InventoryTracker.Infrastructure.Persistence;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
@@ -9,8 +13,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
-using InventoryTracker.Application;
-using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,6 +83,13 @@ builder.Services
 // Configure MediatR
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(InventoryTracker.Application.AssemblyReference).Assembly));
+
+// Register the IAppDbContext to resolve to AppDbContext
+builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
+
+// Register the current user service
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var app = builder.Build();
 

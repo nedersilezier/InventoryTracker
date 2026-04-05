@@ -1,14 +1,18 @@
-﻿using InventoryTracker.Domain.Entities;
+﻿using InventoryTracker.Application.Common.Interfaces;
+using InventoryTracker.Domain.Common;
+using InventoryTracker.Domain.Entities;
 using InventoryTracker.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryTracker.Infrastructure.Persistence;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser>
+public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    private readonly ICurrentUserService _currentUserService;
+    public AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUserService currentUserService) : base(options)
     {
+        _currentUserService = currentUserService;
     }
 
     public DbSet<Country> Countries => Set<Country>();
@@ -25,5 +29,85 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        var currentUser = _currentUserService.Email ?? _currentUserService.UserId ?? "system";
+        var now = DateTime.Now;
+
+        //foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+        //{
+        //    if (entry.State == EntityState.Added)
+        //    {
+        //        entry.Entity.CreatedAt = now;
+        //        entry.Entity.CreatedBy = currentUser;
+        //    }
+
+        //    if (entry.State == EntityState.Modified)
+        //    {
+        //        entry.Entity.UpdatedAt = now;
+        //        entry.Entity.UpdatedBy = currentUser;
+        //    }
+        //}
+        //foreach (var entry in ChangeTracker.Entries<SoftDeletableEntity>())
+        //{
+        //    if (entry.State == EntityState.Deleted)
+        //    {
+        //        entry.State = EntityState.Modified;
+        //        entry.Entity.IsActive = false;
+        //        entry.Entity.DeletedAt = now;
+        //        entry.Entity.DeletedBy = currentUser;
+        //        entry.Entity.UpdatedAt = now;
+        //        entry.Entity.UpdatedBy = currentUser;
+        //    }
+        //    else if (entry.State == EntityState.Modified)
+        //    {
+        //        var isActiveProperty = entry.Property(x => x.IsActive);
+        //        var wasActive = (bool)isActiveProperty.OriginalValue;
+        //        var isActive = (bool)isActiveProperty.CurrentValue;
+
+        //        if (wasActive && !isActive && entry.Entity.DeletedAt is null)
+        //        {
+        //            entry.Entity.DeletedAt = now;
+        //            entry.Entity.DeletedBy = currentUser;
+        //        }
+        //    }
+        //}
+        foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Entity.CreatedAt = now;
+                entry.Entity.CreatedBy = currentUser;
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                entry.Entity.UpdatedAt = now;
+                entry.Entity.UpdatedBy = currentUser;
+            }
+            else if (entry.State == EntityState.Deleted && entry.Entity is SoftDeletableEntity softDeletable)
+            {
+                entry.State = EntityState.Modified;
+                softDeletable.IsActive = false;
+                softDeletable.DeletedAt = now;
+                softDeletable.DeletedBy = currentUser;
+                softDeletable.UpdatedAt = now;
+                softDeletable.UpdatedBy = currentUser;
+            }
+
+            if (entry.Entity is SoftDeletableEntity softEntity && entry.State == EntityState.Modified)
+            {
+                var isActiveProperty = entry.Property(nameof(SoftDeletableEntity.IsActive));
+                var wasActive = (bool)isActiveProperty.OriginalValue!;
+                var isActive = (bool)isActiveProperty.CurrentValue!;
+
+                if (wasActive && !isActive && softEntity.DeletedAt is null)
+                {
+                    softEntity.DeletedAt = now;
+                    softEntity.DeletedBy = currentUser;
+                }
+            }
+        }
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

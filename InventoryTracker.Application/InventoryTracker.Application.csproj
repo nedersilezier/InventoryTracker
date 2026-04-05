@@ -11,14 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Items\Commands\" />
-    <Folder Include="Features\Items\DTOs\" />
-    <Folder Include="Features\Items\Queries\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="MediatR" Version="14.1.0" />
-    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.1.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
   </ItemGroup>
 
 </Project>
