@@ -1,26 +1,26 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
-using InventoryTracker.Application.Features.Items.DTOs;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using InventoryTracker.Application.Features.Items.DTOs;
 
-namespace InventoryTracker.Application.Features.Items.Commands.DeactivateItem
+namespace InventoryTracker.Application.Features.Items.Commands.ActivateItem
 {
-    public class DeactivateItemCommandHandler : IRequestHandler<DeactivateItemCommand, ItemDTO?>
+    public class ActivateItemCommandHandler : IRequestHandler<ActivateItemCommand, ItemDTO?>
     {
         private readonly IAppDbContext _context;
-        public DeactivateItemCommandHandler(IAppDbContext context)
+        public ActivateItemCommandHandler(IAppDbContext context)
         {
             _context = context;
         }
-        public async Task<ItemDTO?> Handle(DeactivateItemCommand request, CancellationToken cancellationToken)
+        public async Task<ItemDTO?> Handle(ActivateItemCommand request, CancellationToken cancellationToken)
         {
             var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemId == request.ItemId, cancellationToken);
             if (item == null)
                 return null;
-            item.IsActive = false;
+            item.IsActive = true;
             await _context.SaveChangesAsync(cancellationToken);
             return new ItemDTO
             {

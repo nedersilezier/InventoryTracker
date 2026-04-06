@@ -68,6 +68,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
                     softEntity.DeletedAt = now;
                     softEntity.DeletedBy = currentUser;
                 }
+                if(!wasActive && isActive)
+                {
+                    softEntity.DeletedAt = null;
+                    softEntity.DeletedBy = null;
+                }
             }
         }
         return await base.SaveChangesAsync(cancellationToken);

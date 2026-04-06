@@ -17,7 +17,7 @@ namespace InventoryTracker.Application.Features.Items.Commands.UpdateItem
         }
         public async Task<ItemDTO?> Handle(UpdateItemCommand request, CancellationToken cancellationToken)
         {
-            var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemId == request.ItemId);
+            var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemId == request.ItemId, cancellationToken);
             if (item == null)
                 return null;
 

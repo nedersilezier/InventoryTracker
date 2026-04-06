@@ -1,16 +1,15 @@
 ﻿using InventoryTracker.Application.Features.Items.DTOs;
-using InventoryTracker.Application.Features.Items.Queries.GetItems;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace InventoryTracker.Application.Features.Items.Commands.DeactivateItem
+namespace InventoryTracker.Application.Features.Items.Commands.ActivateItem
 {
-    public class DeactivateItemCommand: IRequest<ItemDTO?>
+    public class ActivateItemCommand: IRequest<ItemDTO?>
     {
         public Guid ItemId { get; private set; }
-        public DeactivateItemCommand(Guid itemId)
+        public ActivateItemCommand(Guid itemId)
         {
             ItemId = itemId;
         }

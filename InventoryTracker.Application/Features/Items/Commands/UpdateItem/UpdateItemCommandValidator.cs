@@ -9,9 +9,6 @@ namespace InventoryTracker.Application.Features.Items.Commands.UpdateItem
     {
         public UpdateItemCommandValidator()
         {
-            RuleFor(x => x.ItemId)
-                .NotEmpty().WithMessage("Item ID is required.");
-
             RuleFor(x => x.Name)
                 .NotEmpty().WithMessage("Name is required.")
                 .MaximumLength(150);
