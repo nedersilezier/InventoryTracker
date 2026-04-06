@@ -18,15 +18,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\TransactionItems\Commands\" />
-    <Folder Include="Features\TransactionItems\DTOs\" />
-    <Folder Include="Features\TransactionItems\Queries\" />
     <Folder Include="Features\Stocks\Commands\" />
     <Folder Include="Features\Stocks\DTOs\" />
     <Folder Include="Features\Stocks\Queries\" />
-    <Folder Include="Features\Transactions\Commands\" />
-    <Folder Include="Features\Transactions\DTOs\" />
-    <Folder Include="Features\Transactions\Queries\" />
   </ItemGroup>
 
 </Project>
