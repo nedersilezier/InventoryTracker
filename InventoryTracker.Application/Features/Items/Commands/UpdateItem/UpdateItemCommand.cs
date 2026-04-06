@@ -1,4 +1,4 @@
-﻿using InventoryTracker.Application.Features.Items.DTOs.Items;
+﻿using InventoryTracker.Application.Features.Items.DTOs;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,5 @@ namespace InventoryTracker.Application.Features.Items.Commands.UpdateItem
         public string UnitOfMeasure { get; set; } = default!;
         public decimal CreditValue { get; set; }
         public decimal Weight { get; set; }
-        public bool IsActive { get; set; }
     }
 }

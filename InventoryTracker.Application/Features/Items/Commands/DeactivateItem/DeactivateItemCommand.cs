@@ -1,4 +1,4 @@
-﻿using InventoryTracker.Application.Features.Items.DTOs.Items;
+﻿using InventoryTracker.Application.Features.Items.DTOs;
 using InventoryTracker.Application.Features.Items.Queries.GetItems;
 using MediatR;
 using System;

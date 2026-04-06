@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace InventoryTracker.Application.Features.Items.DTOs.Items
+namespace InventoryTracker.Application.Features.Items.DTOs
 {
     public class ItemDTO
     {

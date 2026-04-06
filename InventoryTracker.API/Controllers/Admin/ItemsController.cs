@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InventoryTracker.API.Controllers.Admin
 {
     [ApiController]
-    [Route("api/admin/items-controller")]
+    [Route("api/admin/items")]
     [Authorize(Roles = "Admin")]
     public class ItemsController : ControllerBase
     {
@@ -39,7 +39,7 @@ namespace InventoryTracker.API.Controllers.Admin
             var item = await _mediator.Send(command, cancellationToken);
             return Ok(item);
         }
-        [HttpPost]
+        [HttpPut]
         [Route("{id}/update")]
         public async Task<IActionResult> UpdateItem(Guid id, UpdateItemCommand command, CancellationToken cancellationToken)
         {
@@ -50,7 +50,7 @@ namespace InventoryTracker.API.Controllers.Admin
                 return NotFound();
             return Ok(item);
         }
-        [HttpPost]
+        [HttpDelete]
         [Route("{id}/deactivate")]
         public async Task<IActionResult> DeactivateItem(Guid id, CancellationToken cancellationToken)
         {

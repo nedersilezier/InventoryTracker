@@ -1,5 +1,5 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
-using InventoryTracker.Application.Features.Items.DTOs.Items;
+using InventoryTracker.Application.Features.Items.DTOs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -33,7 +33,6 @@ namespace InventoryTracker.Application.Features.Items.Commands.UpdateItem
             item.UnitOfMeasure = request.UnitOfMeasure;
             item.CreditValue = request.CreditValue;
             item.Weight = request.Weight;
-            item.IsActive = request.IsActive;
             await _context.SaveChangesAsync(cancellationToken);
             return new ItemDTO
             {

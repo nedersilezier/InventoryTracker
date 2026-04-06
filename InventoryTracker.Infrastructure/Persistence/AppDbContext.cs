@@ -33,46 +33,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var currentUser = _currentUserService.Email ?? _currentUserService.UserId ?? "system";
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
 
-        //foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
-        //{
-        //    if (entry.State == EntityState.Added)
-        //    {
-        //        entry.Entity.CreatedAt = now;
-        //        entry.Entity.CreatedBy = currentUser;
-        //    }
-
-        //    if (entry.State == EntityState.Modified)
-        //    {
-        //        entry.Entity.UpdatedAt = now;
-        //        entry.Entity.UpdatedBy = currentUser;
-        //    }
-        //}
-        //foreach (var entry in ChangeTracker.Entries<SoftDeletableEntity>())
-        //{
-        //    if (entry.State == EntityState.Deleted)
-        //    {
-        //        entry.State = EntityState.Modified;
-        //        entry.Entity.IsActive = false;
-        //        entry.Entity.DeletedAt = now;
-        //        entry.Entity.DeletedBy = currentUser;
-        //        entry.Entity.UpdatedAt = now;
-        //        entry.Entity.UpdatedBy = currentUser;
-        //    }
-        //    else if (entry.State == EntityState.Modified)
-        //    {
-        //        var isActiveProperty = entry.Property(x => x.IsActive);
-        //        var wasActive = (bool)isActiveProperty.OriginalValue;
-        //        var isActive = (bool)isActiveProperty.CurrentValue;
-
-        //        if (wasActive && !isActive && entry.Entity.DeletedAt is null)
-        //        {
-        //            entry.Entity.DeletedAt = now;
-        //            entry.Entity.DeletedBy = currentUser;
-        //        }
-        //    }
-        //}
         foreach (var entry in ChangeTracker.Entries<AuditableEntity>())
         {
             if (entry.State == EntityState.Added)

@@ -1,5 +1,5 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
-using InventoryTracker.Application.Features.Items.DTOs.Items;
+using InventoryTracker.Application.Features.Items.DTOs;
 using InventoryTracker.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

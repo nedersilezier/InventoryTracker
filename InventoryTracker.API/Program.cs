@@ -1,5 +1,8 @@
+using FluentValidation;
+using InventoryTracker.API.Middleware;
 using InventoryTracker.API.Services;
 using InventoryTracker.Application;
+using InventoryTracker.Application.Common.Behaviors;
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Infrastructure.Identity;
 using InventoryTracker.Infrastructure.Persistence;
@@ -82,7 +85,14 @@ builder.Services
 
 // Configure MediatR
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(InventoryTracker.Application.AssemblyReference).Assembly));
+{
+    cfg.RegisterServicesFromAssembly(typeof(InventoryTracker.Application.AssemblyReference).Assembly);
+    //validation pipeline
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+});
+
+// Register FluentValidation validators from Application assembly
+builder.Services.AddValidatorsFromAssembly(typeof(InventoryTracker.Application.AssemblyReference).Assembly);
 
 // Register the IAppDbContext to resolve to AppDbContext
 builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
@@ -90,6 +100,10 @@ builder.Services.AddScoped<IAppDbContext>(provider => provider.GetRequiredServic
 // Register the current user service
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
+// Register global exception handler
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -103,6 +117,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
