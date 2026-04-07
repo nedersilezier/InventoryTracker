@@ -13,6 +13,15 @@ namespace InventoryTracker.Application.Features.Clients.Commands.CreateClient
         public string ClientCode { get; set; } = default!;
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
-        public AddressDTO Address { get; set; } = default!;
+        public CreateClientAddressDTO Address { get; set; } = default!;
+        public class CreateClientAddressDTO
+        {
+            public string Street { get; set; } = default!;
+            public string HouseNumber { get; set; } = default!;
+            public string? ApartmentNumber { get; set; }
+            public string PostalCode { get; set; } = default!;
+            public string City { get; set; } = default!;
+            public Guid CountryId { get; set; }
+        }
     }
 }

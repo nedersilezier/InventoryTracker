@@ -1,4 +1,5 @@
-﻿using InventoryTracker.Application.Features.Items.Commands.ActivateItem;
+﻿using InventoryTracker.API.Requests.Items;
+using InventoryTracker.Application.Features.Items.Commands.ActivateItem;
 using InventoryTracker.Application.Features.Items.Commands.CreateItem;
 using InventoryTracker.Application.Features.Items.Commands.DeactivateItem;
 using InventoryTracker.Application.Features.Items.Commands.UpdateItem;
@@ -42,41 +43,42 @@ namespace InventoryTracker.API.Controllers.Admin
             return CreatedAtAction(nameof(GetItemById), new { id = item.ItemId }, item);
         }
         [HttpPut]
-        [Route("{id}/update")]
-        public async Task<IActionResult> UpdateItem(Guid id, UpdateItemCommand command, CancellationToken cancellationToken)
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateItem(Guid id, UpdateItemRequest request, CancellationToken cancellationToken)
         {
-            if (id != command.ItemId)
+            var command = new UpdateItemCommand
             {
-                return BadRequest(new ProblemDetails
-                {
-                    Status = 400,
-                    Title = "Invalid request",
-                    Detail = "ID in URL does not match ID in body."
-                });
-            }
-
+                ItemId = id,
+                Name = request.Name,
+                SKU = request.SKU,
+                Description = request.Description,
+                UnitOfMeasure = request.UnitOfMeasure,
+                CreditValue = request.CreditValue,
+                Weight = request.Weight
+            };
             var item = await _mediator.Send(command, cancellationToken);
             if (item == null)
                 return NotFound();
             return Ok(item);
         }
-        [HttpDelete]
+       
+        [HttpPatch]
         [Route("{id}/deactivate")]
         public async Task<IActionResult> DeactivateItem(Guid id, CancellationToken cancellationToken)
         {
             var item = await _mediator.Send(new DeactivateItemCommand(id), cancellationToken);
             if (item == null)
                 return NotFound();
-            return CreatedAtAction(nameof(GetItemById), new { id = item.ItemId }, item);
+            return Ok(item);
         }
-        [HttpPut]
+        [HttpPatch]
         [Route("{id}/activate")]
         public async Task<IActionResult> ActivateItem(Guid id, CancellationToken cancellationToken)
         {
             var item = await _mediator.Send(new ActivateItemCommand(id), cancellationToken);
             if (item == null)
                 return NotFound();
-            return CreatedAtAction(nameof(GetItemById), new { id = item.ItemId }, item);
+            return Ok(item);
         }
     }
 }

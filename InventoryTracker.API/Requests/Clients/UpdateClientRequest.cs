@@ -1,22 +1,13 @@
-﻿using InventoryTracker.Application.Common.DTOs;
-using InventoryTracker.Application.Features.Clients.DTOs;
-using InventoryTracker.Application.Features.Items.DTOs;
-using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace InventoryTracker.Application.Features.Clients.Commands.UpdateClient
+﻿namespace InventoryTracker.API.Requests.Clients
 {
-    public class UpdateClientCommand: IRequest<ClientDTO?>
+    public class UpdateClientRequest
     {
-        public Guid ClientId { get; set; }
         public string Name { get; set; } = default!;
         public string ClientCode { get; set; } = default!;
         public string Email { get; set; } = default!;
         public string PhoneNumber { get; set; } = default!;
-        public UpdateClientAddressDTO Address { get; set; } = default!;
-        public class UpdateClientAddressDTO
+        public UpdateClientAddressRequest Address { get; set; } = default!;
+        public class UpdateClientAddressRequest
         {
             public string Street { get; set; } = default!;
             public string HouseNumber { get; set; } = default!;

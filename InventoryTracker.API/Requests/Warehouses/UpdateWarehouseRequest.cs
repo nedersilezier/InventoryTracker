@@ -1,18 +1,11 @@
-﻿using InventoryTracker.Application.Common.DTOs;
-using InventoryTracker.Application.Features.Warehouses.DTOs;
-using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace InventoryTracker.Application.Features.Warehouses.Commands.CreateWarehouse
+﻿namespace InventoryTracker.API.Requests.Warehouses
 {
-    public class CreateWarehouseCommand: IRequest<WarehouseDTO>
+    public class UpdateWarehouseRequest
     {
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
-        public CreateWarehouseAddressDTO Address { get; set; } = default!;
-        public class CreateWarehouseAddressDTO
+        public UpdateWarehouseAddressRequest Address { get; set; } = default!;
+        public class UpdateWarehouseAddressRequest
         {
             public string Street { get; set; } = default!;
             public string HouseNumber { get; set; } = default!;

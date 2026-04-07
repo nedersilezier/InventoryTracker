@@ -8,7 +8,7 @@ namespace InventoryTracker.Application.Features.Countries.Commands.UpdateCountry
 {
     public class UpdateCountryCommand: IRequest<CountryDTO?>
     {
-        public Guid CountryId { get; private set; }
+        public Guid CountryId { get; set; }
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
     }

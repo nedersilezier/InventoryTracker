@@ -27,6 +27,7 @@ namespace InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses
                     Code = w.Code,
                     Address = new AddressDTO
                     {
+                        AddressId = w.Address.AddressId,
                         Street = w.Address.Street,
                         City = w.Address.City,
                         HouseNumber = w.Address.HouseNumber,

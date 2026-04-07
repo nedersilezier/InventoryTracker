@@ -18,7 +18,7 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.UpdateWareho
         }
         public async Task<WarehouseDTO?> Handle(UpdateWarehouseCommand request, CancellationToken cancellationToken)
         {
-            var warehouse = await _context.Warehouses.FirstOrDefaultAsync(w => w.WarehouseId == request.WarehouseId, cancellationToken);
+            var warehouse = await _context.Warehouses.Include(w => w.Address).FirstOrDefaultAsync(w => w.WarehouseId == request.WarehouseId, cancellationToken);
             if (warehouse == null)
                 throw new InvalidOperationException($"Warehouse with id {request.WarehouseId} not found.");
 
@@ -26,12 +26,12 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.UpdateWareho
             if (warehouseCodeExists)
                 throw new InvalidOperationException($"Another warehouse with code {request.Code} already exists.");
 
-            var countryExists = await _context.Countries.AnyAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
-            if (!countryExists)
+            var country = await _context.Countries.FirstOrDefaultAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
+            if (country == null)
                 throw new InvalidOperationException($"Country with id {request.Address.CountryId} not found.");
-            var addressExists = await _context.Addresses.AnyAsync(a => a.AddressId == request.Address.AddressId, cancellationToken);
-            if (!addressExists)
-                throw new InvalidOperationException($"Address with id {request.Address.AddressId} not found.");
+            var address = warehouse.Address;
+            if (address == null)
+                throw new InvalidOperationException($"Address not found.");
 
             warehouse.Name = request.Name;
             warehouse.Code = request.Code;
@@ -50,13 +50,14 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.UpdateWareho
                 Code = warehouse.Code,
                 Address = new AddressDTO
                 {
+                    AddressId = warehouse.Address.AddressId,
                     Street = warehouse.Address.Street,
                     City = warehouse.Address.City,
                     HouseNumber = warehouse.Address.HouseNumber,
                     ApartmentNumber = warehouse.Address.ApartmentNumber,
                     PostalCode = warehouse.Address.PostalCode,
-                    CountryName = warehouse.Address.Country.Name,
-                    CountryId = warehouse.Address.CountryId
+                    CountryName = country.Name,
+                    CountryId = country.CountryId
                 }
             };
         }

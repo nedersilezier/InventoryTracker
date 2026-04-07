@@ -30,6 +30,7 @@ namespace InventoryTracker.Application.Features.Clients.Queries.GetClients
                     IsActive = c.IsActive,
                     Address = new AddressDTO
                     {
+                        AddressId = c.Address.AddressId,
                         Street = c.Address.Street,
                         City = c.Address.City,
                         HouseNumber = c.Address.HouseNumber,

@@ -23,8 +23,8 @@ namespace InventoryTracker.Application.Features.Clients.Commands.CreateClient
             if (clientCodeExists)
                 throw new InvalidOperationException($"Client with code {request.ClientCode} already exists.");
 
-            var countryExists = await _context.Countries.AnyAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
-            if(!countryExists)
+            var country = await _context.Countries.FirstOrDefaultAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
+            if(country == null)
                 throw new InvalidOperationException($"Country with id {request.Address.CountryId} does not exist.");
 
             var address = new Address
@@ -35,7 +35,8 @@ namespace InventoryTracker.Application.Features.Clients.Commands.CreateClient
                 HouseNumber = request.Address.HouseNumber,
                 ApartmentNumber = request.Address.ApartmentNumber,
                 PostalCode = request.Address.PostalCode,
-                CountryId = request.Address.CountryId
+                CountryId = request.Address.CountryId,
+                Country = country
             };
 
             var client = new Client
