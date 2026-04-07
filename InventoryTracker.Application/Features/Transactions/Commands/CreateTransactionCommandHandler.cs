@@ -27,6 +27,10 @@ namespace InventoryTracker.Application.Features.Transactions.Commands
             {
                 throw new InvalidOperationException("Transaction must contain at least one item.");
             }
+            // Validate quantities
+            if (request.Items.Any(i => i.Quantity < 0))
+                throw new InvalidOperationException("Item quantity cannot be negative.");
+
             // Validate based on transaction type
             switch (request.Type)
             {
@@ -90,9 +94,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands
             if (itemIds.Count != items.Count)
                 throw new InvalidOperationException("One or more items do not exist or are inactive.");
 
-            // Validate quantities
-            if (request.Items.Any(i => i.Quantity < 0))
-                throw new InvalidOperationException("Item quantity cannot be negative.");
+            
 
             // Create transaction
             var transaction = new Transaction

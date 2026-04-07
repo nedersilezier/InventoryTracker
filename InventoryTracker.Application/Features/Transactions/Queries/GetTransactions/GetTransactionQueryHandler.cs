@@ -8,18 +8,18 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionQueryHandler: IRequestHandler<GetTransactionQuery, List<TransactionDTO>>
+    public class GetTransactionQueryHandler: IRequestHandler<GetTransactionQuery, List<TransactionListDTO>>
     {
         private readonly IAppDbContext _context;
         public GetTransactionQueryHandler(IAppDbContext context)
         {
             _context = context;
         }
-        public async Task<List<TransactionDTO>> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
+        public async Task<List<TransactionListDTO>> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
         {
             return await _context.Transactions
                 .AsNoTracking()
-                .Select(t => new TransactionDTO
+                .Select(t => new TransactionListDTO
                 {
                     TransactionId = t.TransactionId,
                     TransactionDate = t.TransactionDate,
@@ -29,9 +29,12 @@ namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransact
                     ClientName = t.Client == null ? null : t.Client.Name,
                     SourceWarehouseId = t.SourceWarehouseId,
                     DestinationWarehouseId = t.DestinationWarehouseId,
+                    SourceWarehouseNameSnapshot = t.SourceWarehouseNameSnapshot,
+                    DestinationWarehouseNameSnapshot = t.DestinationWarehouseNameSnapshot,
                     ReferenceNumber = t.ReferenceNumber,
                     Notes = t.Notes,
                 })
+                .OrderByDescending(t => t.TransactionDate)
                 .ToListAsync(cancellationToken);
         }
     }

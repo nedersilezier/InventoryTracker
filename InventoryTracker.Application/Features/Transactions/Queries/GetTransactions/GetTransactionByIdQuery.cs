@@ -6,7 +6,12 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionQuery: IRequest<List<TransactionListDTO>>
+    public class GetTransactionByIdQuery: IRequest<TransactionDTO?>
     {
+        public Guid TransactionId { get; private set; }
+        public GetTransactionByIdQuery(Guid transactionId)
+        {
+            TransactionId = transactionId;
+        }
     }
 }
