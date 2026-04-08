@@ -75,6 +75,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
                 }
             }
         }
+
         return await base.SaveChangesAsync(cancellationToken);
     }
 }

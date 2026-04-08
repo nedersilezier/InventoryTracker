@@ -1,4 +1,6 @@
-﻿using InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction;
+﻿using InventoryTracker.API.Requests.Transactions;
+using InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction;
+using InventoryTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -39,6 +41,32 @@ namespace InventoryTracker.API.Controllers.Admin
         {
             var transaction = await _mediator.Send(command, cancellationToken);
             return CreatedAtAction(nameof(GetTransactionById), new { id = transaction.TransactionId }, transaction);
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateTransaction(Guid id, UpdateTransactionRequest request, CancellationToken cancellationToken)
+        {
+            var command = new UpdateTransactionCommand
+            {
+                TransactionId = id,
+                Type = request.Type,
+                ClientId = request.ClientId,
+                SourceWarehouseId = request.SourceWarehouseId,
+                DestinationWarehouseId = request.DestinationWarehouseId,
+                TransactionDate = request.TransactionDate,
+                ReferenceNumber = request.ReferenceNumber,
+                Notes = request.Notes,
+                Items = request.Items.Select(i => new UpdateTransactionCommand.UpdateTransactionItemDTO
+                {
+                    ItemId = i.ItemId,
+                    Quantity = i.Quantity
+                }).ToList()
+            };
+            var transaction = await _mediator.Send(command, cancellationToken);
+            if (transaction == null)
+                return NotFound();
+            return Ok(transaction);
         }
     }
 }
