@@ -8,14 +8,14 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionQueryHandler: IRequestHandler<GetTransactionQuery, List<TransactionListDTO>>
+    public class GetTransactionsQueryHandler: IRequestHandler<GetTransactionsQuery, List<TransactionListDTO>>
     {
         private readonly IAppDbContext _context;
-        public GetTransactionQueryHandler(IAppDbContext context)
+        public GetTransactionsQueryHandler(IAppDbContext context)
         {
             _context = context;
         }
-        public async Task<List<TransactionListDTO>> Handle(GetTransactionQuery request, CancellationToken cancellationToken)
+        public async Task<List<TransactionListDTO>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
             return await _context.Transactions
                 .AsNoTracking()

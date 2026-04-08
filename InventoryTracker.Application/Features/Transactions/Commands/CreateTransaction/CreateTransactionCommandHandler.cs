@@ -7,8 +7,9 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
-namespace InventoryTracker.Application.Features.Transactions.Commands
+namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
     public class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, TransactionDTO>
     {
@@ -20,81 +21,45 @@ namespace InventoryTracker.Application.Features.Transactions.Commands
 
         public async Task<TransactionDTO> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
         {
-            string? sourceWarehouseName = null;
-            string? destinationWarehouseName = null;
-            //check if items are present
-            if (request.Items is null || request.Items.Count == 0)
-            {
-                throw new InvalidOperationException("Transaction must contain at least one item.");
-            }
-            // Validate quantities
-            if (request.Items.Any(i => i.Quantity < 0))
-                throw new InvalidOperationException("Item quantity cannot be negative.");
+            Client? client = null;
+            Warehouse? sourceWarehouse = null;
+            Warehouse? destinationWarehouse = null;
 
-            // Validate based on transaction type
-            switch (request.Type)
-            {
-                case TransactionType.IssueToClient:
-                    if (!request.ClientId.HasValue || !request.SourceWarehouseId.HasValue || request.DestinationWarehouseId.HasValue)
-                        throw new InvalidOperationException("IssueToClient requires ClientId and SourceWarehouseId only.");
-                    break;
-
-                case TransactionType.ReturnFromClient:
-                    if (!request.ClientId.HasValue || !request.DestinationWarehouseId.HasValue || request.SourceWarehouseId.HasValue)
-                        throw new InvalidOperationException("ReturnFromClient requires ClientId and DestinationWarehouseId only.");
-                    break;
-
-                case TransactionType.TransferBetweenWarehouses:
-                    if (!request.SourceWarehouseId.HasValue || !request.DestinationWarehouseId.HasValue || request.ClientId.HasValue)
-                        throw new InvalidOperationException("TransferBetweenWarehouses requires source and destination warehouse.");
-                    break;
-
-                case TransactionType.Adjustment:
-                    if (!request.SourceWarehouseId.HasValue && !request.DestinationWarehouseId.HasValue)
-                        throw new InvalidOperationException("Adjustment requires at least one warehouse.");
-                    break;
-            }
             //validate client and warehouses if provided
-            var clientName = await _context.Clients.Where(c => c.ClientId == request.ClientId).Select(c => c.Name).FirstOrDefaultAsync(cancellationToken);
-            if (request.ClientId.HasValue && clientName == null)
-                throw new InvalidOperationException($"Client with id {request.ClientId} not found");
-
-
+            if (request.ClientId.HasValue)
+            {
+                client = await _context.Clients.Where(c => c.IsActive == true && c.ClientId == request.ClientId).FirstOrDefaultAsync(cancellationToken);
+                if(client == null)
+                    throw new InvalidOperationException($"Client with id {request.ClientId} does not exist or is inactive.");
+            }
+                
             if (request.SourceWarehouseId.HasValue)
             {
-                sourceWarehouseName = await _context.Warehouses
-                    .Where(w => w.WarehouseId == request.SourceWarehouseId)
-                    .Select(w => w.Name)
-                    .FirstOrDefaultAsync(cancellationToken);
-                if (sourceWarehouseName == null)
+                sourceWarehouse = await _context.Warehouses.Where(w => w.IsActive == true && w.WarehouseId == request.SourceWarehouseId).FirstOrDefaultAsync(cancellationToken);
+                if (sourceWarehouse == null)
                 {
                     throw new InvalidOperationException("Source warehouse does not exist or is inactive.");
                 }
             }
             if (request.DestinationWarehouseId.HasValue)
             {
-                destinationWarehouseName = await _context.Warehouses
-                    .Where(w => w.WarehouseId == request.DestinationWarehouseId)
-                    .Select(w => w.Name)
-                    .FirstOrDefaultAsync(cancellationToken);
-                if (destinationWarehouseName == null)
+                destinationWarehouse = await _context.Warehouses.Where(w => w.IsActive == true && w.WarehouseId == request.DestinationWarehouseId).FirstOrDefaultAsync(cancellationToken);
+                if (destinationWarehouse == null)
                 {
                     throw new InvalidOperationException("Destination warehouse does not exist or is inactive.");
                 }
             }
 
             // Get item snapshots
-            var itemIds = request.Items.Select(i => i.ItemId).ToList();
+            var itemIds = request.Items.Select(i => i.ItemId).Distinct().ToList();
             var items = await _context.Items
                 .AsNoTracking()
-                .Where(i => itemIds.Contains(i.ItemId))
+                .Where(i => i.IsActive == true && itemIds.Contains(i.ItemId))
                 .ToDictionaryAsync(i => i.ItemId, cancellationToken);
 
             //validate if all items exist and are active
             if (itemIds.Count != items.Count)
                 throw new InvalidOperationException("One or more items do not exist or are inactive.");
-
-            
 
             // Create transaction
             var transaction = new Transaction
@@ -102,11 +67,17 @@ namespace InventoryTracker.Application.Features.Transactions.Commands
                 TransactionId = Guid.NewGuid(),
                 Type = request.Type,
                 Status = TransactionStatus.Draft,
+                Client = client,
                 ClientId = request.ClientId,
+                
+                SourceWarehouse = sourceWarehouse,
                 SourceWarehouseId = request.SourceWarehouseId,
+                SourceWarehouseNameSnapshot = sourceWarehouse == null ? null : sourceWarehouse.Name,
+
+                DestinationWarehouse = destinationWarehouse,
                 DestinationWarehouseId = request.DestinationWarehouseId,
-                SourceWarehouseNameSnapshot = sourceWarehouseName,
-                DestinationWarehouseNameSnapshot = destinationWarehouseName,
+                DestinationWarehouseNameSnapshot = destinationWarehouse == null ?  null : destinationWarehouse.Name,
+
                 TransactionDate = request.TransactionDate,
                 ReferenceNumber = request.ReferenceNumber,
                 Notes = request.Notes,
@@ -135,7 +106,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands
                 Type = transaction.Type,
                 Status = transaction.Status,
                 ClientId = transaction.ClientId,
-                ClientName = clientName,
+                ClientName = client == null ? null : client.Name,
                 SourceWarehouseId = transaction.SourceWarehouseId,
                 SourceWarehouseNameSnapshot = transaction.SourceWarehouseNameSnapshot,
                 DestinationWarehouseId = transaction.DestinationWarehouseId,
@@ -154,7 +125,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands
                     UnitCreditValueSnapshot = ti.UnitCreditValueSnapshot,
                     TotalCreditValue = ti.TotalCreditValue
                 }).ToList()
-            };
+            }; 
         }
     }
 }

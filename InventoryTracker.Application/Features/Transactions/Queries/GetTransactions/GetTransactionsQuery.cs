@@ -6,7 +6,7 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransactions
 {
-    public class GetTransactionQuery: IRequest<List<TransactionListDTO>>
+    public class GetTransactionsQuery: IRequest<List<TransactionListDTO>>
     {
     }
 }

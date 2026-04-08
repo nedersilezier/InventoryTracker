@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace InventoryTracker.Application.Features.Transactions.Commands
+namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
     public class CreateTransactionCommand : IRequest<TransactionDTO>
     {
