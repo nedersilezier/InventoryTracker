@@ -51,6 +51,7 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.CreateWareho
             await _context.SaveChangesAsync(cancellationToken);
             return new WarehouseDTO
             {
+                WarehouseId = warehouse.WarehouseId,
                 Name = warehouse.Name,
                 Code = warehouse.Code,
                 Address = new AddressDTO

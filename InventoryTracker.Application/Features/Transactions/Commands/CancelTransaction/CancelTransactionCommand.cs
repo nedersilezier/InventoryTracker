@@ -8,12 +8,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CancelTran
 {
     public class CancelTransactionCommand: IRequest<TransactionDTO?>
     {
-        public Guid TransactionId {  get; private set; }
+        public Guid TransactionId {  get; set; }
         public string CancellationReason { get; set; } = string.Empty;
-
-        public CancelTransactionCommand(Guid transactionId)
-        {
-            TransactionId = transactionId;
-        }
     }
 }

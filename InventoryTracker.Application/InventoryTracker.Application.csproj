@@ -19,8 +19,6 @@
 
   <ItemGroup>
     <Folder Include="Features\Stocks\Commands\" />
-    <Folder Include="Features\Stocks\DTOs\" />
-    <Folder Include="Features\Stocks\Queries\" />
   </ItemGroup>
 
 </Project>

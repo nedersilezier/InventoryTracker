@@ -1,4 +1,6 @@
 ﻿using InventoryTracker.API.Requests.Transactions;
+using InventoryTracker.Application.Features.Transactions.Commands.ApproveTransaction;
+using InventoryTracker.Application.Features.Transactions.Commands.CancelTransaction;
 using InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using InventoryTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions;
@@ -67,6 +69,30 @@ namespace InventoryTracker.API.Controllers.Admin
             if (transaction == null)
                 return NotFound();
             return Ok(transaction);
+        }
+        [HttpPatch]
+        [Route("{id}/cancel")]
+        public async Task<IActionResult> CancelTransaction(Guid id, CancelTransactionRequest request, CancellationToken cancellationToken)
+        {
+            var command = new CancelTransactionCommand
+            {
+                TransactionId = id,
+                CancellationReason = request.CancellationReason
+            };
+            var result = await _mediator.Send(command, cancellationToken);
+            if (result == null)
+                return NotFound();
+            return Ok(result);
+        }
+        [HttpPatch]
+        [Route("{id}/approve")]
+        public async Task<IActionResult> ApproveTransaction(Guid id, CancellationToken cancellationToken)
+        {
+            var command = new ApproveTransactionCommand(id);
+            var result = await _mediator.Send(command, cancellationToken);
+            if (result == null)
+                return NotFound();
+            return Ok(result);
         }
     }
 }
