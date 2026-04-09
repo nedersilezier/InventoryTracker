@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Folder Include="Features\Stocks\Commands\" />
+    <Folder Include="Features\Users\Queries\" />
   </ItemGroup>
 
 </Project>

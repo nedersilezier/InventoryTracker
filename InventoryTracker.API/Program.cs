@@ -105,6 +105,9 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
+// register identity service
+builder.Services.AddScoped<IIdentityService, IdentityService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

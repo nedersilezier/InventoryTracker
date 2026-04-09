@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace InventoryTracker.API.Services
 {
-    public class CurrentUserService: ICurrentUserService
+    public class CurrentUserService : ICurrentUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -24,6 +24,15 @@ namespace InventoryTracker.API.Services
             get
             {
                 return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email);
+            }
+        }
+        public IEnumerable<string> Roles
+        {
+            get
+            {
+                return _httpContextAccessor.HttpContext?.User?
+                    .FindAll(ClaimTypes.Role)
+                    .Select(c => c.Value) ?? Enumerable.Empty<string>();
             }
         }
     }
