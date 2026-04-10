@@ -23,11 +23,11 @@ namespace InventoryTracker.Infrastructure.Identity
         private readonly AppDbContext _context;
         private readonly RefreshTokenGenerator _refreshTokenGenerator;
 
-        public IdentityService(UserManager<ApplicationUser> userManager, 
-            RoleManager<IdentityRole> roleManager, 
-            SignInManager<ApplicationUser> signInManager, 
-            JwtTokenGenerator jwtTokenGenerator, 
-            AppDbContext context, 
+        public IdentityService(UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            SignInManager<ApplicationUser> signInManager,
+            JwtTokenGenerator jwtTokenGenerator,
+            AppDbContext context,
             RefreshTokenGenerator refreshTokenGenerator
             )
         {
@@ -159,6 +159,19 @@ namespace InventoryTracker.Infrastructure.Identity
                 Roles = roles
             };
         }
+
+        public async Task LogoutAsync(string refreshToken, CancellationToken cancellationToken)
+        {
+            var token = await _context.RefreshTokens.FirstOrDefaultAsync(x => x.Token == refreshToken, cancellationToken);
+            if (token == null)
+                return;
+            if (!token.IsRevoked)
+            {
+                token.RevokedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+
         public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
         {
             var storedToken = await _context.RefreshTokens
@@ -202,6 +215,22 @@ namespace InventoryTracker.Infrastructure.Identity
                 RefreshToken = newRefreshToken.Token,
                 UserId = user.Id,
                 Email = user.Email ?? string.Empty,
+                Roles = roles
+            };
+        }
+        public async Task<CurrentUserDTO> GetCurrentUserAsync(string userId, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new InvalidOperationException("User not found.");
+            var roles = await _userManager.GetRolesAsync(user);
+            return new CurrentUserDTO
+            {
+                UserId = user.Id,
+                Email = user.Email ?? string.Empty,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
+                PhoneNumber = user.PhoneNumber ?? string.Empty,
                 Roles = roles
             };
         }

@@ -10,7 +10,9 @@ namespace InventoryTracker.Application.Common.Interfaces
     public interface IIdentityService
     {
         Task<CreateUserResult> CreateUserAsync(string? firstName, string? lastName, string email, string password, string? phoneNumber, string role);
-        Task<AuthResponseDto> LoginAsync(string? email, string? password, CancellationToken cancellationToken);
+        Task<AuthResponseDto> LoginAsync(string email, string password, CancellationToken cancellationToken);
+        Task LogoutAsync(string refreshToken, CancellationToken cancellationToken);
         Task<AuthResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
+        Task<CurrentUserDTO> GetCurrentUserAsync(string userId, CancellationToken cancellationToken);
     }
 }

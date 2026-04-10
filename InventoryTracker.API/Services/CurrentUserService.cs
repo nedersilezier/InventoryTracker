@@ -26,6 +26,7 @@ namespace InventoryTracker.API.Services
                 return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Email);
             }
         }
+        
         public IEnumerable<string> Roles
         {
             get
