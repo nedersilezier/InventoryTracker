@@ -20,7 +20,7 @@ namespace InventoryTracker.Application.Features.Auth.Commands.Login
         public async Task<AuthResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             var result = await _identityService
-                .LoginAsync(request.Email, request.Password);
+                .LoginAsync(request.Email, request.Password, cancellationToken);
 
             return result;
         }

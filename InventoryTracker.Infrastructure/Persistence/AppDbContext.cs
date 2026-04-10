@@ -2,6 +2,7 @@
 using InventoryTracker.Domain.Common;
 using InventoryTracker.Domain.Entities;
 using InventoryTracker.Infrastructure.Identity;
+using InventoryTracker.Infrastructure.Identity.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +24,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
     public DbSet<Stock> Stocks => Set<Stock>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<TransactionItem> TransactionItems => Set<TransactionItem>();
+
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

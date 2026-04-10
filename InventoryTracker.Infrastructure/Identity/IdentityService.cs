@@ -3,8 +3,10 @@ using InventoryTracker.Application.Features.Auth.Commands.Login;
 using InventoryTracker.Application.Features.Auth.DTOs;
 using InventoryTracker.Application.Features.Users.Commands.CreateUser;
 using InventoryTracker.Application.Features.Users.DTOs;
-using InventoryTracker.Infrastructure.Identity;
+using InventoryTracker.Infrastructure.Identity.Entities;
+using InventoryTracker.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -18,13 +20,23 @@ namespace InventoryTracker.Infrastructure.Identity
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly JwtTokenGenerator _jwtTokenGenerator;
+        private readonly AppDbContext _context;
+        private readonly RefreshTokenGenerator _refreshTokenGenerator;
 
-        public IdentityService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, SignInManager<ApplicationUser> signInManager, JwtTokenGenerator jwtTokenGenerator)
+        public IdentityService(UserManager<ApplicationUser> userManager, 
+            RoleManager<IdentityRole> roleManager, 
+            SignInManager<ApplicationUser> signInManager, 
+            JwtTokenGenerator jwtTokenGenerator, 
+            AppDbContext context, 
+            RefreshTokenGenerator refreshTokenGenerator
+            )
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
             _jwtTokenGenerator = jwtTokenGenerator;
+            _context = context;
+            _refreshTokenGenerator = refreshTokenGenerator;
         }
 
         public async Task<CreateUserResult> CreateUserAsync(string? firstName, string? lastName, string email, string password, string? phoneNumber, string role)
@@ -107,7 +119,7 @@ namespace InventoryTracker.Infrastructure.Identity
                 IsActive = user.IsActive
             };
         }
-        public async Task<AuthResponseDto> LoginAsync(string email, string password)
+        public async Task<AuthResponseDto> LoginAsync(string email, string password, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByEmailAsync(email);
 
@@ -126,11 +138,68 @@ namespace InventoryTracker.Infrastructure.Identity
                 throw new InvalidOperationException("Invalid email or password.");
             var roles = await _userManager.GetRolesAsync(user);
             var tokenResult = _jwtTokenGenerator.GenerateToken(user, roles);
+            var refreshToken = new RefreshToken
+            {
+                RefreshTokenId = Guid.NewGuid(),
+                Token = _refreshTokenGenerator.Generate(),
+                UserId = user.Id,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            };
 
+            _context.RefreshTokens.Add(refreshToken);
+            await _context.SaveChangesAsync(cancellationToken);
             return new AuthResponseDto
             {
                 AccessToken = tokenResult.AccessToken,
+                RefreshToken = refreshToken.Token,
                 ExpiresAtUtc = tokenResult.ExpiresAtUtc,
+                UserId = user.Id,
+                Email = user.Email ?? string.Empty,
+                Roles = roles
+            };
+        }
+        public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+        {
+            var storedToken = await _context.RefreshTokens
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Token == refreshToken, cancellationToken);
+            if (storedToken == null)
+                throw new InvalidOperationException("Invalid refresh token.");
+
+            if (storedToken.IsRevoked)
+                throw new InvalidOperationException("Refresh token has been revoked.");
+
+            if (storedToken.IsExpired)
+                throw new InvalidOperationException("Refresh token has expired.");
+
+            var user = storedToken.User;
+
+            if (!user.IsActive)
+                throw new InvalidOperationException("User account is inactive.");
+
+            var roles = await _userManager.GetRolesAsync(user);
+            var jwtResult = _jwtTokenGenerator.GenerateToken(user, roles);
+
+            storedToken.RevokedAt = DateTime.UtcNow;
+
+            var newRefreshToken = new RefreshToken
+            {
+                RefreshTokenId = Guid.NewGuid(),
+                Token = _refreshTokenGenerator.Generate(),
+                UserId = user.Id,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            };
+
+            _context.RefreshTokens.Add(newRefreshToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return new AuthResponseDto
+            {
+                AccessToken = jwtResult.AccessToken,
+                ExpiresAtUtc = jwtResult.ExpiresAtUtc,
+                RefreshToken = newRefreshToken.Token,
                 UserId = user.Id,
                 Email = user.Email ?? string.Empty,
                 Roles = roles

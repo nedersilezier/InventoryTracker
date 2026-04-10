@@ -5,6 +5,7 @@ using InventoryTracker.Application;
 using InventoryTracker.Application.Common.Behaviors;
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Infrastructure.Identity;
+using InventoryTracker.Infrastructure.Identity.Entities;
 using InventoryTracker.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -82,6 +83,8 @@ builder.Services
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
         };
     });
+// Register the refresh token generator
+builder.Services.AddScoped<RefreshTokenGenerator>();
 
 // Configure MediatR
 builder.Services.AddMediatR(cfg =>

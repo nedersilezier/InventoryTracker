@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using InventoryTracker.Infrastructure.Identity.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
