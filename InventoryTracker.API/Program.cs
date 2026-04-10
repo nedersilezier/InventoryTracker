@@ -108,6 +108,9 @@ builder.Services.AddProblemDetails();
 // register identity service
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 
+// register authorization services
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

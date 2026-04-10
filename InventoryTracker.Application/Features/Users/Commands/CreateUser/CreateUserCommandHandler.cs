@@ -19,7 +19,14 @@ namespace InventoryTracker.Application.Features.Users.Commands.CreateUser
 
         public async Task<UserDTO> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            var result = await _identityService.CreateUserAsync(request, cancellationToken);
+            var result = await _identityService
+                .CreateUserAsync(
+                request.FirstName, 
+                request.LastName, 
+                request.Email, 
+                request.Password, 
+                request.PhoneNumber,
+                request.Role);
 
             if (!result.Succeeded)
             {

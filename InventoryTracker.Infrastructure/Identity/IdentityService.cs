@@ -1,4 +1,6 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
+using InventoryTracker.Application.Features.Auth.Commands.Login;
+using InventoryTracker.Application.Features.Auth.DTOs;
 using InventoryTracker.Application.Features.Users.Commands.CreateUser;
 using InventoryTracker.Application.Features.Users.DTOs;
 using InventoryTracker.Infrastructure.Identity;
@@ -14,41 +16,45 @@ namespace InventoryTracker.Infrastructure.Identity
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly JwtTokenGenerator _jwtTokenGenerator;
 
-        public IdentityService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public IdentityService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, SignInManager<ApplicationUser> signInManager, JwtTokenGenerator jwtTokenGenerator)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _signInManager = signInManager;
+            _jwtTokenGenerator = jwtTokenGenerator;
         }
 
-        public async Task<CreateUserResult> CreateUserAsync(CreateUserCommand command, CancellationToken cancellationToken)
+        public async Task<CreateUserResult> CreateUserAsync(string? firstName, string? lastName, string email, string password, string? phoneNumber, string role)
         {
             //ensure email and username are unique and role exists before creating the user
-            var emailExists = await _userManager.FindByEmailAsync(command.Email);
+            var emailExists = await _userManager.FindByEmailAsync(email);
             if (emailExists != null)
             {
                 return new CreateUserResult
                 {
                     Succeeded = false,
-                    Errors = [$"User with email '{command.Email}' already exists."]
+                    Errors = [$"User with email '{email}' already exists."]
                 };
             }
-            var usernameExists = await _userManager.FindByNameAsync(command.Email);
+            var usernameExists = await _userManager.FindByNameAsync(email);
             if (usernameExists != null)
             {
                 return new CreateUserResult
                 {
                     Succeeded = false,
-                    Errors = [$"User with user name '{command.Email}' already exists."]
+                    Errors = [$"User with user name '{email}' already exists."]
                 };
             }
-            var roleExists = await _roleManager.RoleExistsAsync(command.Role);
+            var roleExists = await _roleManager.RoleExistsAsync(role);
             if (!roleExists)
             {
                 return new CreateUserResult
                 {
                     Succeeded = false,
-                    Errors = [$"Role '{command.Role}' does not exist."]
+                    Errors = [$"Role '{role}' does not exist."]
                 };
             }
 
@@ -56,17 +62,17 @@ namespace InventoryTracker.Infrastructure.Identity
             var user = new ApplicationUser
             {
                 Id = Guid.NewGuid().ToString(),
-                UserName = command.Email,
-                Email = command.Email,
-                FirstName = command.FirstName,
-                LastName = command.LastName,
-                PhoneNumber = command.PhoneNumber,
+                UserName = email,
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                PhoneNumber = phoneNumber,
                 IsActive = true,
                 EmailConfirmed = true
             };
 
             //create the user in the database and add to role
-            var result = await _userManager.CreateAsync(user, command.Password);
+            var result = await _userManager.CreateAsync(user, password);
             if (!result.Succeeded)
             {
                 return new CreateUserResult
@@ -76,7 +82,7 @@ namespace InventoryTracker.Infrastructure.Identity
                 };
             }
 
-            var addToRoleResult = await _userManager.AddToRoleAsync(user, command.Role);
+            var addToRoleResult = await _userManager.AddToRoleAsync(user, role);
             if (!addToRoleResult.Succeeded)
             {
                 await _userManager.DeleteAsync(user);
@@ -88,8 +94,6 @@ namespace InventoryTracker.Infrastructure.Identity
                 };
             }
 
-            await _userManager.AddToRoleAsync(user, command.Role);
-
             return new CreateUserResult
             {
                 Succeeded = true,
@@ -99,8 +103,37 @@ namespace InventoryTracker.Infrastructure.Identity
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 PhoneNumber = user.PhoneNumber,
-                Role = command.Role,
+                Role = role,
                 IsActive = user.IsActive
+            };
+        }
+        public async Task<AuthResponseDto> LoginAsync(string email, string password)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                throw new InvalidOperationException("Invalid email or password.");
+
+            if (user.IsActive == false)
+                throw new InvalidOperationException("User account is inactive.");
+
+            var passwordValid = await _signInManager.CheckPasswordSignInAsync(
+                user,
+                password,
+                lockoutOnFailure: false);
+
+            if (!passwordValid.Succeeded)
+                throw new InvalidOperationException("Invalid email or password.");
+            var roles = await _userManager.GetRolesAsync(user);
+            var tokenResult = _jwtTokenGenerator.GenerateToken(user, roles);
+
+            return new AuthResponseDto
+            {
+                AccessToken = tokenResult.AccessToken,
+                ExpiresAtUtc = tokenResult.ExpiresAtUtc,
+                UserId = user.Id,
+                Email = user.Email ?? string.Empty,
+                Roles = roles
             };
         }
     }

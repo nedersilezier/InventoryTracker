@@ -12,18 +12,13 @@ namespace InventoryTracker.Infrastructure.Identity
     public class JwtTokenGenerator
     {
         private readonly JwtSettings _jwtSettings;
-        private readonly UserManager<ApplicationUser> _userManager;
 
-        public JwtTokenGenerator(IOptions<JwtSettings> jwtSettings, UserManager<ApplicationUser> userManager)
+        public JwtTokenGenerator(IOptions<JwtSettings> jwtSettings)
         {
             _jwtSettings = jwtSettings.Value;
-            _userManager = userManager;
         }
-
-        public async Task<string> GenerateTokenAsync(ApplicationUser user)
+        public JwtTokenResult GenerateToken(ApplicationUser user, IEnumerable<string> roles)
         {
-            var roles = await _userManager.GetRolesAsync(user);
-
             var claims = new List<Claim>
             {
                 new(JwtRegisteredClaimNames.Sub, user.Id),
@@ -46,7 +41,12 @@ namespace InventoryTracker.Infrastructure.Identity
                 expires: DateTime.UtcNow.AddMinutes(_jwtSettings.DurationInMinutes),
                 signingCredentials: credentials);
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var accesstoken = new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtTokenResult
+            {
+                AccessToken = accesstoken,
+                ExpiresAtUtc = token.ValidTo
+            };
         }
     }
 }
