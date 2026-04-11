@@ -1,5 +1,6 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Transactions.DTOs;
+using InventoryTracker.Shared.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -33,6 +34,24 @@ namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransact
                     DestinationWarehouseNameSnapshot = t.DestinationWarehouseNameSnapshot,
                     ReferenceNumber = t.ReferenceNumber,
                     Notes = t.Notes,
+                    FromDisplay = t.Type == TransactionType.Adjustment
+                        ? null
+                        : t.Type == TransactionType.ReturnFromClient
+                        ? t.Client == null ? null : t.Client.Name
+                        : t.Type == TransactionType.TransferBetweenWarehouses
+                        ? t.SourceWarehouseNameSnapshot
+                        : t.Type == TransactionType.IssueToClient
+                        ? t.SourceWarehouseNameSnapshot
+                        : null,
+                    ToDisplay = t.Type == TransactionType.Adjustment
+                        ? t.SourceWarehouseNameSnapshot
+                        : t.Type == TransactionType.ReturnFromClient
+                        ? t.DestinationWarehouseNameSnapshot
+                        : t.Type == TransactionType.TransferBetweenWarehouses
+                        ? t.DestinationWarehouseNameSnapshot
+                        : t.Type == TransactionType.IssueToClient
+                        ? t.Client == null ? null : t.Client.Name
+                        : null
                 })
                 .OrderByDescending(t => t.TransactionDate)
                 .ToListAsync(cancellationToken);

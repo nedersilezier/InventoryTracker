@@ -1,0 +1,28 @@
+﻿<header class="fixed top-0 w-full z-50 bg-white shadow">
+    <div class="flex justify-between items-center h-16 px-6 max-w-[1440px] mx-auto">
+
+        <div class="flex items-center gap-8">
+            <span class="text-xl font-bold">InventoryTracker</span>
+
+            <nav class="flex gap-6">
+                <a asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                <a asp-controller="Items" asp-action="Index">Items</a>
+                <a asp-controller="Clients" asp-action="Index">Clients</a>
+                <a asp-controller="Warehouses" asp-action="Index">Warehouses</a>
+                <a asp-controller="Stocks" asp-action="Index">Stocks</a>
+                <a asp-controller="Transactions" asp-action="Index">Transactions</a>
+                <a asp-controller="Users" asp-action="Index">Users</a>
+                <a asp-controller="Countries" asp-action="Index">Countries</a>
+            </nav>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="nav-link btn btn-link text-dark p-0 border-0">
+                    Logout
+                </button>
+            </form>
+        </div>
+    </div>
+</header>

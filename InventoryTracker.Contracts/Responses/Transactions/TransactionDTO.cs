@@ -1,10 +1,9 @@
 ﻿using InventoryTracker.Shared.Enums;
-using InventoryTracker.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace InventoryTracker.Application.Features.Transactions.DTOs
+namespace InventoryTracker.Contracts.Responses.Transactions
 {
     public class TransactionListDTO
     {
@@ -40,12 +39,6 @@ namespace InventoryTracker.Application.Features.Transactions.DTOs
         public string? CancellationReason { get; set; }
         public string? FromDisplay { get; set; } = default!;
         public string? ToDisplay { get; set; } = default!;
-        public string TypeDisplay
-        {
-            get
-            {
-                return TransactionTypeExtensions.ToDisplayName(Type);
-            }
-        }
+        public string TypeDisplay { get; set; } = default!;
     }
 }
