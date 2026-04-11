@@ -82,6 +82,26 @@ namespace InventoryTracker.WebAdmin.Controllers
                 return View(request);
             }
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                try
+                {
+                    await _authService.LogoutAsync(new LogoutRequest { RefreshToken = refreshToken }, cancellationToken);
+                }
+                catch
+                {
+                    // Ignore exceptions during logout
+                }
+            }
+            Response.Cookies.Delete("accessToken");
+            Response.Cookies.Delete("refreshToken");
+            return RedirectToAction("Login", "Auth");
+        }
 
         private void AppendAuthCookies(AuthResponseDTO result)
         {

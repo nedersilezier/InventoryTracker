@@ -4,6 +4,7 @@ using InventoryTracker.WebAdmin.Exceptions;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.Models;
 using InventoryTracker.WebAdmin.ViewModels.Login;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace InventoryTracker.WebAdmin.Services
@@ -18,7 +19,7 @@ namespace InventoryTracker.WebAdmin.Services
         public async Task<AuthResponseDTO?> LoginAsync(LoginViewModel request, CancellationToken cancellationToken)
         {
             var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request, cancellationToken);
-            if(response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 return await response.Content.ReadFromJsonAsync<AuthResponseDTO>(cancellationToken: cancellationToken);
             }
@@ -26,10 +27,9 @@ namespace InventoryTracker.WebAdmin.Services
             throw new Exception("Unreachable?");
         }
 
-        public async Task LogoutAsync(LogoutRequest request)
+        public async Task LogoutAsync(LogoutRequest request, CancellationToken cancellationToken)
         {
-            var response = await _httpClient.PostAsJsonAsync("/api/auth/logout", request);
-             response.EnsureSuccessStatusCode();
+            await _httpClient.PostAsJsonAsync("/api/auth/logout", request, cancellationToken);
         }
         public async Task<AuthResponseDTO?> RefreshTokenAsync(TokenRefreshRequest request, CancellationToken cancellationToken)
         {
