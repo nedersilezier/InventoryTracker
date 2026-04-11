@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
-using InventoryTracker.Domain.Enums;
+using InventoryTracker.Shared.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction

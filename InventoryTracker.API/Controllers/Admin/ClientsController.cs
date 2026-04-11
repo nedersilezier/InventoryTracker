@@ -1,4 +1,4 @@
-﻿using InventoryTracker.API.Requests.Clients;
+﻿using InventoryTracker.Contracts.Requests.Clients;
 using InventoryTracker.Application.Features.Clients.Commands.ActivateClient;
 using InventoryTracker.Application.Features.Clients.Commands.CreateClient;
 using InventoryTracker.Application.Features.Clients.Commands.DeactivateClient;

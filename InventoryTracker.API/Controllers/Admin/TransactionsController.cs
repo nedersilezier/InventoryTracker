@@ -1,4 +1,4 @@
-﻿using InventoryTracker.API.Requests.Transactions;
+﻿using InventoryTracker.Contracts.Requests.Transactions;
 using InventoryTracker.Application.Features.Transactions.Commands.ApproveTransaction;
 using InventoryTracker.Application.Features.Transactions.Commands.CancelTransaction;
 using InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction;

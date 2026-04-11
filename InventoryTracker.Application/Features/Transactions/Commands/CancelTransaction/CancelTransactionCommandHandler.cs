@@ -2,7 +2,7 @@
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Transactions.DTOs;
 using InventoryTracker.Domain.Entities;
-using InventoryTracker.Domain.Enums;
+using InventoryTracker.Shared.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;

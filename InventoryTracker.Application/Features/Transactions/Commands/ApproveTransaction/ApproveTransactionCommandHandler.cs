@@ -7,7 +7,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Domain.Entities;
-using InventoryTracker.Domain.Enums;
+using InventoryTracker.Shared.Enums;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTransaction
 {

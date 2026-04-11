@@ -1,5 +1,5 @@
 ﻿using InventoryTracker.Domain.Common;
-using InventoryTracker.Domain.Enums;
+using InventoryTracker.Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -1,4 +1,4 @@
-﻿using InventoryTracker.API.Requests.Items;
+﻿using InventoryTracker.Contracts.Requests.Items;
 using InventoryTracker.Application.Features.Items.Commands.ActivateItem;
 using InventoryTracker.Application.Features.Items.Commands.CreateItem;
 using InventoryTracker.Application.Features.Items.Commands.DeactivateItem;

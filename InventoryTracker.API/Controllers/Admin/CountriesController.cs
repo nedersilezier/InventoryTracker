@@ -1,4 +1,4 @@
-﻿using InventoryTracker.API.Requests.Countries;
+﻿using InventoryTracker.Contracts.Requests.Countries;
 using InventoryTracker.Application.Features.Countries.Commands.CreateCountry;
 using InventoryTracker.Application.Features.Countries.Commands.UpdateCountry;
 using InventoryTracker.Application.Features.Countries.Queries.GetCountries;

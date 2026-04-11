@@ -1,4 +1,4 @@
-﻿using InventoryTracker.API.Requests.Warehouses;
+﻿using InventoryTracker.Contracts.Requests.Warehouses;
 using InventoryTracker.Application.Features.Warehouses.Commands.ActivateWarehouse;
 using InventoryTracker.Application.Features.Warehouses.Commands.CreateWarehouse;
 using InventoryTracker.Application.Features.Warehouses.Commands.DeactivateWarehouse;

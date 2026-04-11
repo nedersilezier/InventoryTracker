@@ -1,5 +1,5 @@
 ﻿using InventoryTracker.Application.Features.Transactions.DTOs;
-using InventoryTracker.Domain.Enums;
+using InventoryTracker.Shared.Enums;
 using MediatR;
 using System;
 using System.Collections.Generic;

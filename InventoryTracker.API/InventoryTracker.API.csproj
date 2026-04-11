@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InventoryTracker.Application\InventoryTracker.Application.csproj" />
+    <ProjectReference Include="..\InventoryTracker.Contracts\InventoryTracker.Contracts.csproj" />
     <ProjectReference Include="..\InventoryTracker.Infrastructure\InventoryTracker.Infrastructure.csproj" />
   </ItemGroup>
 
