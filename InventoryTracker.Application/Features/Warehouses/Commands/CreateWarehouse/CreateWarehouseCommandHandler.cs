@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Domain.Entities;
 using InventoryTracker.Application.Common.DTOs;
+using InventoryTracker.Application.Common.Exceptions;
 
 namespace InventoryTracker.Application.Features.Warehouses.Commands.CreateWarehouse
 {
@@ -21,10 +22,10 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.CreateWareho
         {
             var warehouseCodeExists = await _context.Warehouses.AnyAsync(w => w.Code == request.Code, cancellationToken);
             if (warehouseCodeExists)
-                throw new InvalidOperationException($"Warehouse with code '{request.Code}' already exists.");
+                throw new BusinessException($"Warehouse with code '{request.Code}' already exists.");
             var country = await _context.Countries.FirstOrDefaultAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
             if (country == null)
-                throw new InvalidOperationException($"Country with id '{request.Address.CountryId}' does not exist.");
+                throw new RecordNotFoundException(nameof(Country), request.Address.CountryId);
 
             var address = new Address
             {

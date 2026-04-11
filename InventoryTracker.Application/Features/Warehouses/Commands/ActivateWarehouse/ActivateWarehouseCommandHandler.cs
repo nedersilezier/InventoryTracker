@@ -1,6 +1,8 @@
 ﻿using InventoryTracker.Application.Common.DTOs;
+using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Warehouses.DTOs;
+using InventoryTracker.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -24,7 +26,7 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.ActivateWare
                 .FirstOrDefaultAsync(w => w.WarehouseId == request.WarehouseId, cancellationToken);
 
             if (warehouse == null)
-                throw new InvalidOperationException($"Warehouse with id {request.WarehouseId} not found.");
+                throw new RecordNotFoundException(nameof(Warehouse), request.WarehouseId);
 
             warehouse.IsActive = true;
             await _context.SaveChangesAsync(cancellationToken);

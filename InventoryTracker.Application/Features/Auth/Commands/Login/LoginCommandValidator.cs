@@ -13,8 +13,7 @@ namespace InventoryTracker.Application.Features.Auth.Commands.Login
                 .NotEmpty().WithMessage("Email is required.")
                 .MaximumLength(256).WithMessage("Email cannot exceed 256 characters.");
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Password is required.")
-                .MinimumLength(8).WithMessage("Password must be at least 8 characters long.");
+                .NotEmpty().WithMessage("Password is required.");
         }
     }
 }

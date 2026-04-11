@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Application.Common.Interfaces;
+using InventoryTracker.Application.Common.Exceptions;
 
 namespace InventoryTracker.Application.Features.Countries.Commands.UpdateCountry
 {
@@ -23,7 +24,7 @@ namespace InventoryTracker.Application.Features.Countries.Commands.UpdateCountry
 
             var codeExists = await _context.Countries.AnyAsync(x => x.Code == request.Code && x.CountryId != request.CountryId, cancellationToken);
             if (codeExists)
-                throw new InvalidOperationException($"Another country with code {request.Code} already exists.");
+                throw new BusinessException($"Another country with code {request.Code} already exists.");
 
             country.Name = request.Name;
             country.Code = request.Code;

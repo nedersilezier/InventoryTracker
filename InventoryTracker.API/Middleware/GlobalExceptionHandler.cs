@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using InventoryTracker.Application.Common.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,7 +14,7 @@ namespace InventoryTracker.API.Middleware
         }
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            var problemDetails = new ProblemDetails();
+            ProblemDetails problemDetails;
             switch (exception)
             {
                 case ValidationException validationException:
@@ -21,38 +22,55 @@ namespace InventoryTracker.API.Middleware
                     {
                         Status = StatusCodes.Status400BadRequest,
                         Title = "Validation failed",
-                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1",
-                        Extensions =
-                        {
-                            ["errors"] = validationException.Errors
-                                        .GroupBy(e => e.PropertyName)
-                                        .ToDictionary(
-                                                    g => g.Key,
-                                                    g => g.Select(e => e.ErrorMessage).ToArray())
-                        }
+                        Detail = "One or more validation errors occurred.",
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.1"
+                    };
+
+                    problemDetails.Extensions["errors"] = validationException.Errors
+                        .GroupBy(e => string.IsNullOrWhiteSpace(e.PropertyName) ? "General" : e.PropertyName)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => g.Select(e => e.ErrorMessage).ToArray());
+
+                    break;
+                case InvalidOperationException invalidOperationException:
+                    _logger.LogError(invalidOperationException, "System configuration or invalid runtime state");
+                    problemDetails = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status500InternalServerError,
+                        Title = "Application error",
+                        Detail = "An internal application error occurred.",
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1"
                     };
                     break;
-                case InvalidOperationException:
+                case RecordNotFoundException notFoundException:
+                    problemDetails = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status404NotFound,
+                        Title = "Resource not found",
+                        Detail = notFoundException.Message,
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.5"
+                    };
+                    break;
+                case BusinessException businessException:
                     problemDetails = new ProblemDetails
                     {
                         Status = StatusCodes.Status409Conflict,
                         Title = "Business rule violation",
-                        Detail = exception.Message
+                        Detail = businessException.Message,
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10"
                     };
                     break;
                 default:
-                    problemDetails = null;
+                    _logger.LogError(exception, "Unhandled exception occurred");
+                    problemDetails = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status500InternalServerError,
+                        Title = "An unexpected error occurred",
+                        Detail = "An unexpected server error occurred.",
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.6.1"
+                    };
                     break;
-            }
-            if (problemDetails is null)
-            {
-                // Unhandled exceptions — log and return generic 500
-                _logger.LogError(exception, "Unhandled exception occurred");
-                problemDetails = new ProblemDetails
-                {
-                    Status = StatusCodes.Status500InternalServerError,
-                    Title = "An unexpected error occurred"
-                };
             }
 
             httpContext.Response.StatusCode = problemDetails.Status ?? 500;

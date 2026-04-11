@@ -27,7 +27,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CancelTran
                 throw new RecordNotFoundException(nameof(Transaction), request.TransactionId);
 
             if (transaction.Status != TransactionStatus.Draft)
-                throw new InvalidOperationException("Transaction cannot be cancelled due to its status.");
+                throw new BusinessException("Transaction cannot be cancelled due to its status.");
 
             transaction.Status = TransactionStatus.Cancelled;
             transaction.CancellationReason = request.CancellationReason;

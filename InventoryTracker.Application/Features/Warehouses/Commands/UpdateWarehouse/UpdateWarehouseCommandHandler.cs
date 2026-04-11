@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Application.Common.DTOs;
+using InventoryTracker.Application.Common.Exceptions;
+using InventoryTracker.Domain.Entities;
 
 namespace InventoryTracker.Application.Features.Warehouses.Commands.UpdateWarehouse
 {
@@ -20,18 +22,18 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.UpdateWareho
         {
             var warehouse = await _context.Warehouses.Include(w => w.Address).FirstOrDefaultAsync(w => w.WarehouseId == request.WarehouseId, cancellationToken);
             if (warehouse == null)
-                throw new InvalidOperationException($"Warehouse with id {request.WarehouseId} not found.");
+                throw new RecordNotFoundException(nameof(Warehouse), request.WarehouseId);
 
             var warehouseCodeExists = await _context.Warehouses.AnyAsync(w => w.Code == request.Code && w.WarehouseId != request.WarehouseId, cancellationToken);
             if (warehouseCodeExists)
-                throw new InvalidOperationException($"Another warehouse with code {request.Code} already exists.");
+                throw new BusinessException($"Another warehouse with code {request.Code} already exists.");
 
             var country = await _context.Countries.FirstOrDefaultAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
             if (country == null)
-                throw new InvalidOperationException($"Country with id {request.Address.CountryId} not found.");
+                throw new RecordNotFoundException(nameof(Country), request.Address.CountryId);
             var address = warehouse.Address;
             if (address == null)
-                throw new InvalidOperationException($"Address not found.");
+                throw new RecordNotFoundException(nameof(Address), warehouse.Address.AddressId);
 
             warehouse.Name = request.Name;
             warehouse.Code = request.Code;

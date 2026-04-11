@@ -1,4 +1,5 @@
-﻿using InventoryTracker.Application.Common.Interfaces;
+﻿using InventoryTracker.Application.Common.Exceptions;
+using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Items.DTOs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +25,7 @@ namespace InventoryTracker.Application.Features.Items.Commands.UpdateItem
             var skuExists = await _context.Items.AnyAsync(x => x.SKU == request.SKU && x.ItemId != request.ItemId, cancellationToken);
             if (skuExists)
             {
-                throw new InvalidOperationException("Another item with the same SKU already exists.");
+                throw new BusinessException("Another item with the same SKU already exists.");
             }
 
             item.Name = request.Name;

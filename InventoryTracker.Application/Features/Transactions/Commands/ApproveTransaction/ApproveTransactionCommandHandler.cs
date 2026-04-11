@@ -25,7 +25,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                 throw new RecordNotFoundException(nameof(Transaction), request.TransactionId);
 
             if (transaction.Status != TransactionStatus.Draft)
-                throw new InvalidOperationException("Transaction cannot be approved due to its status.");
+                throw new BusinessException("Transaction cannot be approved due to its status.");
 
             // update stock levels based on transaction type and items
             var itemIds = transaction.TransactionItems.Select(i => i.ItemId).ToList();
@@ -37,7 +37,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
             {
                 case TransactionType.Adjustment:
                     if (transaction.SourceWarehouseId == null)
-                        throw new InvalidOperationException("No source warehouse bound to the transaction.");
+                        throw new BusinessException("No source warehouse bound to the transaction.");
 
                     var stocksToAdjust = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
                     foreach (var item in transaction.TransactionItems)
@@ -57,7 +57,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                         }
                         var quantityChange = stock.Quantity + item.Quantity;
                         if (quantityChange < 0)
-                            throw new InvalidOperationException($"Insufficient stock for item {item.ItemId} to adjust.");
+                            throw new BusinessException($"Insufficient stock for item {item.ItemId} to adjust.");
 
                         stock.Quantity = quantityChange;
                     }
@@ -65,24 +65,24 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
 
                 case TransactionType.IssueToClient:
                     if (transaction.SourceWarehouseId == null)
-                        throw new InvalidOperationException("No source warehouse bound to the transaction.");
+                        throw new BusinessException("No source warehouse bound to the transaction.");
 
                     var stocksToSend = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
                     foreach (var item in transaction.TransactionItems)
                     {
                         var stock = stocksToSend.FirstOrDefault(s => s.ItemId == item.ItemId);
                         if (stock == null)
-                            throw new InvalidOperationException($"No stock record found for item {item.ItemId} in the source warehouse.");
+                            throw new BusinessException($"No stock record found for item {item.ItemId} in the source warehouse.");
                         var quantityChange = stock.Quantity - item.Quantity;
                         if (quantityChange < 0)
-                            throw new InvalidOperationException($"Insufficient stock for item {item.ItemId} to issue to client.");
+                            throw new BusinessException($"Insufficient stock for item {item.ItemId} to issue to client.");
                         stock.Quantity = quantityChange;
                     }
                     break;
 
                 case TransactionType.TransferBetweenWarehouses:
                     if (transaction.SourceWarehouseId == null || transaction.DestinationWarehouseId == null)
-                        throw new InvalidOperationException("Source or destination warehouse not bound to the transaction.");
+                        throw new BusinessException("Source or destination warehouse not bound to the transaction.");
 
                     var sourceWarehouseStocks = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
                     var destinationWarehouseStocks = await stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToListAsync(cancellationToken);
@@ -91,7 +91,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                     {
                         var sourceStock = sourceWarehouseStocks.FirstOrDefault(s => s.ItemId == item.ItemId);
                         if (sourceStock == null)
-                            throw new InvalidOperationException($"No stock record found for item {item.ItemId} in the source warehouse.");
+                            throw new BusinessException($"No stock record found for item {item.ItemId} in the source warehouse.");
                         var destinationStock = destinationWarehouseStocks.FirstOrDefault(s => s.ItemId == item.ItemId);
                         if (destinationStock == null)
                         {
@@ -107,7 +107,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                         }
                         var quantityChangeSource = sourceStock.Quantity - item.Quantity;
                         if (quantityChangeSource < 0)
-                            throw new InvalidOperationException($"Insufficient stock for item {item.ItemId} to transfer to destination warehouse.");
+                            throw new BusinessException($"Insufficient stock for item {item.ItemId} to transfer to destination warehouse.");
 
                         sourceStock.Quantity -= item.Quantity;
                         destinationStock.Quantity += item.Quantity;
@@ -116,7 +116,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
 
                 case TransactionType.ReturnFromClient:
                     if (transaction.DestinationWarehouseId == null || transaction.ClientId == null)
-                        throw new InvalidOperationException("Return transaction requires destination warehouse and client.");
+                        throw new BusinessException("Return transaction requires destination warehouse and client.");
                     var stocksReturned = await stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToListAsync(cancellationToken);
                     foreach(var item in transaction.TransactionItems)
                     {
@@ -137,7 +137,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                     }
                     break;
                 default:
-                    throw new InvalidOperationException("Unsupported transaction type.");
+                    throw new BusinessException("Unsupported transaction type.");
             }
 
             //change status to approved

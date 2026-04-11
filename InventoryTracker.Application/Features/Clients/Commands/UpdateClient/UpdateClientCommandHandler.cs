@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Application.Common.DTOs;
+using InventoryTracker.Application.Common.Exceptions;
+using InventoryTracker.Domain.Entities;
 
 namespace InventoryTracker.Application.Features.Clients.Commands.UpdateClient
 {
@@ -20,16 +22,15 @@ namespace InventoryTracker.Application.Features.Clients.Commands.UpdateClient
         {
             var client = await _context.Clients.Include(c => c.Address).ThenInclude(a => a.Country).FirstOrDefaultAsync(c => c.ClientId == request.ClientId, cancellationToken);
             if (client == null)
-                throw new InvalidOperationException($"Client with id {request.ClientId} not found.");
+                throw new RecordNotFoundException(nameof(Client), request.ClientId);
 
             var country = await _context.Countries.FirstOrDefaultAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
             if (country == null)
-                throw new InvalidOperationException($"Country with id {request.Address.CountryId} does not exist.");
+                throw new RecordNotFoundException(nameof(Country), request.Address.CountryId);
 
             var addressExists = await _context.Addresses.AnyAsync(a => a.AddressId == client.AddressId, cancellationToken);
             if (!addressExists)
-                throw new InvalidOperationException($"Address with id {client.AddressId} does not exist.");
-
+                throw new RecordNotFoundException(nameof(Address), client.AddressId);
             client.Name = request.Name;
             client.ClientCode = request.ClientCode;
             client.Email = request.Email;

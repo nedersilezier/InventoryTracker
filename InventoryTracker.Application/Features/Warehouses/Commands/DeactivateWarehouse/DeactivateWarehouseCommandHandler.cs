@@ -7,6 +7,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using InventoryTracker.Application.Common.Exceptions;
+using InventoryTracker.Domain.Entities;
 
 namespace InventoryTracker.Application.Features.Warehouses.Commands.DeactivateWarehouse
 {
@@ -25,7 +27,7 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.DeactivateWa
                 .FirstOrDefaultAsync(w => w.WarehouseId == request.WarehouseId, cancellationToken);
 
             if (warehouse == null)
-                throw new InvalidOperationException($"Warehouse with id {request.WarehouseId} not found.");
+                throw new RecordNotFoundException(nameof(Warehouse), request.WarehouseId);
 
             warehouse.IsActive = false;
             await _context.SaveChangesAsync(cancellationToken);

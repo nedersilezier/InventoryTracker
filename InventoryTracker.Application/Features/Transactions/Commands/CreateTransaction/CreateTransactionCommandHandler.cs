@@ -8,6 +8,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Shared.Enums;
 using System.ComponentModel.DataAnnotations;
+using InventoryTracker.Application.Common.Exceptions;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
@@ -30,7 +31,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTran
             {
                 client = await _context.Clients.Where(c => c.IsActive == true && c.ClientId == request.ClientId).FirstOrDefaultAsync(cancellationToken);
                 if(client == null)
-                    throw new InvalidOperationException($"Client with id {request.ClientId} does not exist or is inactive.");
+                    throw new BusinessException($"Client with id {request.ClientId} does not exist or is inactive.");
             }
                 
             if (request.SourceWarehouseId.HasValue)
@@ -38,7 +39,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTran
                 sourceWarehouse = await _context.Warehouses.Where(w => w.IsActive == true && w.WarehouseId == request.SourceWarehouseId).FirstOrDefaultAsync(cancellationToken);
                 if (sourceWarehouse == null)
                 {
-                    throw new InvalidOperationException("Source warehouse does not exist or is inactive.");
+                    throw new BusinessException($"Source warehouse with id {request.SourceWarehouseId} does not exist or is inactive.");
                 }
             }
             if (request.DestinationWarehouseId.HasValue)
@@ -46,7 +47,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTran
                 destinationWarehouse = await _context.Warehouses.Where(w => w.IsActive == true && w.WarehouseId == request.DestinationWarehouseId).FirstOrDefaultAsync(cancellationToken);
                 if (destinationWarehouse == null)
                 {
-                    throw new InvalidOperationException("Destination warehouse does not exist or is inactive.");
+                    throw new BusinessException($"Destination warehouse with id {request.DestinationWarehouseId} does not exist or is inactive.");
                 }
             }
 
@@ -59,7 +60,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTran
 
             //validate if all items exist and are active
             if (itemIds.Count != items.Count)
-                throw new InvalidOperationException("One or more items do not exist or are inactive.");
+                throw new BusinessException("One or more items do not exist or are inactive.");
 
             // Create transaction
             var transaction = new Transaction

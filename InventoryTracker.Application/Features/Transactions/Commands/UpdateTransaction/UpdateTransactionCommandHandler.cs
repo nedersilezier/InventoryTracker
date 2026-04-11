@@ -24,7 +24,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.UpdateTran
             if(transaction == null)
                 throw new RecordNotFoundException(nameof(Transaction), request.TransactionId);
             if(transaction.Status != TransactionStatus.Draft)
-                throw new InvalidOperationException("Cannot update due to transaction's status.");
+                throw new BusinessException("Cannot update due to transaction's status.");
 
             Client? client = null;
             Warehouse? sourceWarehouse = null;
@@ -35,7 +35,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.UpdateTran
             {
                 client = await _context.Clients.Where(c => c.IsActive == true && c.ClientId == request.ClientId).FirstOrDefaultAsync(cancellationToken);
                 if (client == null)
-                    throw new InvalidOperationException($"Client with id {request.ClientId} does not exist or is inactive.");
+                    throw new BusinessException($"Client with id {request.ClientId} does not exist or is inactive.");
             }
 
             if (request.SourceWarehouseId.HasValue)
@@ -43,7 +43,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.UpdateTran
                 sourceWarehouse = await _context.Warehouses.Where(w => w.IsActive == true && w.WarehouseId == request.SourceWarehouseId).FirstOrDefaultAsync(cancellationToken);
                 if (sourceWarehouse == null)
                 {
-                    throw new InvalidOperationException("Source warehouse does not exist or is inactive.");
+                    throw new RecordNotFoundException(nameof(Warehouse), request.SourceWarehouseId);
                 }
             }
             if (request.DestinationWarehouseId.HasValue)
@@ -51,7 +51,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.UpdateTran
                 destinationWarehouse = await _context.Warehouses.Where(w => w.IsActive == true && w.WarehouseId == request.DestinationWarehouseId).FirstOrDefaultAsync(cancellationToken);
                 if (destinationWarehouse == null)
                 {
-                    throw new InvalidOperationException("Destination warehouse does not exist or is inactive.");
+                    throw new RecordNotFoundException(nameof(Warehouse), request.DestinationWarehouseId);
                 }
             }
 
@@ -147,7 +147,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.UpdateTran
             {
                 var itemsToAdd = await _context.Items.Where(i => i.IsActive == true && itemIdsToAdd.Contains(i.ItemId)).ToListAsync(cancellationToken);
                 if (itemsToAdd.Count != itemIdsToAdd.Count)
-                    throw new InvalidOperationException("One or more items do not exist or are inactive.");
+                    throw new RecordNotFoundException(nameof(Item), string.Join(", ", itemIdsToAdd));
                 foreach (var itemToAdd in itemsToAdd)
                 {
                     var transactionItem = new TransactionItem

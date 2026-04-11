@@ -8,7 +8,7 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Auth.Commands.Login
 {
-    public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDto>
+    public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponseDTO>
     {
         private readonly IIdentityService _identityService;
 
@@ -17,7 +17,7 @@ namespace InventoryTracker.Application.Features.Auth.Commands.Login
             _identityService = identityService;
         }
 
-        public async Task<AuthResponseDto> Handle(LoginCommand request, CancellationToken cancellationToken)
+        public async Task<AuthResponseDTO> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             var result = await _identityService
                 .LoginAsync(request.Email, request.Password, cancellationToken);

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Auth.Commands.RefreshToken
 {
-    public class RefreshTokenCommand : IRequest<AuthResponseDto>
+    public class RefreshTokenCommand : IRequest<AuthResponseDTO>
     {
         public string RefreshToken { get; set; } = default!;
     }

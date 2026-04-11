@@ -25,7 +25,7 @@ namespace InventoryTracker.API.Controllers.Auth
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<ActionResult<AuthResponseDto>> Login(LoginCommand command)
+        public async Task<ActionResult<AuthResponseDTO>> Login(LoginCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(result);
@@ -41,7 +41,7 @@ namespace InventoryTracker.API.Controllers.Auth
 
         [AllowAnonymous]
         [HttpPost("refresh")]
-        public async Task<ActionResult<AuthResponseDto>> RefreshToken(RefreshTokenCommand command)
+        public async Task<ActionResult<AuthResponseDTO>> RefreshToken(RefreshTokenCommand command)
         {
             var result = await _mediator.Send(command);
             return Ok(result);

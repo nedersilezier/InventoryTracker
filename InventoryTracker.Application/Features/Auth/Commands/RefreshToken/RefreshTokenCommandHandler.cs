@@ -7,14 +7,14 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Auth.Commands.RefreshToken
 {
-    public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthResponseDto>
+    public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthResponseDTO>
     {
         private readonly IIdentityService _identityService;
         public RefreshTokenCommandHandler(IIdentityService identityService)
         {
             _identityService = identityService;
         }
-        public async Task<AuthResponseDto> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
+        public async Task<AuthResponseDTO> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             return await _identityService.RefreshTokenAsync(request.RefreshToken, cancellationToken);
         }

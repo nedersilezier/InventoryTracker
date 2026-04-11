@@ -1,4 +1,6 @@
-﻿using InventoryTracker.Application.Common.Interfaces;
+﻿using FluentValidation;
+using FluentValidation.Results;
+using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Users.Commands.CreateUser;
 using InventoryTracker.Application.Features.Users.DTOs;
 using MediatR;
@@ -30,8 +32,8 @@ namespace InventoryTracker.Application.Features.Users.Commands.CreateUser
 
             if (!result.Succeeded)
             {
-                var errors = string.Join("; ", result.Errors);
-                throw new InvalidOperationException($"User creation failed: {errors}");
+                var failures = result.Errors.Select(error => new ValidationFailure("General", error)).ToList();
+                throw new ValidationException(failures);
             }
 
             return new UserDTO

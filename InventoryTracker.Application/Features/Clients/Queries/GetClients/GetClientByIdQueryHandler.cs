@@ -1,6 +1,8 @@
 ﻿using InventoryTracker.Application.Common.DTOs;
+using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Clients.DTOs;
+using InventoryTracker.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -42,7 +44,7 @@ namespace InventoryTracker.Application.Features.Clients.Queries.GetClients
                     }
                 }).FirstOrDefaultAsync(cancellationToken);
             if (client == null)
-                throw new InvalidOperationException($"Client with id {request.ClientId} not found.");
+                throw new RecordNotFoundException(nameof(Client), request.ClientId);
             return client;
         }
     }
