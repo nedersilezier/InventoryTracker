@@ -114,6 +114,20 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 // register authorization services
 builder.Services.AddAuthorization();
 
+// Configure CORS to allow requests from frontend applications
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .WithOrigins(
+                "https://localhost:7244" // WebAdmin
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

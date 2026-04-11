@@ -1,0 +1,24 @@
+﻿@model IEnumerable<InventoryTracker.Contracts.Responses.Countries.CountryDTO>
+@{
+    ViewData["Title"] = "Countries";
+}
+<h1>Countries</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Code</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var country in Model)
+        {
+            <tr>
+                <td>@country.CountryId</td>
+                <td>@country.Name</td>
+                <td>@country.Code</td>
+            </tr>
+        }
+    </tbody>
+</table>

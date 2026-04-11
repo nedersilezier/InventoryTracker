@@ -1,9 +1,11 @@
+using InventoryTracker.WebAdmin.Filters;
 using InventoryTracker.WebAdmin.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
 namespace InventoryTracker.WebAdmin.Controllers
 {
+    [RequireAuth]
     public class HomeController : Controller
     {
         public IActionResult Index()
