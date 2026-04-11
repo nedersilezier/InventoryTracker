@@ -1,4 +1,5 @@
-﻿using InventoryTracker.Application.Common.Interfaces;
+﻿using InventoryTracker.Application.Common.Exceptions;
+using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Auth.Commands.Login;
 using InventoryTracker.Application.Features.Auth.DTOs;
 using InventoryTracker.Application.Features.Users.Commands.CreateUser;
@@ -119,15 +120,15 @@ namespace InventoryTracker.Infrastructure.Identity
                 IsActive = user.IsActive
             };
         }
-        public async Task<AuthResponseDto> LoginAsync(string email, string password, CancellationToken cancellationToken)
+        public async Task<AuthResponseDTO> LoginAsync(string email, string password, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
-                throw new InvalidOperationException("Invalid email or password.");
+                throw new BusinessException("Invalid email or password.");
 
             if (user.IsActive == false)
-                throw new InvalidOperationException("User account is inactive.");
+                throw new BusinessException("User account is inactive.");
 
             var passwordValid = await _signInManager.CheckPasswordSignInAsync(
                 user,
@@ -135,7 +136,7 @@ namespace InventoryTracker.Infrastructure.Identity
                 lockoutOnFailure: false);
 
             if (!passwordValid.Succeeded)
-                throw new InvalidOperationException("Invalid email or password.");
+                throw new BusinessException("Invalid email or password.");
             var roles = await _userManager.GetRolesAsync(user);
             var tokenResult = _jwtTokenGenerator.GenerateToken(user, roles);
             var refreshToken = new RefreshToken
@@ -143,17 +144,18 @@ namespace InventoryTracker.Infrastructure.Identity
                 RefreshTokenId = Guid.NewGuid(),
                 Token = _refreshTokenGenerator.Generate(),
                 UserId = user.Id,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(7)
+                CreatedAtUtc = DateTime.UtcNow,
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(7)
             };
 
             _context.RefreshTokens.Add(refreshToken);
             await _context.SaveChangesAsync(cancellationToken);
-            return new AuthResponseDto
+            return new AuthResponseDTO
             {
                 AccessToken = tokenResult.AccessToken,
                 RefreshToken = refreshToken.Token,
-                ExpiresAtUtc = tokenResult.ExpiresAtUtc,
+                AccessTokenExpiresAtUtc = tokenResult.ExpiresAtUtc,
+                RefreshTokenExpiresAtUtc = refreshToken.ExpiresAtUtc,
                 UserId = user.Id,
                 Email = user.Email ?? string.Empty,
                 Roles = roles
@@ -167,52 +169,52 @@ namespace InventoryTracker.Infrastructure.Identity
                 return;
             if (!token.IsRevoked)
             {
-                token.RevokedAt = DateTime.UtcNow;
+                token.RevokedAtUtc = DateTime.UtcNow;
                 await _context.SaveChangesAsync(cancellationToken);
             }
         }
 
-        public async Task<AuthResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+        public async Task<AuthResponseDTO> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
         {
             var storedToken = await _context.RefreshTokens
                 .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.Token == refreshToken, cancellationToken);
             if (storedToken == null)
-                throw new InvalidOperationException("Invalid refresh token.");
+                throw new BusinessException("Invalid refresh token.");
 
             if (storedToken.IsRevoked)
-                throw new InvalidOperationException("Refresh token has been revoked.");
-
+                throw new BusinessException("Refresh token has been revoked.");
             if (storedToken.IsExpired)
-                throw new InvalidOperationException("Refresh token has expired.");
+                throw new BusinessException("Refresh token has expired.");
 
             var user = storedToken.User;
 
             if (!user.IsActive)
-                throw new InvalidOperationException("User account is inactive.");
+                throw new BusinessException("User account is inactive.");
 
             var roles = await _userManager.GetRolesAsync(user);
             var jwtResult = _jwtTokenGenerator.GenerateToken(user, roles);
 
-            storedToken.RevokedAt = DateTime.UtcNow;
+            storedToken.RevokedAtUtc = DateTime.UtcNow;
 
             var newRefreshToken = new RefreshToken
             {
                 RefreshTokenId = Guid.NewGuid(),
                 Token = _refreshTokenGenerator.Generate(),
                 UserId = user.Id,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddDays(7)
+                CreatedAtUtc = DateTime.UtcNow,
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(7)
             };
 
             _context.RefreshTokens.Add(newRefreshToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            return new AuthResponseDto
+            return new AuthResponseDTO
             {
                 AccessToken = jwtResult.AccessToken,
-                ExpiresAtUtc = jwtResult.ExpiresAtUtc,
+                AccessTokenExpiresAtUtc = jwtResult.ExpiresAtUtc,
                 RefreshToken = newRefreshToken.Token,
+                RefreshTokenExpiresAtUtc = newRefreshToken.ExpiresAtUtc,
                 UserId = user.Id,
                 Email = user.Email ?? string.Empty,
                 Roles = roles
@@ -222,7 +224,7 @@ namespace InventoryTracker.Infrastructure.Identity
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
-                throw new InvalidOperationException("User not found.");
+                throw new RecordNotFoundException(nameof(ApplicationUser), userId);
             var roles = await _userManager.GetRolesAsync(user);
             return new CurrentUserDTO
             {

@@ -23,10 +23,10 @@ namespace InventoryTracker.Infrastructure.Persistence.Configurations
             builder.Property(x => x.UserId)
                 .IsRequired();
 
-            builder.Property(x => x.CreatedAt)
+            builder.Property(x => x.CreatedAtUtc)
                 .IsRequired();
 
-            builder.Property(x => x.ExpiresAt)
+            builder.Property(x => x.ExpiresAtUtc)
                 .IsRequired();
 
             builder.HasOne(x => x.User)
