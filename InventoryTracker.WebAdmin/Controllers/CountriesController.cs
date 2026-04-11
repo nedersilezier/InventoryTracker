@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryTracker.WebAdmin.Controllers
 {
-    [RequireAuth]
+    //[RequireAuth]
     public class CountriesController: Controller
     {
         private readonly ICountriesService _countriesService;

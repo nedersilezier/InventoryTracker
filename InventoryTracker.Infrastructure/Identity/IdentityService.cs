@@ -137,6 +137,12 @@ namespace InventoryTracker.Infrastructure.Identity
 
             if (!passwordValid.Succeeded)
                 throw new BusinessException("Invalid email or password.");
+            var activeTokens = await _context.RefreshTokens.Where(x => x.UserId == user.Id && x.RevokedAtUtc == null && x.ExpiresAtUtc > DateTime.UtcNow).ToListAsync(cancellationToken);
+            foreach (var token in activeTokens)
+            {
+                token.RevokedAtUtc = DateTime.UtcNow;
+            }
+
             var roles = await _userManager.GetRolesAsync(user);
             var tokenResult = _jwtTokenGenerator.GenerateToken(user, roles);
             var refreshToken = new RefreshToken

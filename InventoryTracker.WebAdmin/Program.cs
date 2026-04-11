@@ -20,6 +20,9 @@ builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+// Register HttpContextAccessor for accessing cookies in services
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

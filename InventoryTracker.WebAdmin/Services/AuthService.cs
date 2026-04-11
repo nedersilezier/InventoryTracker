@@ -31,6 +31,16 @@ namespace InventoryTracker.WebAdmin.Services
             var response = await _httpClient.PostAsJsonAsync("/api/auth/logout", request);
              response.EnsureSuccessStatusCode();
         }
+        public async Task<AuthResponseDTO?> RefreshTokenAsync(TokenRefreshRequest request, CancellationToken cancellationToken)
+        {
+            var response = await _httpClient.PostAsJsonAsync("/api/auth/refresh", request, cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<AuthResponseDTO>(cancellationToken: cancellationToken);
+            }
+            await ThrowApiExceptionAsync(response, cancellationToken);
+            throw new Exception("Unreachable?");
+        }
         private static async Task ThrowApiExceptionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
         {
             var raw = await response.Content.ReadAsStringAsync(cancellationToken);

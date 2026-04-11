@@ -9,5 +9,6 @@ namespace InventoryTracker.WebAdmin.Interfaces
     {
         Task<AuthResponseDTO?> LoginAsync(LoginViewModel request, CancellationToken cancellationToken);
         Task LogoutAsync(LogoutRequest request);
+        Task<AuthResponseDTO?> RefreshTokenAsync(TokenRefreshRequest request, CancellationToken cancellationToken);
     }
 }
