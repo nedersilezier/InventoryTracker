@@ -1,0 +1,140 @@
+﻿@model IEnumerable<InventoryTracker.Contracts.Responses.Transactions.TransactionListDTO>
+@using InventoryTracker.Shared.Enums
+
+<div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+
+    <!-- Header -->
+    <div class="p-6 flex justify-between items-center border-b border-slate-100">
+        <h3 class="text-lg font-bold text-slate-900">
+            Recent Transactions
+        </h3>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+
+            <thead>
+                <tr class="bg-slate-50 border-y border-slate-100">
+                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        Date
+                    </th>
+                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        Type
+                    </th>
+                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        From
+                    </th>
+                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        To
+                    </th>
+                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        Status
+                    </th>
+                    <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        Reference
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-slate-50">
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var t in Model)
+                    {
+                        <tr class="hover:bg-slate-100 transition-colors group">
+
+                            <!-- Date -->
+                            <td class="px-6 py-5">
+                                <div class="text-sm font-medium text-slate-900">
+                                    @t.TransactionDate.ToString("yyyy-MM-dd")
+                                </div>
+                                <div class="text-[11px] text-slate-400">
+                                    @t.TransactionDate.ToString("HH:mm")
+                                </div>
+                            </td>
+
+                            <!-- Type -->
+                            <td class="px-6 py-5">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider @GetTypeBadgeClass(t.Type)">
+                                    @t.TypeDisplay
+                                </span>
+                            </td>
+
+                            <!-- From -->
+                            <td class="px-6 py-5">
+                                <div class="text-sm text-slate-700">
+                                    @t.FromDisplay
+                                </div>
+                            </td>
+
+                            <!-- To -->
+                            <td class="px-6 py-5">
+                                <div class="text-sm text-slate-700">
+                                    @t.ToDisplay
+                                </div>
+                            </td>
+
+                            <!-- Status -->
+                            <td class="px-6 py-5">
+                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider @GetStatusBadgeClass(t.Status)">
+                                    @t.Status
+                                </span>
+                            </td>
+
+                            <!-- Reference -->
+                            <td class="px-6 py-5">
+                                <div class="text-sm font-medium text-slate-900">
+                                    @t.ReferenceNumber
+                                </div>
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
+                            No transactions found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+@functions {
+    private string GetTypeBadgeClass(TransactionType type)
+    {
+        switch (type)
+        {
+            case TransactionType.ReturnFromClient:
+                return "bg-blue-50 text-blue-700";
+            case TransactionType.IssueToClient:
+                return "bg-red-50 text-blue-700";
+            case TransactionType.TransferBetweenWarehouses:
+                return "bg-slate-100 text-slate-600";
+            case TransactionType.Adjustment:
+                return "bg-amber-50 text-amber-700";
+            default:
+                return "bg-slate-100 text-slate-600";
+        }
+    }
+    private string GetStatusBadgeClass(TransactionStatus status)
+    {
+        switch (status)
+        {
+            case TransactionStatus.Approved:
+                return "bg-emerald-50 text-emerald-700";
+            case TransactionStatus.Draft:
+                return "bg-blue-50 text-blue-700";
+            case TransactionStatus.Cancelled:
+                return "bg-red-50 text-red-700";
+            default:
+                return "bg-slate-100 text-slate-600";
+        }
+    }
+}

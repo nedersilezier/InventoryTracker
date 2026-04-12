@@ -23,7 +23,11 @@ namespace InventoryTracker.Application.Features.Countries.Queries.GetCountries
                 {
                     CountryId = c.CountryId,
                     Name = c.Name,
-                    Code = c.Code
+                    Code = c.Code,
+                    CreatedBy = c.CreatedBy ?? string.Empty,
+                    CreatedAt = c.CreatedAt,
+                    UpdatedBy = c.UpdatedBy,
+                    UpdatedAt = c.UpdatedAt
                 }).ToListAsync(cancellationToken);
         }
     }

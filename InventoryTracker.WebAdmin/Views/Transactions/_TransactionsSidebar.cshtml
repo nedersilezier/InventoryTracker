@@ -1,0 +1,62 @@
+﻿@model InventoryTracker.WebAdmin.ViewModels.Transactions.TransactionFiltersViewModel
+
+<div class="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 sticky top-24">
+    <div class="mb-6 px-2">
+        <p class="text-[11px] text-slate-500 font-medium uppercase tracking-wider">
+            Search and filter
+        </p>
+    </div>
+
+    <form asp-controller="Transactions" asp-action="Index" method="get" class="space-y-6">
+        <div class="space-y-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Search
+            </label>
+            <input asp-for="SearchTerm"
+                   class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                   placeholder="Ref, item, warehouse..." />
+        </div>
+
+        <div class="space-y-2">
+            <label asp-for="DateRange" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Date Range
+            </label>
+            <select asp-for="DateRange"
+                    class="w-full bg-white border border-slate-200 rounded-md text-xs py-2 px-3 focus:ring-blue-200">
+                <option class="checked:bg-slate-100" value="7d">Last 7 Days</option>
+                <option class="hover:bg-slate-100" value="30d">Last 30 Days</option>
+                <option class="hover:bg-slate-100" value="90d">Last 90 Days</option>
+                <option class="hover:bg-slate-100" value="month">This Month</option>
+                <option class="hover:bg-slate-100" value="">All Time</option>
+            </select>
+        </div>
+
+        <div class="space-y-2">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Transaction Type
+            </label>
+
+            <div class="space-y-2">
+                <label class="flex items-center gap-2 text-xs text-slate-600">
+                    <input asp-for="IncludeInbound" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
+                    Inbound
+                </label>
+
+                <label class="flex items-center gap-2 text-xs text-slate-600">
+                    <input asp-for="IncludeInternal" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
+                    Internal
+                </label>
+
+                <label class="flex items-center gap-2 text-xs text-slate-600">
+                    <input asp-for="IncludeOutbound" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
+                    Outbound
+                </label>
+            </div>
+        </div>
+
+        <button type="submit"
+                class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-full text-sm font-semibold shadow">
+            Apply Changes
+        </button>
+    </form>
+</div>

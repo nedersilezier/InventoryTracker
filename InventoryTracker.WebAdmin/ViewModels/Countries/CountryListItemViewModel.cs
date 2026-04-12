@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace InventoryTracker.Contracts.Responses.Countries
+﻿namespace InventoryTracker.WebAdmin.ViewModels.Countries
 {
-    public class CountryDTO
+    public class CountryListItemViewModel
     {
         public Guid CountryId { get; set; }
         public string Name { get; set; } = default!;

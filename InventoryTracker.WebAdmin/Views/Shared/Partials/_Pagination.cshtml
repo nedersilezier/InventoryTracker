@@ -1,0 +1,30 @@
+﻿@model InventoryTracker.WebAdmin.ViewModels.HelperVMs.PaginationViewModel
+
+@if (Model.TotalPages > 1)
+{
+    <div class="flex gap-2">
+        @for (var i = 1; i <= Model.TotalPages; i++)
+        {
+            if (i == Model.CurrentPage)
+            {
+                <span class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-bold">
+                    @i
+                </span>
+            }
+            else
+            {
+                var routeValues = new Dictionary<string, string?>(Model.RouteValues)
+                {
+                    ["page"] = i.ToString()
+                };
+
+                <a asp-controller="@Model.Controller"
+                       asp-action="@Model.Action"
+                       asp-all-route-data="routeValues"
+                       class="px-3 py-1 text-slate-500 hover:bg-slate-50 rounded-lg text-xs font-medium">
+                    @i
+                </a>
+            }
+        }
+    </div>
+}

@@ -8,7 +8,7 @@
 <div class="mb-10">
     <h1 class="text-3xl font-bold">Overview</h1>
     <p class="text-gray-500">
-        Real-time inventory metrics and recent transactions at a glance.
+        Real-time inventory metrics and recent transactions.
     </p>
 </div>
 
@@ -24,13 +24,13 @@
         new MetricCardViewModel { Title = "Warehouses", Value = Model.Warehouses.ToString() })
 
     @await Html.PartialAsync("Partials/_MetricCard",
-        new MetricCardViewModel { Title = "Stock %", Value = Model.StockCapacity.ToString() })
+        new MetricCardViewModel { Title = "Stock", Value = Model.StockCapacity.ToString() })
 
 </div>
 
 <div class="d-grid gap-8">
 
-        @await Html.PartialAsync("Partials/_TransactionsTable",
+        @await Html.PartialAsync("_TransactionsTable",
             Model.RecentTransactions)
 
 </div>

@@ -26,7 +26,7 @@ namespace InventoryTracker.WebAdmin.Controllers
                     if (result != null)
                     {
                         AppendAuthCookies(result);
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("Index", "Dashboard");
                     }
                 }
                 catch
@@ -55,7 +55,7 @@ namespace InventoryTracker.WebAdmin.Controllers
                     return View(request);
                 }
                 AppendAuthCookies(result);
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Index", "Dashboard");
             }
             catch (ApiValidationException ex)
             {

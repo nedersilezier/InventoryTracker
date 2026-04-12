@@ -12,10 +12,17 @@ namespace InventoryTracker.WebAdmin.Controllers
         {
             _countriesService = countriesService;
         }
-        public async Task<IActionResult> Index(CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(string? searchTerm, CancellationToken cancellationToken)
         {
-            var countries = await _countriesService.GetAllAsync(cancellationToken);
-            return View(countries);
+            var countriesListViewModel = await _countriesService.GetAllAsync(cancellationToken);
+            //TEST
+            countriesListViewModel.SearchTerm = searchTerm;
+            return View(countriesListViewModel);
         }
+        //public async Task<IActionResult> Index(CancellationToken cancellationToken)
+        //{
+        //    var countries = await _countriesService.GetAllAsync(cancellationToken);
+        //    return View(countries);
+        //}
     }
 }

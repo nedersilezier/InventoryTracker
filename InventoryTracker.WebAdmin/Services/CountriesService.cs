@@ -1,6 +1,8 @@
 ﻿using InventoryTracker.Contracts.Requests.Countries;
 using InventoryTracker.Contracts.Responses.Countries;
 using InventoryTracker.WebAdmin.Interfaces;
+using InventoryTracker.WebAdmin.ViewModels.Countries;
+using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 
@@ -16,7 +18,7 @@ namespace InventoryTracker.WebAdmin.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<IEnumerable<CountryDTO>> GetAllAsync(CancellationToken cancellationToken)
+        public async Task<CountriesIndexViewModel> GetAllAsync(CancellationToken cancellationToken)
         {
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
 
@@ -29,9 +31,35 @@ namespace InventoryTracker.WebAdmin.Services
             using var response = await _httpClient.SendAsync(request, cancellationToken);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<List<CountryDTO>>(cancellationToken: cancellationToken)
-                   ?? new List<CountryDTO>();
+            var countries = await response.Content.ReadFromJsonAsync<List<CountryListItemViewModel>>(cancellationToken: cancellationToken);
+            return new CountriesIndexViewModel
+            {
+                Countries = countries ?? new List<CountryListItemViewModel>(),
+                TotalCount = countries?.Count ?? 0,
+                Pagination = new PaginationViewModel
+                {
+                        CurrentPage = 1,
+                        Controller = "Countries",
+                        TotalPages = (int)Math.Ceiling((double)(countries?.Count ?? 0) / 10)
+                }
+            };
         }
+        //public async Task<IEnumerable<CountryDTO>> GetAllAsync(CancellationToken cancellationToken)
+        //{
+        //    var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
+
+        //    if (string.IsNullOrEmpty(accessToken))
+        //        throw new UnauthorizedAccessException("Access token is missing.");
+
+        //    using var request = new HttpRequestMessage(HttpMethod.Get, "/api/admin/countries");
+        //    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+        //    using var response = await _httpClient.SendAsync(request, cancellationToken);
+        //    response.EnsureSuccessStatusCode();
+
+        //    return await response.Content.ReadFromJsonAsync<List<CountryDTO>>(cancellationToken: cancellationToken)
+        //           ?? new List<CountryDTO>();
+        //}
 
         public Task<CountryDTO> GetCountryByIdAsync(Guid id, CancellationToken cancellationToken)
         {

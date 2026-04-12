@@ -1,0 +1,169 @@
+﻿@model InventoryTracker.WebAdmin.ViewModels.Items.ItemsIndexViewModel
+
+<div class="flex gap-8">
+    <aside class="hidden lg:block w-64 shrink-0">
+        <div class="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 sticky top-24">
+            <div class="mb-6 px-2">
+                <p class="text-[11px] text-slate-500 font-medium uppercase tracking-wider">
+                    Search and filter
+                </p>
+            </div>
+
+            <form asp-controller="Items" asp-action="Index" method="get" class="space-y-4">
+                <div>
+                    <label asp-for="SearchTerm"
+                           class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                        Search
+                    </label>
+
+                    <input asp-for="SearchTerm"
+                           value="@(ViewContext.HttpContext.Request.Query["searchTerm"])"
+                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                           placeholder="Name, code..." />
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold py-3 rounded-full shadow-lg">
+                    Apply Filters
+                </button>
+            </form>
+        </div>
+    </aside>
+    <section class="flex-1 min-w-0">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
+                    Items
+                </h1>
+                <p class="text-sm text-slate-500 max-w-2xl">
+                    Browse and manage items.
+                </p>
+            </div>
+
+            <div class="flex gap-3">
+                <a asp-controller="Items"
+                       asp-action="Create"
+                       class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-semibold shadow hover:bg-blue-700 transition">
+                    + New Item
+                </a>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+
+                    <thead>
+                        <tr class="bg-slate-50 border-y border-slate-100">
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Item</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">SKU</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Unit</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Weight</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Value</th>
+                            <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-50">
+                        @if (Model.Items.Any())
+                        {
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr class="hover:bg-slate-100 transition-colors group">
+
+                                    <!-- Item -->
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div>
+                                                <div class="text-sm font-semibold text-slate-900">
+                                                    @item.Name
+                                                </div>
+
+                                                @if (!string.IsNullOrWhiteSpace(item.Description))
+                                                {
+                                                    <div class="text-[11px] text-slate-400">
+                                                        @item.Description
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- SKU -->
+                                    <td class="px-6 py-5 text-sm font-mono text-slate-500">
+                                        @item.SKU
+                                    </td>
+
+                                    <!-- Unit -->
+                                    <td class="px-6 py-5 text-sm text-slate-700">
+                                        @item.UnitOfMeasure
+                                    </td>
+
+                                    <!-- Weight -->
+                                    <td class="px-6 py-5 text-sm text-slate-700">
+                                        @item.Weight
+                                    </td>
+
+                                    <!-- Value -->
+                                    <td class="px-6 py-5 text-sm font-medium text-slate-900">
+                                        @item.CreditValue.ToString("C")
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="px-6 py-5 text-right">
+                                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                                            <a asp-controller="Items"
+                                                   asp-action="Details"
+                                                   asp-route-id="@item.ItemId"
+                                                   class="p-2 hover:bg-slate-100 rounded-lg">
+                                                <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">details</span>
+                                            </a>
+
+                                            <a asp-controller="Items"
+                                                   asp-action="Edit"
+                                                   asp-route-id="@item.ItemId"
+                                                   class="p-2 hover:bg-slate-100 rounded-lg">
+                                                <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">edit</span>
+                                            </a>
+                                            <a asp-controller="Items"
+                                                   asp-action="Delete"
+                                                   asp-route-id="@item.ItemId"
+                                                   class="p-2 hover:bg-slate-100 rounded-lg">
+                                                <span class="material-symbols-outlined text-slate-400 hover:text-red-400">delete</span>
+                                            </a>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
+                                    No items found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-6 border-t border-slate-100 flex items-center justify-between">
+
+                <span class="text-xs text-slate-400">
+                    Showing @Model.Items.Count of @Model.TotalCount items
+                </span>
+
+                @await Html.PartialAsync("Partials/_Pagination", Model.Pagination)
+
+            </div>
+        </div>
+    </section>
+</div>

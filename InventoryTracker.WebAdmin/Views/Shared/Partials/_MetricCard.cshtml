@@ -1,11 +1,8 @@
 ﻿@model InventoryTracker.WebAdmin.ViewModels.Dashboard.MetricCardViewModel
-<style>
-    .metric-card {
-        background: linear-gradient(90deg, #F5F5F5 50%, #F0F0F0 100%) !important;
-    }
-</style>
+
 <div class="bg-white p-6 rounded-xl shadow flex flex-col gap-2 metric-card">
-    <span class="text-xs uppercase text-black-500 font-semibold">
+    @* <span class="text-xs uppercase text-black-500 font-semibold"> *@
+    <span class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">
         @Model.Title
     </span>
 

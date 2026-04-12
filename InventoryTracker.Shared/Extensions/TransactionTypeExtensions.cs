@@ -12,7 +12,7 @@ namespace InventoryTracker.Shared.Extensions
             switch (type)
             {
                 case TransactionType.TransferBetweenWarehouses:
-                    return "Transfer between warehouses";
+                    return "Transfer";
                 case TransactionType.IssueToClient:
                     return "Issue to client";
                 case TransactionType.Adjustment:
