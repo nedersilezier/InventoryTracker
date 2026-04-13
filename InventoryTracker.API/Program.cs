@@ -7,6 +7,7 @@ using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Infrastructure.Identity;
 using InventoryTracker.Infrastructure.Identity.Entities;
 using InventoryTracker.Infrastructure.Persistence;
+using InventoryTracker.Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -110,6 +111,9 @@ builder.Services.AddProblemDetails();
 
 // register identity service
 builder.Services.AddScoped<IIdentityService, IdentityService>();
+
+// register users service
+builder.Services.AddScoped<IUsersService, UsersService>();
 
 // register authorization services
 builder.Services.AddAuthorization();

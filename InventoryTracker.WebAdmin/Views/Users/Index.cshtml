@@ -1,0 +1,171 @@
+﻿@model InventoryTracker.WebAdmin.ViewModels.Users.UsersIndexViewModel
+
+<div class="flex gap-8">
+    <aside class="hidden lg:block w-64 shrink-0">
+        <div class="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 sticky top-24">
+            <div class="mb-6 px-2">
+                <p class="text-[11px] text-slate-500 font-medium uppercase tracking-wider">
+                    Search and filter
+                </p>
+            </div>
+
+            <form asp-controller="Users" asp-action="Index" method="get" class="space-y-4">
+                <div>
+                    <label asp-for="SearchTerm"
+                           class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                        Search
+                    </label>
+
+                    <input asp-for="SearchTerm"
+                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                           placeholder="Name, code..." />
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold py-3 rounded-full shadow-lg">
+                    Apply Filters
+                </button>
+            </form>
+        </div>
+    </aside>
+    <section class="flex-1 min-w-0">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">
+                    Users
+                </h1>
+                <p class="text-sm text-slate-500 max-w-2xl">
+                    Browse and manage users.
+                </p>
+            </div>
+
+            <div class="flex gap-3">
+                <a asp-controller="Users"
+                       asp-action="Create"
+                       class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-semibold shadow hover:bg-blue-700 transition">
+                    + New User
+                </a>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+
+                    <thead>
+                        <tr class="bg-slate-50 border-y border-slate-100">
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Full Name</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Email</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Phone Number</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Role</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Active</th>
+                            <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-slate-50">
+                        @if (Model.Users.Any())
+                        {
+                            @foreach (var user in Model.Users)
+                            {
+                                <tr class="hover:bg-slate-100 transition-colors group">
+
+                                    <!-- User -->
+                                    <td class="px-6 py-5">
+                                                <div class="text-sm font-semibold text-slate-900">
+                                                    @user.FirstName @user.LastName
+                                                </div>
+                                    </td>
+                                    
+                                    <!-- Email -->
+                                    <td class="px-6 py-5 text-sm font-mono text-slate-500">
+                                        @user.Email
+                                    </td>
+
+                                    <!-- Phone -->
+                                    <td class="px-6 py-5 text-sm text-slate-700">
+                                        @user.PhoneNumber
+                                    </td>
+
+                                    <!-- Role -->
+                                    <td class="px-6 py-5 text-sm text-slate-700">
+                                        @user.Role
+                                    </td>
+
+                                    <!-- Active -->
+                                    <td class="px-6 py-5 text-sm font-medium text-slate-900">
+                                        @{ var isActiveText = user.IsActive ? "Yes" : "No"; }
+                                        @isActiveText
+                                    </td>
+
+                                    <!-- Actions -->
+                                    <td class="px-6 py-5 text-right">
+                                        <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <a asp-controller="Users"
+                                                   asp-action="Edit"
+                                                   asp-route-id="@user.UserId"
+                                                   class="p-2 hover:bg-slate-100 rounded-lg">
+                                                <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">edit</span>
+                                            </a>
+                                            <a asp-controller="Users"
+                                                   asp-action="Delete"
+                                                   asp-route-id="@user.UserId"
+                                                   class="p-2 hover:bg-slate-100 rounded-lg">
+                                                <span class="material-symbols-outlined text-slate-400 hover:text-red-400">delete</span>
+                                            </a>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="px-6 py-10 text-center text-sm text-slate-400">
+                                    No users found.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-6 border-t border-slate-100 flex items-center justify-between">
+
+                <span class="text-xs text-slate-400">
+                    Showing @Model.Users.Count of @Model.TotalCount items
+                </span>
+
+                <div class="flex items-center gap-4">
+                    <form asp-controller="Users" asp-action="Index" method="get" class="flex items-center gap-2">
+                        <input type="hidden" name="SearchTerm" value="@Model.SearchTerm" />
+                        <input type="hidden" name="PageNumber" value="@Model.Pagination.CurrentPage" />
+
+                        <label for="pageSize" class="text-xs text-slate-500 font-medium">
+                            Rows per page
+                        </label>
+
+                        <select id="pageSize"
+                                name="PageSize"
+                                onchange="this.form.submit()"
+                                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
+                            <option value="1" selected="@(Model.Pagination.PageSize == 1)">1</option>
+                            <option value="2" selected="@(Model.Pagination.PageSize == 2)">2</option>
+                            <option value="3" selected="@(Model.Pagination.PageSize == 3)">3</option>
+                            <option value="4" selected="@(Model.Pagination.PageSize == 4)">4</option>
+                        </select>
+                    </form>
+
+                    @await Html.PartialAsync("Partials/_Pagination", Model.Pagination)
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>

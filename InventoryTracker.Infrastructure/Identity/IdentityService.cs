@@ -226,21 +226,5 @@ namespace InventoryTracker.Infrastructure.Identity
                 Roles = roles
             };
         }
-        public async Task<CurrentUserDTO> GetCurrentUserAsync(string userId, CancellationToken cancellationToken)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                throw new RecordNotFoundException(nameof(ApplicationUser), userId);
-            var roles = await _userManager.GetRolesAsync(user);
-            return new CurrentUserDTO
-            {
-                UserId = user.Id,
-                Email = user.Email ?? string.Empty,
-                FirstName = user.FirstName ?? string.Empty,
-                LastName = user.LastName ?? string.Empty,
-                PhoneNumber = user.PhoneNumber ?? string.Empty,
-                Roles = roles
-            };
-        }
     }
 }

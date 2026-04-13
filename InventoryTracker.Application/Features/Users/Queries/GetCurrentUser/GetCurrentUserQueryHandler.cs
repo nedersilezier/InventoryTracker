@@ -10,12 +10,12 @@ namespace InventoryTracker.Application.Features.Users.Queries.GetCurrentUser
     public class GetCurrentUserQueryHandler : IRequestHandler<GetCurrentUserQuery, CurrentUserDTO>
     {
         private readonly ICurrentUserService _currentUserService;
-        private readonly IIdentityService _identityService;
+        private readonly IUsersService _usersService;
 
-        public GetCurrentUserQueryHandler(ICurrentUserService currentUserService, IIdentityService identityService)
+        public GetCurrentUserQueryHandler(ICurrentUserService currentUserService, IUsersService usersService)
         {
             _currentUserService = currentUserService;
-            _identityService = identityService;
+            _usersService = usersService;
         }
         public async Task<CurrentUserDTO> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
         {
@@ -24,7 +24,7 @@ namespace InventoryTracker.Application.Features.Users.Queries.GetCurrentUser
             {
                 throw new Exception("User is not authenticated.");
             }
-            return await _identityService.GetCurrentUserAsync(userId, cancellationToken);
+            return await _usersService.GetCurrentUserAsync(userId, cancellationToken);
         }
     }
 }

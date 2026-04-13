@@ -15,7 +15,7 @@
             {
                 var routeValues = new Dictionary<string, string?>(Model.RouteValues)
                 {
-                    ["page"] = i.ToString()
+                    ["PageNumber"] = i.ToString()
                 };
 
                 <a asp-controller="@Model.Controller"

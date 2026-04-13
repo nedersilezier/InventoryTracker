@@ -26,6 +26,12 @@ builder.Services.AddHttpClient<ITransactionsService, TransactionsService>(client
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+// Register HttpClient for Users
+builder.Services.AddHttpClient<IUsersService, UsersService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
 // Register HttpContextAccessor for accessing cookies in services
 builder.Services.AddHttpContextAccessor();
 
