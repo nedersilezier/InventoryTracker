@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace InventoryTracker.WebAdmin.Exceptions
+namespace InventoryTracker.AuthClient.Exceptions
 {
     public class ApiException: Exception
     {

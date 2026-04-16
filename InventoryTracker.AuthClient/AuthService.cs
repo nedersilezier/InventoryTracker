@@ -1,13 +1,11 @@
 ﻿using InventoryTracker.Contracts.Requests.Auth;
 using InventoryTracker.Contracts.Responses;
-using InventoryTracker.WebAdmin.Exceptions;
-using InventoryTracker.WebAdmin.Interfaces;
-using InventoryTracker.WebAdmin.Models;
-using InventoryTracker.WebAdmin.ViewModels.Login;
+using InventoryTracker.AuthClient.Exceptions;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Net.Http.Json;
 
-namespace InventoryTracker.WebAdmin.Services
+namespace InventoryTracker.AuthClient
 {
     public class AuthService : IAuthService
     {

@@ -1,9 +1,11 @@
 <Solution>
   <Project Path="InventoryTracker.API/InventoryTracker.API.csproj" />
   <Project Path="InventoryTracker.Application/InventoryTracker.Application.csproj" />
+  <Project Path="InventoryTracker.AuthClient/InventoryTracker.AuthClient.csproj" Id="07f358af-2d39-45f5-bb82-324df867a1fe" />
   <Project Path="InventoryTracker.Contracts/InventoryTracker.Contracts.csproj" Id="79fe1455-123c-4694-aabf-1a978347a904" />
   <Project Path="InventoryTracker.Domain/InventoryTracker.Domain.csproj" />
   <Project Path="InventoryTracker.Infrastructure/InventoryTracker.Infrastructure.csproj" />
   <Project Path="InventoryTracker.Shared/InventoryTracker.Shared.csproj" Id="2dbb9fca-ee41-4768-8886-3dd473ca0b09" />
   <Project Path="InventoryTracker.WebAdmin/InventoryTracker.WebAdmin.csproj" Id="b05d6a04-afb9-48d7-b4c3-fd6356accbfa" />
+  <Project Path="InventoryTracker.WebOperator/InventoryTracker.WebOperator.csproj" Id="8fea1daa-7bf3-496f-a75f-55b684116f7b" />
 </Solution>

@@ -1,5 +1,4 @@
 ﻿using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
-using System.Composition.Convention;
 
 namespace InventoryTracker.WebAdmin.ViewModels.Users
 {

@@ -1,8 +1,8 @@
 ﻿using InventoryTracker.Contracts.Requests.Auth;
 using InventoryTracker.Contracts.Responses;
-using InventoryTracker.WebAdmin.Exceptions;
-using InventoryTracker.WebAdmin.Interfaces;
-using InventoryTracker.WebAdmin.ViewModels.Login;
+using InventoryTracker.AuthClient;
+using InventoryTracker.AuthClient.Exceptions;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryTracker.WebAdmin.Controllers

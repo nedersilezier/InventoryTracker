@@ -1,4 +1,4 @@
-﻿namespace InventoryTracker.WebAdmin.Exceptions
+﻿namespace InventoryTracker.AuthClient.Exceptions
 {
     public class ApiValidationException : ApiException
     {

@@ -1,5 +1,6 @@
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.Services;
+using InventoryTracker.AuthClient;
 
 var builder = WebApplication.CreateBuilder(args);
 

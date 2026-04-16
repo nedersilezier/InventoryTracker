@@ -1,9 +1,8 @@
 ﻿using InventoryTracker.Contracts.Responses;
 using InventoryTracker.Contracts.Requests.Auth;
-using InventoryTracker.WebAdmin.ViewModels.Login;
 
 
-namespace InventoryTracker.WebAdmin.Interfaces
+namespace InventoryTracker.AuthClient
 {
     public interface IAuthService
     {

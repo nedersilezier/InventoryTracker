@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace InventoryTracker.WebAdmin.ViewModels.Login
+namespace InventoryTracker.AuthClient
 {
     public class LoginViewModel
     {
