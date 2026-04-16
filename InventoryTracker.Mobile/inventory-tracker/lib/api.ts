@@ -83,7 +83,7 @@ export async function getRefreshToken(): Promise<string | null> {
 }
 
 // protected endpoint test
-export async function getCurrentUser():Promise<MeResponse> {
+export async function getCurrentUser(): Promise<MeResponse> {
   const token = await getAccessToken();
 
   const response = await fetch(`${API_URL}/api/auth/me`, {

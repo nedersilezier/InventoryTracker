@@ -14,20 +14,18 @@ export default function Index() {
 
       const result = await login(email, password);
 
-      console.log('LOGIN RESULT:', result);
-
-      Alert.alert(
-        'Login success',
-        `Loged in as ${result.email}`
-      );
+      console.log('LOGIN RESULT:', {
+        email: result.email,
+        userId: result.userId,
+        roles: result.roles
+      });
 
       const me = await getCurrentUser();
       console.log('CURRENT USER:', me);
       Alert.alert(
-        'Me endpoint success',
+        'Login success',
         `Loged in as ${me.email} \nName: ${me.firstName} \nLast name: ${me.lastName}`
       );
-      
     } catch (error) {
       console.log('LOGIN ERROR:', error);
       const message =

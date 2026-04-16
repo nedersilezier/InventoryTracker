@@ -1,0 +1,42 @@
+﻿<aside class="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 bg-slate-50 border-r z-40">
+
+    <div class="px-6 py-6">
+        <h1 class="text-lg font-black text-blue-700">Inventory Tracker</h1>
+        <p class="text-[10px] uppercase text-slate-400 font-bold">Operator Portal</p>
+    </div>
+
+    <nav class="flex flex-col gap-1 px-2">
+
+        <a asp-controller="Operator"
+               asp-action="Dashboard"
+               class="px-4 py-3 rounded-xl bg-blue-50 text-blue-700 font-semibold">
+            Dashboard
+        </a>
+
+        <a asp-controller="Operator"
+               asp-action="Receive"
+               class="px-4 py-3 rounded-xl hover:bg-slate-100">
+            Inbound
+        </a>
+
+        <a asp-controller="Operator"
+               asp-action="Issue"
+               class="px-4 py-3 rounded-xl hover:bg-slate-100">
+            Outbound
+        </a>
+
+        <a asp-controller="Operator"
+               asp-action="Drafts"
+               class="px-4 py-3 rounded-xl hover:bg-slate-100">
+            Drafts
+        </a>
+
+        <a asp-controller="Operator"
+               asp-action="History"
+               class="px-4 py-3 rounded-xl hover:bg-slate-100">
+            History
+        </a>
+
+    </nav>
+
+</aside>

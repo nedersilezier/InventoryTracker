@@ -125,7 +125,8 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "https://localhost:7244" // WebAdmin
+                "https://localhost:7244", // WebAdmin
+                "https://localhost:7141/" // WebOperator
             )
             .AllowAnyHeader()
             .AllowAnyMethod();

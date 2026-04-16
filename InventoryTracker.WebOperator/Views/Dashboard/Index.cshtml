@@ -1,0 +1,71 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="grid md:grid-cols-3 gap-6 mb-10">
+
+    <div class="bg-white p-6 rounded-xl shadow">
+        <p class="text-xs uppercase text-slate-400">Pending inbound</p>
+        <h3 class="text-3xl font-bold">12</h3>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow">
+        <p class="text-xs uppercase text-slate-400">Pending outbound</p>
+        <h3 class="text-3xl font-bold">8</h3>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow">
+        <p class="text-xs uppercase text-slate-400">Drafts</p>
+        <h3 class="text-3xl font-bold">25</h3>
+    </div>
+
+</div>
+
+<div class="grid md:grid-cols-3 gap-6 mb-10">
+
+    <a asp-action="Receive"
+           class="p-8 rounded-xl bg-blue-600 text-white shadow-lg hover:scale-[1.02] transition">
+
+        <h4 class="text-xl font-bold mb-2">Receive Materials</h4>
+        <p class="text-sm opacity-90">Scan incoming items</p>
+
+    </a>
+
+    <a asp-action="Issue"
+           class="p-8 rounded-xl bg-blue-200 shadow-lg hover:scale-[1.02] transition">
+
+        <h4 class="text-xl font-bold mb-2">Issue Materials</h4>
+        <p class="text-sm text-slate-500">Release stock</p>
+
+    </a>
+
+    <a asp-action="Drafts"
+           class="p-8 rounded-xl bg-slate-200 shadow-lg hover:scale-[1.02] transition">
+
+        <h4 class="text-xl font-bold mb-2">Continue Drafts</h4>
+        <p class="text-sm text-slate-500">Resume work</p>
+
+    </a>
+
+</div>
+
+<div class="bg-white rounded-xl shadow p-6">
+
+    <h3 class="font-bold mb-4">Recent Activity</h3>
+
+    <div class="space-y-4">
+
+        <div class="flex justify-between">
+            <span>Inbound #TRX-001</span>
+            <span class="text-sm text-slate-400">Today</span>
+        </div>
+
+        <div class="flex justify-between">
+            <span>Outbound #TRX-002</span>
+            <span class="text-sm text-slate-400">Today</span>
+        </div>
+
+    </div>
+
+</div>
