@@ -1,0 +1,58 @@
+﻿@model InventoryTracker.WebOperator.ViewModels.Transactions.OperatorTransactionsIndexViewModel
+@using InventoryTracker.Shared.Enums
+
+@{
+    ViewData["Title"] = Model?.PageTitle ?? "Transactions";
+}
+
+@if (Model == null)
+{
+    <div class="max-w-6xl mx-auto">
+        <div class="rounded-xl bg-red-50 border border-red-200 p-4 text-red-700">
+            Transactions view model is null.
+        </div>
+    </div>
+}
+else
+{
+    <header class="max-w-6xl mx-auto mb-10 flex justify-between items-end">
+        <div>
+            <p class="text-slate-500 font-medium">
+                @Model.PageDescription
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            @await Html.PartialAsync("~/Views/Shared/Partials/_Pagination.cshtml", Model.Pagination)
+            <div class="relative">
+                <details class="group relative">
+                    <summary class="list-none cursor-pointer px-6 py-3 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:opacity-90 transition-opacity flex items-center gap-2">
+                        Create New
+                    </summary>
+
+                    <div class="absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden z-50">
+                        <a asp-controller="Transactions" asp-action="Create" asp-route-type="@TransactionType.IssueToClient" class="block px-4 py-3 text-sm hover:bg-slate-50">
+                            New Issue
+                        </a>
+                        <a asp-controller="Transactions" asp-action="Create" asp-route-type="@TransactionType.ReturnFromClient" class="block px-4 py-3 text-sm hover:bg-slate-50">
+                            New Return
+                        </a>
+                        <a asp-controller="Transactions" asp-action="Create" asp-route-type="@TransactionType.TransferBetweenWarehouses" class="block px-4 py-3 text-sm hover:bg-slate-50">
+                            New Transfer
+                        </a>
+                        <a asp-controller="Transactions" asp-action="Create" asp-route-type="@TransactionType.Adjustment" class="block px-4 py-3 text-sm hover:bg-slate-50">
+                            New Adjustment
+                        </a>
+                    </div>
+                </details>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 auto-rows-fr">
+        @foreach (var transaction in Model.Transactions ?? Enumerable.Empty<InventoryTracker.WebOperator.ViewModels.Transactions.TransactionCardViewModel>())
+        {
+            @await Html.PartialAsync("~/Views/Shared/Partials/_TransactionCard.cshtml", transaction)
+        }
+    </div>
+}

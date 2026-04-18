@@ -1,0 +1,122 @@
+﻿@model InventoryTracker.WebOperator.ViewModels.Transactions.TransactionCardViewModel
+@using InventoryTracker.Shared.Enums
+
+<div class="group bg-white rounded-xl p-4 flex flex-col border-l-4 @GetBorderClass(Model.Type) hover:shadow-md transition h-full">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-start mb-3 gap-2">
+        <div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold mb-1 @GetBadgeClass(Model.Type)">
+                @Model.TypeDisplay
+            </span>
+
+            <h3 class="text-sm font-bold text-slate-900 truncate">
+                @Model.ReferenceNumber
+            </h3>
+        </div>
+
+        <span class="text-[10px] text-slate-400 whitespace-nowrap">
+            @Model.TransactionDate.ToString("dd.MM")
+        </span>
+    </div>
+
+    <!-- BODY -->
+    <div class="flex-1 text-sm space-y-2">
+
+        <!-- ROUTE -->
+        <div class="flex items-center justify-between text-slate-700 text-xs font-medium">
+            <span class="truncate max-w-[40%]">
+                @(string.IsNullOrWhiteSpace(Model.FromDisplay) ? "-" : Model.FromDisplay)
+            </span>
+
+            <span class="mx-2 text-slate-400">
+                →
+            </span>
+
+            <span class="truncate max-w-[40%] text-right">
+                @(string.IsNullOrWhiteSpace(Model.ToDisplay) ? "-" : Model.ToDisplay)
+            </span>
+        </div>
+
+        <!-- STATUS -->
+        <div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold @GetStatusBadgeClass(Model.Status)">
+                @Model.StatusDisplay
+            </span>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="flex items-center justify-between pt-3 mt-2 border-t">
+
+        <div class="flex gap-1">
+            @if (Model.Status == TransactionStatus.Draft)
+            {
+                <a asp-action="Delete"
+                       asp-route-id="@Model.TransactionId"
+                       class="w-8 h-8 flex items-center justify-center rounded hover:bg-red-100 text-slate-500 hover:text-red-600">
+                    🗑
+                </a>
+
+                <a asp-action="Edit"
+                       asp-route-id="@Model.TransactionId"
+                       class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-500">
+                    ✏
+                </a>
+            }
+            else
+            {
+                <a asp-action="Details"
+                       asp-route-id="@Model.TransactionId"
+                       class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-500">
+                    👁
+                </a>
+            }
+        </div>
+
+        <a asp-controller="@Model.ContinueController"
+               asp-action="@Model.ContinueAction"
+               asp-route-id="@Model.TransactionId"
+               class="text-xs font-bold px-3 py-1.5 rounded-lg @GetButtonClass(Model.Type)">
+            @(Model.Status == TransactionStatus.Draft ? "Continue" : "Open")
+        </a>
+    </div>
+
+</div>
+
+@functions {
+    private string GetBorderClass(TransactionType type) => type switch
+    {
+        TransactionType.ReturnFromClient => "border-green-600",
+        TransactionType.IssueToClient => "border-orange-600",
+        TransactionType.TransferBetweenWarehouses => "border-blue-600",
+        TransactionType.Adjustment => "border-slate-500",
+        _ => "border-slate-300"
+    };
+
+    private string GetBadgeClass(TransactionType type) => type switch
+    {
+        TransactionType.ReturnFromClient => "bg-green-100 text-green-700",
+        TransactionType.IssueToClient => "bg-orange-100 text-orange-700",
+        TransactionType.TransferBetweenWarehouses => "bg-blue-100 text-blue-700",
+        TransactionType.Adjustment => "bg-slate-200 text-slate-700",
+        _ => "bg-slate-100 text-slate-600"
+    };
+
+    private string GetButtonClass(TransactionType type) => type switch
+    {
+        TransactionType.ReturnFromClient => "bg-green-600 text-white",
+        TransactionType.IssueToClient => "bg-orange-600 text-white",
+        TransactionType.TransferBetweenWarehouses => "bg-blue-600 text-white",
+        TransactionType.Adjustment => "bg-slate-700 text-white",
+        _ => "bg-slate-900 text-white"
+    };
+
+    private string GetStatusBadgeClass(TransactionStatus status) => status switch
+    {
+        TransactionStatus.Draft => "bg-amber-100 text-amber-700",
+        TransactionStatus.Approved => "bg-green-100 text-green-700",
+        TransactionStatus.Cancelled => "bg-red-100 text-red-700",
+        _ => "bg-slate-100 text-slate-600"
+    };
+}

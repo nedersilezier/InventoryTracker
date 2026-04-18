@@ -8,7 +8,11 @@
 
   <ItemGroup>
     <Folder Include="Services\" />
-    <Folder Include="ViewModels\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\InventoryTracker.Contracts\InventoryTracker.Contracts.csproj" />
+    <ProjectReference Include="..\InventoryTracker.Shared\InventoryTracker.Shared.csproj" />
   </ItemGroup>
 
 </Project>

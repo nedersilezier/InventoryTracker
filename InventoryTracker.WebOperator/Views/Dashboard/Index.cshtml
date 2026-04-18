@@ -3,48 +3,61 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="grid md:grid-cols-3 gap-6 mb-10">
+<div class="grid md:grid-cols-4 gap-6 mb-10">
 
     <div class="bg-white p-6 rounded-xl shadow">
-        <p class="text-xs uppercase text-slate-400">Pending inbound</p>
+        <p class="text-xs uppercase text-slate-400">Issue Drafts</p>
         <h3 class="text-3xl font-bold">12</h3>
     </div>
 
     <div class="bg-white p-6 rounded-xl shadow">
-        <p class="text-xs uppercase text-slate-400">Pending outbound</p>
+        <p class="text-xs uppercase text-slate-400">Return Drafts</p>
         <h3 class="text-3xl font-bold">8</h3>
     </div>
 
     <div class="bg-white p-6 rounded-xl shadow">
-        <p class="text-xs uppercase text-slate-400">Drafts</p>
-        <h3 class="text-3xl font-bold">25</h3>
+        <p class="text-xs uppercase text-slate-400">Transfer Drafts</p>
+        <h3 class="text-3xl font-bold">2</h3>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow">
+        <p class="text-xs uppercase text-slate-400">Adjustment Drafts</p>
+        <h3 class="text-3xl font-bold">1</h3>
     </div>
 
 </div>
 
-<div class="grid md:grid-cols-3 gap-6 mb-10">
+<div class="grid md:grid-cols-4 gap-6 mb-10">
 
-    <a asp-action="Receive"
+    <a asp-controller="Transactions" asp-action="NewReturn"
            class="p-8 rounded-xl bg-blue-600 text-white shadow-lg hover:scale-[1.02] transition">
 
         <h4 class="text-xl font-bold mb-2">Receive Materials</h4>
-        <p class="text-sm opacity-90">Scan incoming items</p>
+        <p class="text-sm opacity-90">Register incoming items</p>
 
     </a>
 
-    <a asp-action="Issue"
+    <a asp-controller="Transactions" asp-action="NewIssue"
            class="p-8 rounded-xl bg-blue-200 shadow-lg hover:scale-[1.02] transition">
 
         <h4 class="text-xl font-bold mb-2">Issue Materials</h4>
-        <p class="text-sm text-slate-500">Release stock</p>
+        <p class="text-sm text-slate-500">Register outgoing items</p>
 
     </a>
 
-    <a asp-action="Drafts"
+    <a asp-controller="Transactions" asp-action="NewTransfer"
            class="p-8 rounded-xl bg-slate-200 shadow-lg hover:scale-[1.02] transition">
 
-        <h4 class="text-xl font-bold mb-2">Continue Drafts</h4>
-        <p class="text-sm text-slate-500">Resume work</p>
+        <h4 class="text-xl font-bold mb-2">New Transfer</h4>
+        <p class="text-sm text-slate-500">Register an exchange between warehouses</p>
+
+    </a>
+
+    <a asp-controller="Transactions" asp-action="NewAdjustment"
+           class="p-8 rounded-xl bg-green-200 shadow-lg hover:scale-[1.02] transition">
+
+        <h4 class="text-xl font-bold mb-2">New Adjustment</h4>
+        <p class="text-sm text-slate-500">Adjust the stock count</p>
 
     </a>
 

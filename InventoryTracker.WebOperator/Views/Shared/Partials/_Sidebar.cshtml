@@ -1,4 +1,5 @@
-﻿<aside class="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 bg-slate-50 border-r z-40">
+﻿@using InventoryTracker.Shared.Enums
+<aside class="hidden lg:flex flex-col fixed left-0 top-0 h-full w-64 bg-slate-50 border-r z-40">
 
     <div class="px-6 py-6">
         <h1 class="text-lg font-black text-blue-700">Inventory Tracker</h1>
@@ -7,35 +8,54 @@
 
     <nav class="flex flex-col gap-1 px-2">
 
-        <a asp-controller="Operator"
-               asp-action="Dashboard"
+        <a asp-controller="Dashboard"
+               asp-action="Index"
+               method="get"
                class="px-4 py-3 rounded-xl bg-blue-50 text-blue-700 font-semibold">
             Dashboard
         </a>
 
-        <a asp-controller="Operator"
-               asp-action="Receive"
+        <a asp-controller="Transactions"
+               asp-action="Index"
+               asp-route-type="@TransactionType.ReturnFromClient"
                class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            Inbound
+            Returns
         </a>
 
-        <a asp-controller="Operator"
-               asp-action="Issue"
+        <a asp-controller="Transactions"
+               asp-action="Index"
+               asp-route-type="@TransactionType.IssueToClient"
                class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            Outbound
+            Issues
         </a>
 
-        <a asp-controller="Operator"
-               asp-action="Drafts"
+        <a asp-controller="Transactions"
+               asp-action="Index"
+               asp-route-type="@TransactionType.TransferBetweenWarehouses"
                class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            Drafts
+            Transfers
         </a>
 
-        <a asp-controller="Operator"
-               asp-action="History"
+        <a asp-controller="Transactions"
+               asp-action="Index"
+               asp-route-type="@TransactionType.Adjustment"
                class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            History
+            Adjustments
         </a>
+
+        <a asp-controller="Transactions"
+               asp-action="Index"
+               asp-route-status="@TransactionStatus.Draft"
+               class="px-4 py-3 rounded-xl hover:bg-slate-100">
+            All Drafts
+        </a>
+
+        <a asp-controller="Transactions"
+               asp-action="Index"
+               class="px-4 py-3 rounded-xl hover:bg-slate-100">
+            All Transactions
+        </a>
+
 
     </nav>
 
