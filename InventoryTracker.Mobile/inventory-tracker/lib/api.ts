@@ -29,6 +29,13 @@ export type MeResponse = {
   phoneNumber: string;
   roles: string[];
 };
+
+export type ApiErrorResponse = {
+  type?: string;
+  title?: string;
+  status?: number;
+  detail?: string;
+};
 export async function login(email: string, password: string): Promise<AuthResponse> {
   const body: LoginRequest = {
     email,
@@ -54,8 +61,16 @@ export async function login(email: string, password: string): Promise<AuthRespon
 
     if (!response.ok) {
       const errorText = await response.text();
+      let message = 'Login failed';
+      try{
+        const errorJson: ApiErrorResponse = JSON.parse(errorText);
+        message = errorJson.detail || errorJson.title || message;
+      }
+      catch{
+        message = errorText || message;
+      }
       console.log('LOGIN ERROR BODY:', errorText);
-      throw new Error(errorText || 'Login failed');
+      throw new Error(message);
     }
 
     const data: AuthResponse = await response.json();

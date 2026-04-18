@@ -1,3 +1,4 @@
+import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Button, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,15 +24,14 @@ export default function Index() {
       const me = await getCurrentUser();
       console.log('CURRENT USER:', me);
       Alert.alert(
-        'Login success',
-        `Loged in as ${me.email} \nName: ${me.firstName} \nLast name: ${me.lastName}`
-      );
+              'Login success',
+              `Loged in as ${me.email} \nName: ${me.firstName} \nLast name: ${me.lastName}`);
     } catch (error) {
       console.log('LOGIN ERROR:', error);
       const message =
         error instanceof Error ? error.message : 'Unknowk error';
 
-      Alert.alert('Login error: ', message);
+      Alert.alert('Login error', message);
     } finally {
       setLoading(false);
     }
@@ -39,6 +39,7 @@ export default function Index() {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <Stack.Screen options={{ title: 'Login' }} />
       <View
         style={{
           flex: 1,
