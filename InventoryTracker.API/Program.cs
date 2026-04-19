@@ -115,6 +115,9 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 // register users service
 builder.Services.AddScoped<IUsersService, UsersService>();
 
+// register countries service
+builder.Services.AddScoped<ICountriesService, CountriesService>();
+
 // register authorization services
 builder.Services.AddAuthorization();
 

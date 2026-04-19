@@ -1,10 +1,11 @@
-﻿using InventoryTracker.WebAdmin.Filters;
+﻿using InventoryTracker.Contracts.Requests.Countries;
+using InventoryTracker.WebAdmin.Filters;
 using InventoryTracker.WebAdmin.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryTracker.WebAdmin.Controllers
 {
-    //[RequireAuth]
+    [RequireAuth]
     public class CountriesController: Controller
     {
         private readonly ICountriesService _countriesService;
@@ -12,17 +13,10 @@ namespace InventoryTracker.WebAdmin.Controllers
         {
             _countriesService = countriesService;
         }
-        public async Task<IActionResult> Index(string? searchTerm, CancellationToken cancellationToken)
+        public async Task<IActionResult> Index(GetCountriesRequest request, CancellationToken cancellationToken)
         {
-            var countriesListViewModel = await _countriesService.GetAllAsync(cancellationToken);
-            //TEST
-            countriesListViewModel.SearchTerm = searchTerm;
+            var countriesListViewModel = await _countriesService.GetAllAsync(request, cancellationToken);
             return View(countriesListViewModel);
         }
-        //public async Task<IActionResult> Index(CancellationToken cancellationToken)
-        //{
-        //    var countries = await _countriesService.GetAllAsync(cancellationToken);
-        //    return View(countries);
-        //}
     }
 }

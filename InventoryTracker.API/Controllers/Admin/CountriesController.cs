@@ -1,7 +1,11 @@
-﻿using InventoryTracker.Contracts.Requests.Countries;
-using InventoryTracker.Application.Features.Countries.Commands.CreateCountry;
+﻿using InventoryTracker.Application.Features.Countries.Commands.CreateCountry;
 using InventoryTracker.Application.Features.Countries.Commands.UpdateCountry;
 using InventoryTracker.Application.Features.Countries.Queries.GetCountries;
+using InventoryTracker.Contracts.Requests.Countries;
+using InventoryTracker.Contracts.Responses.Common;
+using InventoryTracker.Contracts.Responses.Countries;
+using InventoryTracker.Contracts.Responses.Users;
+using InventoryTracker.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,11 +23,37 @@ namespace InventoryTracker.API.Controllers.Admin
             _mediator = mediator;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllCountries(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllCountries([FromQuery] GetCountriesRequest request, CancellationToken cancellationToken)
         {
-            var countries = await _mediator.Send(new GetCountriesQuery(), cancellationToken);
-            return Ok(countries);
+            var query = new GetCountriesQuery
+            {
+                PageNumber = request.PageNumber,
+                //test
+                PageSize = request.PageSize ?? 1,
+                SearchTerm = request.SearchTerm
+            };
+            var countriesPaged = await _mediator.Send(query, cancellationToken);
+            var response = new PagedResponse<CountryResponseDTO>
+            {
+                Items = countriesPaged.Items.Select(country => new CountryResponseDTO
+                {
+                    CountryId = country.CountryId,
+                    Name = country.Name,
+                    Code = country.Code,
+                    CreatedBy = country.CreatedBy ?? string.Empty,
+                    CreatedAt = country.CreatedAt,
+                    UpdatedBy = country.UpdatedBy,
+                    UpdatedAt = country.UpdatedAt
+                }).ToList(),
+
+                TotalPages = countriesPaged.TotalPages,
+                PageNumber = countriesPaged.PageNumber,
+                PageSize = countriesPaged.PageSize,
+                TotalCount = countriesPaged.TotalCount
+            };
+            return Ok(response);
         }
+
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetCountryById(Guid id, CancellationToken cancellationToken)
