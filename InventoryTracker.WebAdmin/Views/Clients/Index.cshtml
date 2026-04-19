@@ -24,7 +24,7 @@
                         </label>
 
                         <input asp-for="SearchTerm"
-                               value="@(ViewContext.HttpContext.Request.Query["searchTerm"])"
+                               value="@(ViewContext.HttpContext.Request.Query["SearchTerm"])"
                                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
                                placeholder="Name, code, city, country..." />
                     </div>
@@ -42,13 +42,13 @@
                    new MetricCardViewModel
                    {
                        Title = "Total Clients",
-                       Value = Model.TotalCount.ToString()
+                       Value = Model.TableFooter.TotalCount.ToString()
                    })
                 @await Html.PartialAsync("Partials/_MetricCard",
                     new MetricCardViewModel
                     {
                         Title = "Current page",
-                        Value = Model.Pagination.CurrentPage.ToString()
+                        Value = Model.TableFooter.Pagination.CurrentPage.ToString()
                     })
                 <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
                     <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
@@ -207,12 +207,7 @@
                 </table>
             </div>
             @* paginator *@
-            <div class="p-6 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-xs text-slate-400">
-                    Showing @Model.Clients.Count of @Model.TotalCount clients
-                </span>
-                @await Html.PartialAsync("Partials/_Pagination", Model.Pagination)
-            </div>
+            @await Html.PartialAsync("Partials/_TableFooter", Model.TableFooter)
         </div>
     </section>
 </div>

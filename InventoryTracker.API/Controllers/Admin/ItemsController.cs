@@ -1,9 +1,14 @@
-﻿using InventoryTracker.Contracts.Requests.Items;
+﻿using Azure.Core;
 using InventoryTracker.Application.Features.Items.Commands.ActivateItem;
 using InventoryTracker.Application.Features.Items.Commands.CreateItem;
 using InventoryTracker.Application.Features.Items.Commands.DeactivateItem;
 using InventoryTracker.Application.Features.Items.Commands.UpdateItem;
 using InventoryTracker.Application.Features.Items.Queries.GetItems;
+using InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses;
+using InventoryTracker.Contracts.Requests.Items;
+using InventoryTracker.Contracts.Responses.Common;
+using InventoryTracker.Contracts.Responses.Items;
+using InventoryTracker.Contracts.Responses.Warehouses;
 using InventoryTracker.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,11 +27,36 @@ namespace InventoryTracker.API.Controllers.Admin
             _mediator = mediator;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllItems(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllItems([FromQuery] GetItemsRequest request, CancellationToken cancellationToken)
         {
-            var items = await _mediator.Send(new GetItemsQuery(), cancellationToken);
-            return Ok(items);
+            var query = new GetItemsQuery
+            {
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize ?? 10,
+                SearchTerm = request.SearchTerm
+            };
+            var itemsPaged = await _mediator.Send(query, cancellationToken);
+            var response = new PagedResponse<ItemResponseDTO>
+            {
+                Items = itemsPaged.Items.Select(i => new ItemResponseDTO
+                {
+                    ItemId = i.ItemId,
+                    Name = i.Name,
+                    SKU = i.SKU,
+                    UnitOfMeasure = i.UnitOfMeasure,
+                    Weight = i.Weight,
+                    CreditValue = i.CreditValue,
+                    Description = i.Description,
+                    IsActive = i.IsActive,
+                }).ToList(),
+                TotalPages = itemsPaged.TotalPages,
+                PageNumber = itemsPaged.PageNumber,
+                PageSize = itemsPaged.PageSize,
+                TotalCount = itemsPaged.TotalCount
+            };
+            return Ok(response);
         }
+
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetItemById(Guid id, CancellationToken cancellationToken)

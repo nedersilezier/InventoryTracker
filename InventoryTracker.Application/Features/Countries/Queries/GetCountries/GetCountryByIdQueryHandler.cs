@@ -17,7 +17,7 @@ namespace InventoryTracker.Application.Features.Countries.Queries.GetCountries
         }
         public async Task<CountryDTO?> Handle(GetCountryByIdQuery request, CancellationToken cancellationToken)
         {
-            var country = await _countriesService.GetCountryById(request.CountryId, cancellationToken);
+            var country = await _countriesService.GetCountryByIdAsync(request.CountryId, cancellationToken);
             return country;
         }
     }

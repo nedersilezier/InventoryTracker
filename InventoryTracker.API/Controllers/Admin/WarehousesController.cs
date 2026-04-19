@@ -7,6 +7,8 @@ using InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using InventoryTracker.Contracts.Responses.Common;
+using InventoryTracker.Contracts.Responses.Warehouses;
 
 namespace InventoryTracker.API.Controllers.Admin
 {
@@ -21,10 +23,39 @@ namespace InventoryTracker.API.Controllers.Admin
             _mediator = mediator;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllWarehouses(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllWarehouses([FromQuery] GetWarehousesRequest request, CancellationToken cancellationToken)
         {
-            var warehouses = await _mediator.Send(new GetWarehousesQuery(), cancellationToken);
-            return Ok(warehouses);
+            var query = new GetWarehousesQuery
+            {
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize ?? 10,
+                SearchTerm = request.SearchTerm
+            };
+            var warehousesPaged = await _mediator.Send(query, cancellationToken);
+            var response = new PagedResponse<WarehouseResponseDTO>
+            {
+                Items = warehousesPaged.Items.Select(i => new WarehouseResponseDTO
+                {
+                    WarehouseId = i.WarehouseId,
+                    Name = i.Name,
+                    Code = i.Code,
+                    Address = new AddressResponseDTO
+                    {
+                        Street = i.Address.Street,
+                        HouseNumber = i.Address.HouseNumber,
+                        ApartmentNumber = i.Address.ApartmentNumber,
+                        PostalCode = i.Address.PostalCode,
+                        City = i.Address.City,
+                        CountryId = i.Address.CountryId,
+                        CountryName = i.Address.CountryName
+                    }
+                }).ToList(),
+                TotalPages = warehousesPaged.TotalPages,
+                PageNumber = warehousesPaged.PageNumber,
+                PageSize = warehousesPaged.PageSize,
+                TotalCount = warehousesPaged.TotalCount
+            };  
+            return Ok(response);
         }
 
         [HttpGet]

@@ -2,50 +2,20 @@
 using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Clients.DTOs;
-using InventoryTracker.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Clients.Queries.GetClients
 {
-    public class GetClientByIdQueryHandler : IRequestHandler<GetClientByIdQuery, ClientDTO>
+    public class GetClientByIdQueryHandler : IRequestHandler<GetClientByIdQuery, ClientDTO?>
     {
-        private readonly IAppDbContext _context;
-        public GetClientByIdQueryHandler(IAppDbContext context)
+        private readonly IClientsQueryService _clientsService;
+        public GetClientByIdQueryHandler(IClientsQueryService clientsService)
         {
-            _context = context;
+            _clientsService = clientsService;
         }
-        public async Task<ClientDTO> Handle(GetClientByIdQuery request, CancellationToken cancellationToken)
+        public async Task<ClientDTO?> Handle(GetClientByIdQuery request, CancellationToken cancellationToken)
         {
-            var client = await _context.Clients
-                .AsNoTracking()
-                .Where(c => c.ClientId == request.ClientId)
-                .Select(c => new ClientDTO
-                {
-                    ClientId = c.ClientId,
-                    Name = c.Name,
-                    ClientCode = c.ClientCode,
-                    Email = c.Email,
-                    PhoneNumber = c.PhoneNumber,
-                    IsActive = c.IsActive,
-                    Address = new AddressDTO
-                    {
-                        AddressId = c.Address.AddressId,
-                        Street = c.Address.Street,
-                        City = c.Address.City,
-                        HouseNumber = c.Address.HouseNumber,
-                        ApartmentNumber = c.Address.ApartmentNumber,
-                        PostalCode = c.Address.PostalCode,
-                        CountryName = c.Address.Country.Name,
-                        CountryId = c.Address.CountryId
-                    }
-                }).FirstOrDefaultAsync(cancellationToken);
-            if (client == null)
-                throw new RecordNotFoundException(nameof(Client), request.ClientId);
-            return client;
+            return await _clientsService.GetClientByIdAsync(request.ClientId, cancellationToken);
         }
     }
 }

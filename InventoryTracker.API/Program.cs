@@ -7,6 +7,7 @@ using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Infrastructure.Identity;
 using InventoryTracker.Infrastructure.Identity.Entities;
 using InventoryTracker.Infrastructure.Persistence;
+using InventoryTracker.Infrastructure.Repositories;
 using InventoryTracker.Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -117,6 +118,19 @@ builder.Services.AddScoped<IUsersService, UsersService>();
 
 // register countries service
 builder.Services.AddScoped<ICountriesService, CountriesService>();
+
+// register clients service
+builder.Services.AddScoped<IClientsQueryService, ClientsQueryService>();
+
+builder.Services.AddScoped<IWarehousesQueryService, WarehousesQueryService>();
+builder.Services.AddScoped<IItemsQueryService, ItemsQueryService>();
+
+// register repositories
+builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
+builder.Services.AddScoped<IClientsRepository, ClientsRepository>();
+builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
+builder.Services.AddScoped<IWarehousesRepository, WarehousesRepository>();
+builder.Services.AddScoped<IItemsRepository, ItemsRepository>();
 
 // register authorization services
 builder.Services.AddAuthorization();

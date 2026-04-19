@@ -1,8 +1,4 @@
 ﻿using FluentValidation;
-using InventoryTracker.Application.Features.Items.Commands.CreateItem;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Clients.Commands.CreateClient
 {

@@ -1,10 +1,6 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Warehouses.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Application.Common.DTOs;
 using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Domain.Entities;
@@ -14,21 +10,25 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.UpdateWareho
     public class UpdateWarehouseCommandHandler : IRequestHandler<UpdateWarehouseCommand, WarehouseDTO?>
     {
         private readonly IAppDbContext _context;
-        public UpdateWarehouseCommandHandler(IAppDbContext context)
+        private readonly IWarehousesRepository _warehousesRepository;
+        private readonly ICountriesRepository _countriesRepository;
+        public UpdateWarehouseCommandHandler(IAppDbContext context, IWarehousesRepository warehousesRepository, ICountriesRepository countriesRepository)
         {
             _context = context;
+            _warehousesRepository = warehousesRepository;
+            _countriesRepository = countriesRepository;
         }
         public async Task<WarehouseDTO?> Handle(UpdateWarehouseCommand request, CancellationToken cancellationToken)
         {
-            var warehouse = await _context.Warehouses.Include(w => w.Address).FirstOrDefaultAsync(w => w.WarehouseId == request.WarehouseId, cancellationToken);
+            var warehouse = await _warehousesRepository.GetWarehouseByIdAsync(request.WarehouseId, cancellationToken);
             if (warehouse == null)
                 throw new RecordNotFoundException(nameof(Warehouse), request.WarehouseId);
 
-            var warehouseCodeExists = await _context.Warehouses.AnyAsync(w => w.Code == request.Code && w.WarehouseId != request.WarehouseId, cancellationToken);
+            var warehouseCodeExists = await _warehousesRepository.WarehouseCodeExistsAsync(request.Code, cancellationToken);
             if (warehouseCodeExists)
                 throw new BusinessException($"Another warehouse with code {request.Code} already exists.");
 
-            var country = await _context.Countries.FirstOrDefaultAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
+            var country = await _countriesRepository.GetCountryByIdAsync(request.Address.CountryId, cancellationToken);
             if (country == null)
                 throw new RecordNotFoundException(nameof(Country), request.Address.CountryId);
             var address = warehouse.Address;

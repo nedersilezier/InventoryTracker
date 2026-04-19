@@ -2,27 +2,25 @@
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Items.DTOs;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Items.Commands.UpdateItem
 {
     public class UpdateItemCommandHandler : IRequestHandler<UpdateItemCommand, ItemDTO?>
     {
         private readonly IAppDbContext _context;
-        public UpdateItemCommandHandler(IAppDbContext context)
+        private readonly IItemsRepository _itemsRepository;
+        public UpdateItemCommandHandler(IAppDbContext context, IItemsRepository itemsRepository)
         {
             _context = context;
+            _itemsRepository = itemsRepository;
         }
         public async Task<ItemDTO?> Handle(UpdateItemCommand request, CancellationToken cancellationToken)
         {
-            var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemId == request.ItemId, cancellationToken);
+            var item = await _itemsRepository.GetItemByIdAsync(request.ItemId, cancellationToken);
             if (item == null)
                 return null;
 
-            var skuExists = await _context.Items.AnyAsync(x => x.SKU == request.SKU && x.ItemId != request.ItemId, cancellationToken);
+            var skuExists = await _itemsRepository.SKUExistsAsync(request.SKU, cancellationToken, request.ItemId);
             if (skuExists)
             {
                 throw new BusinessException("Another item with the same SKU already exists.");

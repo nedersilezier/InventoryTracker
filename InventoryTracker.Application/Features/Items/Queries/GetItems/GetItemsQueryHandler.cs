@@ -1,43 +1,28 @@
-﻿using InventoryTracker.Application.Common.Interfaces;
+﻿using InventoryTracker.Application.Common.DTOs;
+using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Items.DTOs;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Items.Queries.GetItems
 {
-    public class GetItemsQueryHandler: IRequestHandler<GetItemsQuery, List<ItemDTO>>
+    public class GetItemsQueryHandler: IRequestHandler<GetItemsQuery, PagedResult<ItemDTO>>
     {
-        private readonly IAppDbContext _context;
-        public GetItemsQueryHandler(IAppDbContext context)
+        private readonly IItemsQueryService _itemsQueryService;
+        public GetItemsQueryHandler(IItemsQueryService itemsQueryService)
         {
-            _context = context;
+            _itemsQueryService = itemsQueryService;
         }
-        public async Task<List<ItemDTO>> Handle(GetItemsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<ItemDTO>> Handle(GetItemsQuery request, CancellationToken cancellationToken)
         {
-            return await _context.Items
-                .AsNoTracking()
-                .Select(x => new ItemDTO
-                {
-                    ItemId = x.ItemId,
-                    Name = x.Name,
-                    SKU = x.SKU,
-                    Description = x.Description,
-                    UnitOfMeasure = x.UnitOfMeasure,
-                    CreditValue = x.CreditValue,
-                    Weight = x.Weight,
-                    IsActive = x.IsActive,
-                    //test
-                    CreatedAt = x.CreatedAt,
-                    CreatedBy = x.CreatedBy ?? default!,
-                    UpdatedAt = x.UpdatedAt,
-                    UpdatedBy = x.UpdatedBy,
-                    DeletedAt = x.DeletedAt,
-                    DeletedBy = x.DeletedBy
-                })
-                .ToListAsync(cancellationToken);
+            request.PageNumber = request.PageNumber <= 0 ? 1 : request.PageNumber;
+            request.PageSize = request.PageSize <= 0 ? 10 : request.PageSize;
+            var parameters = new GetItemsParameters
+            {
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                SearchTerm = request.SearchTerm
+            };
+            return await _itemsQueryService.GetAllItemsAsync(parameters, cancellationToken);
         }
     }
 }

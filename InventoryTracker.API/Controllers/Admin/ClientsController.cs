@@ -7,6 +7,8 @@ using InventoryTracker.Application.Features.Clients.Queries.GetClients;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using InventoryTracker.Contracts.Responses.Common;
+using InventoryTracker.Contracts.Responses.Clients;
 
 namespace InventoryTracker.API.Controllers.Admin
 {
@@ -21,10 +23,43 @@ namespace InventoryTracker.API.Controllers.Admin
             _mediator = mediator;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllClients(CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllClients([FromQuery] GetClientsRequest request, CancellationToken cancellationToken)
         {
-            var clients = await _mediator.Send(new GetClientsQuery(), cancellationToken);
-            return Ok(clients);
+            var query = new GetClientsQuery
+            {
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize ?? 10,
+                SearchTerm = request.SearchTerm
+            };
+            var clientsPaged = await _mediator.Send(query, cancellationToken);
+            var response = new PagedResponse<ClientResponseDTO>
+            {
+                Items = clientsPaged.Items.Select(client => new ClientResponseDTO
+                {
+                    ClientId = client.ClientId,
+                    Name = client.Name,
+                    ClientCode = client.ClientCode,
+                    Email = client.Email,
+                    PhoneNumber = client.PhoneNumber,
+                    IsActive = client.IsActive,
+                    Address = new AddressResponseDTO
+                    {
+                        AddressId = client.Address.AddressId,
+                        Street = client.Address.Street,
+                        HouseNumber = client.Address.HouseNumber,
+                        ApartmentNumber = client.Address.ApartmentNumber,
+                        PostalCode = client.Address.PostalCode,
+                        City = client.Address.City,
+                        CountryId = client.Address.CountryId,
+                        CountryName = client.Address.CountryName
+                    }
+                }).ToList(),
+                TotalPages = clientsPaged.TotalPages,
+                PageNumber = clientsPaged.PageNumber,
+                PageSize = clientsPaged.PageSize,
+                TotalCount = clientsPaged.TotalCount
+            };
+            return Ok(response);
         }
         [HttpGet]
         [Route("{id}")]

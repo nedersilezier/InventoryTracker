@@ -3,23 +3,21 @@ using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Items.DTOs;
 using InventoryTracker.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Items.Commands.CreateItem
 {
     public class CreateItemCommandHandler: IRequestHandler<CreateItemCommand, ItemDTO>
     {
         private readonly IAppDbContext _context;
-        public CreateItemCommandHandler(IAppDbContext context)
+        private readonly IItemsRepository _itemsRepository;
+        public CreateItemCommandHandler(IAppDbContext context, IItemsRepository itemsRepository)
         {
             _context = context;
+            _itemsRepository = itemsRepository;
         }
         public async Task<ItemDTO> Handle(CreateItemCommand request, CancellationToken cancellationToken)
         {
-            var skuExists = await _context.Items.AnyAsync(i => i.SKU == request.SKU, cancellationToken);
+            var skuExists = await _itemsRepository.SKUExistsAsync(request.SKU, cancellationToken);
             if(skuExists)
             {
                 throw new BusinessException($"An item with SKU '{request.SKU}' already exists.");
@@ -36,7 +34,7 @@ namespace InventoryTracker.Application.Features.Items.Commands.CreateItem
                 Weight = request.Weight,
                 IsActive = true
             };
-            _context.Items.Add(item);
+            await _itemsRepository.AddItem(item);
             await _context.SaveChangesAsync(cancellationToken);
             return new ItemDTO
             {

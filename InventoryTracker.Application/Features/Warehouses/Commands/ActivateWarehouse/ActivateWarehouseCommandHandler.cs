@@ -4,27 +4,21 @@ using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Warehouses.DTOs;
 using InventoryTracker.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Warehouses.Commands.ActivateWarehouse
 {
     public class ActivateWarehouseCommandHandler : IRequestHandler<ActivateWarehouseCommand, WarehouseDTO?>
     {
         private readonly IAppDbContext _context;
-        public ActivateWarehouseCommandHandler(IAppDbContext context)
+        private readonly IWarehousesRepository _warehousesRepository;
+        public ActivateWarehouseCommandHandler(IAppDbContext context, IWarehousesRepository warehousesRepository)
         {
             _context = context;
+            _warehousesRepository = warehousesRepository;
         }
         public async Task<WarehouseDTO?> Handle(ActivateWarehouseCommand request, CancellationToken cancellationToken)
         {
-            var warehouse = await _context.Warehouses
-                .Include(w => w.Address)
-                .ThenInclude(a => a.Country)
-                .FirstOrDefaultAsync(w => w.WarehouseId == request.WarehouseId, cancellationToken);
-
+            var warehouse = await _warehousesRepository.GetWarehouseByIdAsync(request.WarehouseId, cancellationToken);
             if (warehouse == null)
                 throw new RecordNotFoundException(nameof(Warehouse), request.WarehouseId);
 

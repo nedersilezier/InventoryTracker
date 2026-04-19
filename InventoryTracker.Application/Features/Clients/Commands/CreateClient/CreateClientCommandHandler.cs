@@ -1,10 +1,6 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Clients.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Domain.Entities;
 using InventoryTracker.Application.Common.DTOs;
 using InventoryTracker.Application.Common.Exceptions;
@@ -14,18 +10,24 @@ namespace InventoryTracker.Application.Features.Clients.Commands.CreateClient
     public class CreateClientCommandHandler : IRequestHandler<CreateClientCommand, ClientDTO>
     {
         private readonly IAppDbContext _context;
-        public CreateClientCommandHandler(IAppDbContext context)
+        private readonly IAddressesRepository _addressesRepository;
+        private readonly IClientsRepository _clientsRepository;
+        private readonly ICountriesRepository _countriesRepository;
+        public CreateClientCommandHandler(IAppDbContext context, IAddressesRepository addressesRepository, IClientsRepository clientsRepository, ICountriesRepository countriesRepository)
         {
             _context = context;
+            _addressesRepository = addressesRepository;
+            _clientsRepository = clientsRepository;
+            _countriesRepository = countriesRepository;
         }
         public async Task<ClientDTO> Handle(CreateClientCommand request, CancellationToken cancellationToken)
         {
-            var clientCodeExists = await _context.Clients.AnyAsync(c => c.ClientCode == request.ClientCode, cancellationToken);
+            var clientCodeExists = await _clientsRepository.ClientCodeExistsAsync(request.ClientCode, cancellationToken);
             if (clientCodeExists)
                 throw new BusinessException($"Client with code {request.ClientCode} already exists.");
 
-            var country = await _context.Countries.FirstOrDefaultAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
-            if(country == null)
+            var countryExists = await _countriesRepository.CountryExistsAsync(request.Address.CountryId, cancellationToken);
+            if (!countryExists)
                 throw new RecordNotFoundException(nameof(Country), request.Address.CountryId);
 
             var address = new Address
@@ -36,8 +38,7 @@ namespace InventoryTracker.Application.Features.Clients.Commands.CreateClient
                 HouseNumber = request.Address.HouseNumber,
                 ApartmentNumber = request.Address.ApartmentNumber,
                 PostalCode = request.Address.PostalCode,
-                CountryId = request.Address.CountryId,
-                Country = country
+                CountryId = request.Address.CountryId
             };
 
             var client = new Client
@@ -48,11 +49,10 @@ namespace InventoryTracker.Application.Features.Clients.Commands.CreateClient
                 Email = request.Email,
                 PhoneNumber = request.PhoneNumber,
                 AddressId = address.AddressId,
-                Address = address,
                 IsActive = true,
             };
-            _context.Addresses.Add(address);
-            _context.Clients.Add(client);
+            await _addressesRepository.AddAddress(address);
+            await _clientsRepository.AddClient(client);
             await _context.SaveChangesAsync(cancellationToken);
             return new ClientDTO
             {
@@ -64,13 +64,13 @@ namespace InventoryTracker.Application.Features.Clients.Commands.CreateClient
                 IsActive = client.IsActive,
                 Address = new AddressDTO
                 {
-                    AddressId = client.Address.AddressId,
-                    Street = client.Address.Street,
-                    HouseNumber = client.Address.HouseNumber,
-                    ApartmentNumber = client.Address.ApartmentNumber,
-                    PostalCode = client.Address.PostalCode,
-                    City = client.Address.City,
-                    CountryId = client.Address.CountryId
+                    AddressId = address.AddressId,
+                    Street = address.Street,
+                    HouseNumber = address.HouseNumber,
+                    ApartmentNumber = address.ApartmentNumber,
+                    PostalCode = address.PostalCode,
+                    City = address.City,
+                    CountryId = address.CountryId
                 }
             };
         }

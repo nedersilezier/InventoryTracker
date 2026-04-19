@@ -2,44 +2,27 @@
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Clients.DTOs;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Clients.Queries.GetClients
 {
-    public class GetClientsQueryHandler : IRequestHandler<GetClientsQuery, List<ClientDTO>>
+    public class GetClientsQueryHandler : IRequestHandler<GetClientsQuery, PagedResult<ClientDTO>>
     {
-        private readonly IAppDbContext _context;
-        public GetClientsQueryHandler(IAppDbContext context)
+        private readonly IClientsQueryService _clientsService;
+        public GetClientsQueryHandler(IClientsQueryService clientsService)
         {
-            _context = context;
+            _clientsService = clientsService;
         }
-        public async Task<List<ClientDTO>> Handle(GetClientsQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<ClientDTO>> Handle(GetClientsQuery request, CancellationToken cancellationToken)
         {
-            return await _context.Clients
-                .AsNoTracking()
-                .Select(c => new ClientDTO
-                {
-                    ClientId = c.ClientId,
-                    Name = c.Name,
-                    ClientCode = c.ClientCode,
-                    Email = c.Email,
-                    PhoneNumber = c.PhoneNumber,
-                    IsActive = c.IsActive,
-                    Address = new AddressDTO
-                    {
-                        AddressId = c.Address.AddressId,
-                        Street = c.Address.Street,
-                        City = c.Address.City,
-                        HouseNumber = c.Address.HouseNumber,
-                        ApartmentNumber = c.Address.ApartmentNumber,
-                        PostalCode = c.Address.PostalCode,
-                        CountryId = c.Address.CountryId,
-                        CountryName = c.Address.Country.Name
-                    }
-                }).ToListAsync();
+            request.PageNumber = request.PageNumber <= 0 ? 1 : request.PageNumber;
+            request.PageSize = request.PageSize <= 0 ? 10 : request.PageSize;
+            var parameters = new GetClientsParameters
+            {
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                SearchTerm = request.SearchTerm
+            };
+            return await _clientsService.GetAllClientsAsync(parameters, cancellationToken);
         }
     }
 }

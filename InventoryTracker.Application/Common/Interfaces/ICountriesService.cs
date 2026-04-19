@@ -12,6 +12,6 @@ namespace InventoryTracker.Application.Common.Interfaces
         Task<CountryDTO> CreateCountryAsync(CreateCountryParameters parameters, CancellationToken cancellationToken);
         Task<CountryDTO?> UpdateCountryAsync(UpdateCountryParameters parameters, CancellationToken cancellationToken);
         Task DeleteCountryAsync(Guid id, CancellationToken cancellationToken);
-        Task<CountryDTO?> GetCountryById(Guid id, CancellationToken cancellationToken);
+        Task<CountryDTO?> GetCountryByIdAsync(Guid id, CancellationToken cancellationToken);
     }
 }

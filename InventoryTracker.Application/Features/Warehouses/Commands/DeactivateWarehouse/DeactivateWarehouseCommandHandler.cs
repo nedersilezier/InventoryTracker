@@ -1,12 +1,7 @@
 ﻿using InventoryTracker.Application.Common.DTOs;
 using InventoryTracker.Application.Common.Interfaces;
-using InventoryTracker.Application.Features.Warehouses.Commands.ActivateWarehouse;
 using InventoryTracker.Application.Features.Warehouses.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Domain.Entities;
 
@@ -15,17 +10,15 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.DeactivateWa
     public class DeactivateWarehouseCommandHandler : IRequestHandler<DeactivateWarehouseCommand, WarehouseDTO?>
     {
         private readonly IAppDbContext _context;
-        public DeactivateWarehouseCommandHandler(IAppDbContext context)
+        private readonly IWarehousesRepository _warehousesRepository;
+        public DeactivateWarehouseCommandHandler(IAppDbContext context, IWarehousesRepository warehousesRepository)
         {
             _context = context;
+            _warehousesRepository = warehousesRepository;
         }
         public async Task<WarehouseDTO?> Handle(DeactivateWarehouseCommand request, CancellationToken cancellationToken)
         {
-            var warehouse = await _context.Warehouses
-                .Include(w => w.Address)
-                .ThenInclude(a => a.Country)
-                .FirstOrDefaultAsync(w => w.WarehouseId == request.WarehouseId, cancellationToken);
-
+            var warehouse = await _warehousesRepository.GetWarehouseByIdAsync(request.WarehouseId, cancellationToken);
             if (warehouse == null)
                 throw new RecordNotFoundException(nameof(Warehouse), request.WarehouseId);
 

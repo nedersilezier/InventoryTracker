@@ -2,9 +2,6 @@
 using InventoryTracker.Application.Features.Clients.DTOs;
 using InventoryTracker.Application.Features.Items.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Clients.Commands.UpdateClient
 {

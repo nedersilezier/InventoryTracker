@@ -1,10 +1,6 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Warehouses.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Domain.Entities;
 using InventoryTracker.Application.Common.DTOs;
 using InventoryTracker.Application.Common.Exceptions;
@@ -14,16 +10,22 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.CreateWareho
     public class CreateWarehouseCommandHandler : IRequestHandler<CreateWarehouseCommand, WarehouseDTO>
     {
         private readonly IAppDbContext _context;
-        public CreateWarehouseCommandHandler(IAppDbContext context)
+        private readonly IWarehousesRepository _warehousesRepository;
+        private readonly ICountriesRepository _countriesRepository;
+        private readonly IAddressesRepository _addressesRepository;
+        public CreateWarehouseCommandHandler(IAppDbContext context, IWarehousesRepository warehousesRepository, ICountriesRepository countriesRepository, IAddressesRepository addressesRepository)
         {
             _context = context;
+            _warehousesRepository = warehousesRepository;
+            _countriesRepository = countriesRepository;
+            _addressesRepository = addressesRepository;
         }
         public async Task<WarehouseDTO> Handle(CreateWarehouseCommand request, CancellationToken cancellationToken)
         {
-            var warehouseCodeExists = await _context.Warehouses.AnyAsync(w => w.Code == request.Code, cancellationToken);
+            var warehouseCodeExists = await _warehousesRepository.WarehouseCodeExistsAsync(request.Code, cancellationToken);
             if (warehouseCodeExists)
                 throw new BusinessException($"Warehouse with code '{request.Code}' already exists.");
-            var country = await _context.Countries.FirstOrDefaultAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
+            var country = await _countriesRepository.GetCountryByIdAsync(request.Address.CountryId, cancellationToken);
             if (country == null)
                 throw new RecordNotFoundException(nameof(Country), request.Address.CountryId);
 
@@ -47,8 +49,8 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.CreateWareho
                 Address = address,
                 IsActive = true
             };
-            _context.Addresses.Add(address);
-            _context.Warehouses.Add(warehouse);
+            await _addressesRepository.AddAddress(address);
+            await _warehousesRepository.AddWarehouse(warehouse);
             await _context.SaveChangesAsync(cancellationToken);
             return new WarehouseDTO
             {

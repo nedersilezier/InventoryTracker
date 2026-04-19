@@ -1,10 +1,6 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Clients.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Application.Common.DTOs;
 using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Domain.Entities;
@@ -14,21 +10,28 @@ namespace InventoryTracker.Application.Features.Clients.Commands.UpdateClient
     public class UpdateClientCommandHandler : IRequestHandler<UpdateClientCommand, ClientDTO?>
     {
         private readonly IAppDbContext _context;
-        public UpdateClientCommandHandler(IAppDbContext context)
+        private readonly IClientsRepository _clientsRepository;
+        private readonly ICountriesRepository _countriesRepository;
+        private readonly IAddressesRepository _addressesRepository;
+        public UpdateClientCommandHandler(IAppDbContext context, IClientsRepository clientsRepository, ICountriesRepository countriesRepository, IAddressesRepository addressesRepository)
         {
             _context = context;
+            _clientsRepository = clientsRepository;
+            _countriesRepository = countriesRepository;
+            _addressesRepository = addressesRepository;
         }
         public async Task<ClientDTO?> Handle(UpdateClientCommand request, CancellationToken cancellationToken)
         {
-            var client = await _context.Clients.Include(c => c.Address).ThenInclude(a => a.Country).FirstOrDefaultAsync(c => c.ClientId == request.ClientId, cancellationToken);
+            
+            var client = await _clientsRepository.GetClientByIdAsync(request.ClientId, cancellationToken);
             if (client == null)
                 throw new RecordNotFoundException(nameof(Client), request.ClientId);
 
-            var country = await _context.Countries.FirstOrDefaultAsync(c => c.CountryId == request.Address.CountryId, cancellationToken);
+            var country = await _countriesRepository.GetCountryByIdAsync(request.Address.CountryId, cancellationToken);
             if (country == null)
                 throw new RecordNotFoundException(nameof(Country), request.Address.CountryId);
 
-            var addressExists = await _context.Addresses.AnyAsync(a => a.AddressId == client.AddressId, cancellationToken);
+            var addressExists = await _addressesRepository.AddressExistsAsync(client.AddressId, cancellationToken);
             if (!addressExists)
                 throw new RecordNotFoundException(nameof(Address), client.AddressId);
             client.Name = request.Name;
@@ -58,7 +61,8 @@ namespace InventoryTracker.Application.Features.Clients.Commands.UpdateClient
                     HouseNumber = client.Address.HouseNumber,
                     ApartmentNumber = client.Address.ApartmentNumber,
                     PostalCode = client.Address.PostalCode,
-                    CountryId = country.CountryId
+                    CountryId = country.CountryId,
+                    CountryName = country.Name
                 },
                 IsActive = client.IsActive
             };

@@ -4,42 +4,19 @@ using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Warehouses.DTOs;
 using InventoryTracker.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses
 {
     public class GetWarehouseByIdQueryHandler : IRequestHandler<GetWarehouseByIdQuery, WarehouseDTO?>
     {
-        private readonly IAppDbContext _context;
-        public GetWarehouseByIdQueryHandler(IAppDbContext context)
+        private readonly IWarehousesQueryService _warehousesQueryService;
+        public GetWarehouseByIdQueryHandler(IWarehousesQueryService warehousesQueryService)
         {
-            _context = context;
+            _warehousesQueryService = warehousesQueryService;
         }
         public async Task<WarehouseDTO?> Handle(GetWarehouseByIdQuery request, CancellationToken cancellationToken)
         {
-            var warehouse = await _context.Warehouses
-                .AsNoTracking()
-                .Where(w => w.WarehouseId == request.WarehouseId)
-                .Select(w => new WarehouseDTO
-                {
-                    WarehouseId = w.WarehouseId,
-                    Name = w.Name,
-                    Code = w.Code,
-                    Address = new AddressDTO
-                    {
-                        AddressId = w.Address.AddressId,
-                        Street = w.Address.Street,
-                        City = w.Address.City,
-                        HouseNumber = w.Address.HouseNumber,
-                        ApartmentNumber = w.Address.ApartmentNumber,
-                        PostalCode = w.Address.PostalCode,
-                        CountryName = w.Address.Country.Name,
-                        CountryId = w.Address.Country.CountryId
-                    }
-                }).FirstOrDefaultAsync(cancellationToken);
+            var warehouse = await _warehousesQueryService.GetWarehouseByIdAsync(request.WarehouseId, cancellationToken);
             if (warehouse == null)
             {
                 throw new RecordNotFoundException(nameof(Warehouse), request.WarehouseId);

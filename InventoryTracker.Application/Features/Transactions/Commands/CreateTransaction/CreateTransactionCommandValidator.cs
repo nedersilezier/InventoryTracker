@@ -33,9 +33,6 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTran
             {
                 items.RuleFor(i => i.ItemId)
                     .NotEmpty().WithMessage("ItemId is required.");
-
-                //items.RuleFor(i => i.Quantity)
-                //    .GreaterThan(0).WithMessage("Quantity must be greater than zero.");
             });
 
             RuleFor(x => x.Items)
@@ -90,9 +87,6 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTran
                             context.AddFailure("Adjustment cannot involve destination warehouses.");
                         if (!request.SourceWarehouseId.HasValue)
                             context.AddFailure("Adjustment requires a source warehouse.");
-
-                        //if (request.SourceWarehouseId.HasValue == request.DestinationWarehouseId.HasValue)
-                        //    context.AddFailure("Adjustment requires exactly one warehouse.");
                         break;
 
                     default:

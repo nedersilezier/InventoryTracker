@@ -58,7 +58,7 @@ namespace InventoryTracker.Infrastructure.Services
                 TotalCount = totalCount
             };
         }
-        public async Task<CountryDTO?> GetCountryById(Guid id, CancellationToken cancellationToken)
+        public async Task<CountryDTO?> GetCountryByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var country = await _context.Countries
                 .AsNoTracking()
@@ -70,6 +70,8 @@ namespace InventoryTracker.Infrastructure.Services
                     Code = x.Code
                 })
                 .FirstOrDefaultAsync(cancellationToken);
+            if (country == null)
+                throw new RecordNotFoundException(nameof(Country), id);
             return country;
         }
         public async Task<CountryDTO> CreateCountryAsync(CreateCountryParameters parameters, CancellationToken cancellationToken)

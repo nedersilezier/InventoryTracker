@@ -1,42 +1,29 @@
-﻿using InventoryTracker.Application.Common.Interfaces;
+﻿using InventoryTracker.Application.Common.DTOs;
+using InventoryTracker.Application.Common.Interfaces;
+using InventoryTracker.Application.Features.Clients.DTOs;
 using InventoryTracker.Application.Features.Warehouses.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
-using InventoryTracker.Application.Common.DTOs;
 
 namespace InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses
 {
-    public class GetWarehousesQueryHandler : IRequestHandler<GetWarehousesQuery, List<WarehouseDTO>>
+    public class GetWarehousesQueryHandler : IRequestHandler<GetWarehousesQuery, PagedResult<WarehouseDTO>>
     {
-        private readonly IAppDbContext _context;
-        public GetWarehousesQueryHandler(IAppDbContext context)
+        private readonly IWarehousesQueryService _warehousesQueryService;
+        public GetWarehousesQueryHandler(IWarehousesQueryService warehousesQueryService)
         {
-            _context = context;
+            _warehousesQueryService = warehousesQueryService;
         }
-        public async Task<List<WarehouseDTO>> Handle(GetWarehousesQuery request, CancellationToken cancellationToken)
+        public async Task<PagedResult<WarehouseDTO>> Handle(GetWarehousesQuery request, CancellationToken cancellationToken)
         {
-            return await _context.Warehouses
-                .AsNoTracking()
-                .Select(w => new WarehouseDTO
-                {
-                    WarehouseId = w.WarehouseId,
-                    Name = w.Name,
-                    Code = w.Code,
-                    Address = new AddressDTO
-                    {
-                        AddressId = w.Address.AddressId,
-                        Street = w.Address.Street,
-                        City = w.Address.City,
-                        HouseNumber = w.Address.HouseNumber,
-                        ApartmentNumber = w.Address.ApartmentNumber,
-                        PostalCode = w.Address.PostalCode,
-                        CountryName = w.Address.Country.Name,
-                        CountryId = w.Address.CountryId
-                    }
-                }).ToListAsync(cancellationToken);
+            request.PageNumber = request.PageNumber <= 0 ? 1 : request.PageNumber;
+            request.PageSize = request.PageSize <= 0 ? 10 : request.PageSize;
+            var parameters = new GetWarehousesParameters
+            {
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                SearchTerm = request.SearchTerm
+            };
+            return await _warehousesQueryService.GetAllWarehousesAsync(parameters, cancellationToken);
         }
     }
 }

@@ -6,8 +6,6 @@ namespace InventoryTracker.WebAdmin.ViewModels.Clients
     {
         public string? SearchTerm { get; set; }
         public List<ClientListItemViewModel> Clients { get; set; } = new();
-
-        public int TotalCount { get; set; }
-        public PaginationViewModel Pagination { get; set; } = new();
+        public TableFooterViewModel TableFooter { get; set; } = new();
     }
 }
