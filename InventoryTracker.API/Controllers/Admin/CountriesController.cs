@@ -1,4 +1,5 @@
 ﻿using InventoryTracker.Application.Features.Countries.Commands.CreateCountry;
+using InventoryTracker.Application.Features.Countries.Commands.DeleteCountry;
 using InventoryTracker.Application.Features.Countries.Commands.UpdateCountry;
 using InventoryTracker.Application.Features.Countries.Queries.GetCountries;
 using InventoryTracker.Contracts.Requests.Countries;
@@ -28,8 +29,7 @@ namespace InventoryTracker.API.Controllers.Admin
             var query = new GetCountriesQuery
             {
                 PageNumber = request.PageNumber,
-                //test
-                PageSize = request.PageSize ?? 1,
+                PageSize = request.PageSize ?? 10,
                 SearchTerm = request.SearchTerm
             };
             var countriesPaged = await _mediator.Send(query, cancellationToken);
@@ -83,6 +83,18 @@ namespace InventoryTracker.API.Controllers.Admin
             if (country == null)
                 return NotFound();
             return Ok(country);
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteCountry(Guid id, CancellationToken cancellationToken)
+        {
+            var command = new DeleteCountryCommand
+            {
+                CountryId = id
+            };
+            await _mediator.Send(command, cancellationToken);
+            return NoContent();
         }
     }
 }

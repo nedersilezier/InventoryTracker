@@ -61,6 +61,15 @@ namespace InventoryTracker.API.Middleware
                         Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10"
                     };
                     break;
+                case ConflictException conflictException:
+                    problemDetails = new ProblemDetails
+                    {
+                        Status = StatusCodes.Status409Conflict,
+                        Title = "Conflict occurred",
+                        Detail = conflictException.Message,
+                        Type = "https://tools.ietf.org/html/rfc9110#section-15.5.10"
+                    };
+                    break;
                 default:
                     _logger.LogError(exception, "Unhandled exception occurred");
                     problemDetails = new ProblemDetails

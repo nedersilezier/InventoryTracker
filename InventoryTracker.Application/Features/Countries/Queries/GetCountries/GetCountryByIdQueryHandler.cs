@@ -10,23 +10,14 @@ namespace InventoryTracker.Application.Features.Countries.Queries.GetCountries
 {
     public class GetCountryByIdQueryHandler : IRequestHandler<GetCountryByIdQuery, CountryDTO?>
     {
-        private readonly IAppDbContext _context;
-        public GetCountryByIdQueryHandler(IAppDbContext context)
+        private readonly ICountriesService _countriesService;
+        public GetCountryByIdQueryHandler(ICountriesService countriesService)
         {
-            _context = context;
+            _countriesService = countriesService;
         }
         public async Task<CountryDTO?> Handle(GetCountryByIdQuery request, CancellationToken cancellationToken)
         {
-            var country = await _context.Countries
-                .AsNoTracking()
-                .Where(x => x.CountryId == request.CountryId)
-                .Select(x => new CountryDTO
-                {
-                    CountryId = x.CountryId,
-                    Name = x.Name,
-                    Code = x.Code
-                })
-                .FirstOrDefaultAsync(cancellationToken);
+            var country = await _countriesService.GetCountryById(request.CountryId, cancellationToken);
             return country;
         }
     }

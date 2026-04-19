@@ -1,12 +1,7 @@
 ﻿using InventoryTracker.Application.Common.DTOs;
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Countries.DTOs;
-using InventoryTracker.Application.Features.Users.DTOs;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Countries.Queries.GetCountries
 {

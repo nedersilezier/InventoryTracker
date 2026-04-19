@@ -1,40 +1,34 @@
 ﻿using InventoryTracker.Application.Features.Countries.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Application.Common.Interfaces;
-using InventoryTracker.Application.Common.Exceptions;
 
 namespace InventoryTracker.Application.Features.Countries.Commands.UpdateCountry
 {
     public class UpdateCountryCommandHandler : IRequestHandler<UpdateCountryCommand, CountryDTO?>
     {
-        private readonly IAppDbContext _context;
-        public UpdateCountryCommandHandler(IAppDbContext context)
+        private readonly ICountriesService _countriesService;
+        public UpdateCountryCommandHandler(ICountriesService countriesService)
         {
-            _context = context;
+            _countriesService = countriesService;
         }
         public async Task<CountryDTO?> Handle(UpdateCountryCommand request, CancellationToken cancellationToken)
         {
-            var country = await _context.Countries.FirstOrDefaultAsync(x => x.CountryId == request.CountryId, cancellationToken);
-            if (country == null)
-                return null;
-
-            var codeExists = await _context.Countries.AnyAsync(x => x.Code == request.Code && x.CountryId != request.CountryId, cancellationToken);
-            if (codeExists)
-                throw new BusinessException($"Another country with code {request.Code} already exists.");
-
-            country.Name = request.Name;
-            country.Code = request.Code;
-            await _context.SaveChangesAsync(cancellationToken);
-            return new CountryDTO
+            request.Name = request.Name.Trim();
+            var nameSplit = request.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < nameSplit.Length; i++)
             {
-                CountryId = country.CountryId,
-                Name = country.Name,
-                Code = country.Code
+                nameSplit[i] = char.ToUpper(nameSplit[i][0]) + nameSplit[i].Substring(1).ToLower();
+            }
+            request.Name = string.Join(' ', nameSplit);
+            request.Code = request.Code.Trim().ToUpper();
+
+            var parameters = new UpdateCountryParameters
+            {
+                CountryId = request.CountryId,
+                Name = request.Name,
+                Code = request.Code
             };
+            return await _countriesService.UpdateCountryAsync(parameters, cancellationToken);
         }
     }
 }

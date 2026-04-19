@@ -1,42 +1,35 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Countries.DTOs;
-using InventoryTracker.Domain.Entities;
 using MediatR;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.EntityFrameworkCore;
 
 namespace InventoryTracker.Application.Features.Countries.Commands.CreateCountry
 {
     public class CreateCountryCommandHandler: IRequestHandler<CreateCountryCommand, CountryDTO>
     {
-        private readonly IAppDbContext _context;
-        public CreateCountryCommandHandler(IAppDbContext context)
+        private readonly ICountriesService _countriesService;
+        public CreateCountryCommandHandler(ICountriesService countriesService)
         {
-            _context = context;
+            _countriesService = countriesService;
         }
         public async Task<CountryDTO> Handle(CreateCountryCommand request, CancellationToken cancellationToken)
         {
-            var countryCodeExists = await _context.Countries.AnyAsync(c => c.Code == request.Code, cancellationToken);
-            if (countryCodeExists)
-                throw new Exception($"Country with code {request.Code} already exists.");
-
-            var country = new Country
+            request.Name = request.Name.Trim();
+            var nameSplit = request.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < nameSplit.Length; i++)
             {
-                CountryId = Guid.NewGuid(),
+                nameSplit[i] = char.ToUpper(nameSplit[i][0]) + nameSplit[i].Substring(1).ToLower();
+            }
+            request.Name = string.Join(' ', nameSplit);
+            request.Code = request.Code.Trim().ToUpper();
+            var parameters = new CreateCountryParameters
+            {
                 Name = request.Name,
                 Code = request.Code
             };
-
-            _context.Countries.Add(country);
-            await _context.SaveChangesAsync(cancellationToken);
-            return new CountryDTO
-            {
-                CountryId = country.CountryId,
-                Name = country.Name,
-                Code = country.Code
-            };
+            return await _countriesService.CreateCountryAsync(parameters, cancellationToken);
         }
     }
 }
