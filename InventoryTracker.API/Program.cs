@@ -124,6 +124,8 @@ builder.Services.AddScoped<IClientsQueryService, ClientsQueryService>();
 
 builder.Services.AddScoped<IWarehousesQueryService, WarehousesQueryService>();
 builder.Services.AddScoped<IItemsQueryService, ItemsQueryService>();
+builder.Services.AddScoped<IStocksQueryService, StocksQueryService>();
+builder.Services.AddScoped<ITransactionsQueryService, TransactionsQueryService>();
 
 // register repositories
 builder.Services.AddScoped<IAddressesRepository, AddressesRepository>();
@@ -131,6 +133,8 @@ builder.Services.AddScoped<IClientsRepository, ClientsRepository>();
 builder.Services.AddScoped<ICountriesRepository, CountriesRepository>();
 builder.Services.AddScoped<IWarehousesRepository, WarehousesRepository>();
 builder.Services.AddScoped<IItemsRepository, ItemsRepository>();
+builder.Services.AddScoped<ITransactionsRepository, TransactionsRepository>();
+builder.Services.AddScoped<IStocksRepository, StocksRepository>();
 
 // register authorization services
 builder.Services.AddAuthorization();

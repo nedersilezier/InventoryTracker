@@ -4,25 +4,23 @@ using InventoryTracker.Application.Features.Transactions.DTOs;
 using InventoryTracker.Domain.Entities;
 using InventoryTracker.Shared.Enums;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.CancelTransaction
 {
-    public class CancelTransactionCommandHandler : IRequestHandler<CancelTransactionCommand, TransactionDTO?>
+    public class CancelTransactionCommandHandler : IRequestHandler<CancelTransactionCommand, Guid>
     {
         private readonly IAppDbContext _context;
         private readonly ICurrentUserService _currentUserService;
-        public CancelTransactionCommandHandler(IAppDbContext context, ICurrentUserService currentUserService)
+        private readonly ITransactionsRepository _transactionsRepository;
+        public CancelTransactionCommandHandler(IAppDbContext context, ICurrentUserService currentUserService, ITransactionsRepository transactionsRepository)
         {
             _context = context;
             _currentUserService = currentUserService;
+            _transactionsRepository = transactionsRepository;
         }
-        public async Task<TransactionDTO?> Handle(CancelTransactionCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(CancelTransactionCommand request, CancellationToken cancellationToken)
         {
-            var transaction = await _context.Transactions.Include(t => t.TransactionItems).FirstOrDefaultAsync(t => t.TransactionId == request.TransactionId, cancellationToken);
+            var transaction = await _transactionsRepository.GetTransactionWithItemsByIdAsync(request.TransactionId, cancellationToken);
             if (transaction == null)
                 throw new RecordNotFoundException(nameof(Transaction), request.TransactionId);
 
@@ -34,26 +32,27 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CancelTran
             transaction.CancelledAt = DateTime.UtcNow;
             transaction.CancelledBy = _currentUserService.Email ?? _currentUserService.UserId ?? "system";
             await _context.SaveChangesAsync(cancellationToken);
-            return new TransactionDTO
-            {
-                TransactionId = transaction.TransactionId,
-                Type = transaction.Type,
-                Status = transaction.Status,
-                TransactionDate = transaction.TransactionDate,
-                CancelledAt = transaction.CancelledAt,
-                CancelledBy = transaction.CancelledBy,
-                CancellationReason = transaction.CancellationReason,
-                Items = transaction.TransactionItems.Select(i => new TransactionItemDTO
-                {
-                    TransactionItemId = i.TransactionItemId,
-                    ItemId = i.ItemId,
-                    NameSnapshot = i.NameSnapshot,
-                    SKUSnapshot = i.SKUSnapshot,
-                    UnitOfMeasureSnapshot = i.UnitOfMeasureSnapshot,
-                    UnitCreditValueSnapshot = i.UnitCreditValueSnapshot,
-                    Quantity = i.Quantity
-                }).ToList()
-            };
+            //return new TransactionDTO
+            //{
+            //    TransactionId = transaction.TransactionId,
+            //    Type = transaction.Type,
+            //    Status = transaction.Status,
+            //    TransactionDate = transaction.TransactionDate,
+            //    CancelledAt = transaction.CancelledAt,
+            //    CancelledBy = transaction.CancelledBy,
+            //    CancellationReason = transaction.CancellationReason,
+            //    Items = transaction.TransactionItems.Select(i => new TransactionItemDTO
+            //    {
+            //        TransactionItemId = i.TransactionItemId,
+            //        ItemId = i.ItemId,
+            //        NameSnapshot = i.NameSnapshot,
+            //        SKUSnapshot = i.SKUSnapshot,
+            //        UnitOfMeasureSnapshot = i.UnitOfMeasureSnapshot,
+            //        UnitCreditValueSnapshot = i.UnitCreditValueSnapshot,
+            //        Quantity = i.Quantity
+            //    }).ToList()
+            //};
+            return transaction.TransactionId;
         }
     }
 }

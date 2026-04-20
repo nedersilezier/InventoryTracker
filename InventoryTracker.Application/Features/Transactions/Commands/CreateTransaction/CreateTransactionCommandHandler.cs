@@ -2,64 +2,61 @@
 using InventoryTracker.Application.Features.Transactions.DTOs;
 using InventoryTracker.Domain.Entities;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Shared.Enums;
-using System.ComponentModel.DataAnnotations;
 using InventoryTracker.Application.Common.Exceptions;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
-    public class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, TransactionDTO>
+    public class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, Guid>
     {
         private readonly IAppDbContext _context;
-        public CreateTransactionCommandHandler(IAppDbContext context)
+        private readonly IClientsRepository _clientsRepository;
+        private readonly IWarehousesRepository _warehousesRepository;
+        private readonly IItemsRepository _itemsRepository;
+        private readonly ITransactionsRepository _transactionsRepository;
+        public CreateTransactionCommandHandler(IAppDbContext context, IClientsRepository clientsRepository, IWarehousesRepository warehousesRepository, IItemsRepository itemsRepository, ITransactionsRepository transactionsRepository)
         {
             _context = context;
+            _clientsRepository = clientsRepository;
+            _warehousesRepository = warehousesRepository;
+            _itemsRepository = itemsRepository;
+            _transactionsRepository = transactionsRepository;
         }
 
-        public async Task<TransactionDTO> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
         {
             Client? client = null;
             Warehouse? sourceWarehouse = null;
             Warehouse? destinationWarehouse = null;
-
+            
             //validate client and warehouses if provided
             if (request.ClientId.HasValue)
             {
-                client = await _context.Clients.Where(c => c.IsActive == true && c.ClientId == request.ClientId).FirstOrDefaultAsync(cancellationToken);
-                if(client == null)
+                client = await _clientsRepository.GetActiveClientByIdAsync(request.ClientId.Value, cancellationToken);
+                if (client == null)
                     throw new BusinessException($"Client with id {request.ClientId} does not exist or is inactive.");
             }
                 
             if (request.SourceWarehouseId.HasValue)
             {
-                sourceWarehouse = await _context.Warehouses.Where(w => w.IsActive == true && w.WarehouseId == request.SourceWarehouseId).FirstOrDefaultAsync(cancellationToken);
+                sourceWarehouse = await _warehousesRepository.GetActiveWarehouseByIdAsync(request.SourceWarehouseId.Value, cancellationToken);
                 if (sourceWarehouse == null)
-                {
                     throw new BusinessException($"Source warehouse with id {request.SourceWarehouseId} does not exist or is inactive.");
-                }
             }
             if (request.DestinationWarehouseId.HasValue)
             {
-                destinationWarehouse = await _context.Warehouses.Where(w => w.IsActive == true && w.WarehouseId == request.DestinationWarehouseId).FirstOrDefaultAsync(cancellationToken);
+                destinationWarehouse = await _warehousesRepository.GetActiveWarehouseByIdAsync(request.DestinationWarehouseId.Value, cancellationToken);
                 if (destinationWarehouse == null)
-                {
                     throw new BusinessException($"Destination warehouse with id {request.DestinationWarehouseId} does not exist or is inactive.");
-                }
             }
 
             // Get item snapshots
             var itemIds = request.Items.Select(i => i.ItemId).Distinct().ToList();
-            var items = await _context.Items
-                .AsNoTracking()
-                .Where(i => i.IsActive == true && itemIds.Contains(i.ItemId))
-                .ToDictionaryAsync(i => i.ItemId, cancellationToken);
+            var items = await _itemsRepository.GetActiveItemsByIdsAsync(itemIds, cancellationToken);
+            var itemsDict = items.ToDictionary(i => i.ItemId, i => i);
 
             //validate if all items exist and are active
-            if (itemIds.Count != items.Count)
+            if (itemIds.Count != items.Count())
                 throw new BusinessException("One or more items do not exist or are inactive.");
 
             // Create transaction
@@ -68,14 +65,11 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTran
                 TransactionId = Guid.NewGuid(),
                 Type = request.Type,
                 Status = TransactionStatus.Draft,
-                Client = client,
                 ClientId = request.ClientId,
                 
-                SourceWarehouse = sourceWarehouse,
                 SourceWarehouseId = request.SourceWarehouseId,
                 SourceWarehouseNameSnapshot = sourceWarehouse == null ? null : sourceWarehouse.Name,
 
-                DestinationWarehouse = destinationWarehouse,
                 DestinationWarehouseId = request.DestinationWarehouseId,
                 DestinationWarehouseNameSnapshot = destinationWarehouse == null ?  null : destinationWarehouse.Name,
 
@@ -84,7 +78,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTran
                 Notes = request.Notes,
                 TransactionItems = request.Items.Select(i =>
                 {
-                    var item = items[i.ItemId];
+                    var item = itemsDict[i.ItemId];
                     return new TransactionItem
                     {
                         TransactionItemId = Guid.NewGuid(),
@@ -98,35 +92,9 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTran
                 }).ToList()
             };
 
-            _context.Transactions.Add(transaction);
+            await _transactionsRepository.AddTransaction(transaction);
             await _context.SaveChangesAsync(cancellationToken);
-
-            return new TransactionDTO
-            {
-                TransactionId = transaction.TransactionId,
-                Type = transaction.Type,
-                Status = transaction.Status,
-                ClientId = transaction.ClientId,
-                ClientName = client == null ? null : client.Name,
-                SourceWarehouseId = transaction.SourceWarehouseId,
-                SourceWarehouseNameSnapshot = transaction.SourceWarehouseNameSnapshot,
-                DestinationWarehouseId = transaction.DestinationWarehouseId,
-                DestinationWarehouseNameSnapshot = transaction.DestinationWarehouseNameSnapshot,
-                TransactionDate = transaction.TransactionDate,
-                ReferenceNumber = transaction.ReferenceNumber,
-                Notes = transaction.Notes,
-                Items = transaction.TransactionItems.Select(ti => new TransactionItemDTO
-                {
-                    TransactionItemId = ti.TransactionItemId,
-                    ItemId = ti.ItemId,
-                    NameSnapshot = ti.NameSnapshot,
-                    SKUSnapshot = ti.SKUSnapshot,
-                    UnitOfMeasureSnapshot = ti.UnitOfMeasureSnapshot,
-                    Quantity = ti.Quantity,
-                    UnitCreditValueSnapshot = ti.UnitCreditValueSnapshot,
-                    TotalCreditValue = ti.TotalCreditValue
-                }).ToList()
-            }; 
+            return transaction.TransactionId;
         }
     }
 }

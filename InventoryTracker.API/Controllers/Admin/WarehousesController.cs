@@ -41,6 +41,7 @@ namespace InventoryTracker.API.Controllers.Admin
                     Code = i.Code,
                     Address = new AddressResponseDTO
                     {
+                        AddressId = i.Address.AddressId,
                         Street = i.Address.Street,
                         HouseNumber = i.Address.HouseNumber,
                         ApartmentNumber = i.Address.ApartmentNumber,

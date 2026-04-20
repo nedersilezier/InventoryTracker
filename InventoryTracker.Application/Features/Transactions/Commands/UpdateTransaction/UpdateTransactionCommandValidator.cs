@@ -69,9 +69,10 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.UpdateTran
                     case TransactionType.Adjustment:
                         if (request.ClientId.HasValue)
                             context.AddFailure("Adjustment cannot involve clients.");
-
-                        if (request.SourceWarehouseId.HasValue == request.DestinationWarehouseId.HasValue)
-                            context.AddFailure("Adjustment requires exactly one warehouse.");
+                        if (request.DestinationWarehouseId.HasValue)
+                            context.AddFailure("Adjustment cannot involve destination warehouses.");
+                        if (!request.SourceWarehouseId.HasValue)
+                            context.AddFailure("Adjustment requires a source warehouse.");
                         break;
 
                     default:

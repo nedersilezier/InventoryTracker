@@ -7,7 +7,7 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.UpdateTransaction
 {
-    public class UpdateTransactionCommand: IRequest<TransactionDTO?>
+    public class UpdateTransactionCommand: IRequest<Guid>
     {
         public Guid TransactionId { get; set; }
         public TransactionType Type { get; set; }

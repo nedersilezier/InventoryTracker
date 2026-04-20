@@ -1,11 +1,10 @@
-﻿using InventoryTracker.Application.Common.DTOs;
-using InventoryTracker.Application.Features.Transactions.DTOs;
-using MediatR;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-
-namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransactions
+namespace InventoryTracker.Application.Features.Transactions.DTOs
 {
-    public class GetTransactionsQuery: IRequest<PagedResult<TransactionListDTO>>
+    public class GetTransactionsParameters
     {
         public string? SearchTerm { get; set; }
         public int PageNumber { get; set; } = 1;

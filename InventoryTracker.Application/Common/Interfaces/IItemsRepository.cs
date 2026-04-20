@@ -9,6 +9,7 @@ namespace InventoryTracker.Application.Common.Interfaces
     {
         Task AddItem(Item item);
         Task<Item?> GetItemByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<IReadOnlyList<Item>> GetActiveItemsByIdsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken);
         Task<bool> SKUExistsAsync(string sku, CancellationToken cancellationToken, Guid? excludedId = null);
     }
 }

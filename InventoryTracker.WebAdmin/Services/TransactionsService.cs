@@ -29,6 +29,5 @@ namespace InventoryTracker.WebAdmin.Services
             return await response.Content.ReadFromJsonAsync<List<TransactionListDTO>>(cancellationToken: cancellationToken)
                    ?? new List<TransactionListDTO>();
         }
-
     }
 }

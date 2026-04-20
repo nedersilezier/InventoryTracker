@@ -1,26 +1,27 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Transactions.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Domain.Entities;
 using InventoryTracker.Shared.Enums;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTransaction
 {
-    public class ApproveTransactionCommandHandler : IRequestHandler<ApproveTransactionCommand, TransactionDTO>
+    public class ApproveTransactionCommandHandler : IRequestHandler<ApproveTransactionCommand, Guid>
     {
         private readonly IAppDbContext _context;
-        public ApproveTransactionCommandHandler(IAppDbContext context)
+        private readonly ITransactionsRepository _transactionsRepository;
+        private readonly IStocksRepository _stocksRepository;
+        public ApproveTransactionCommandHandler(IAppDbContext context, ITransactionsRepository transactionsRepository, IStocksRepository stocksRepository)
         {
             _context = context;
+            _transactionsRepository = transactionsRepository;
+            _stocksRepository = stocksRepository;
         }
-        public async Task<TransactionDTO> Handle(ApproveTransactionCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(ApproveTransactionCommand request, CancellationToken cancellationToken)
         {
-            var transaction = await _context.Transactions.Include(t => t.TransactionItems).FirstOrDefaultAsync(t => t.TransactionId == request.TransactionId, cancellationToken);
+            var transaction = await _transactionsRepository.GetTransactionWithItemsByIdAsync(request.TransactionId, cancellationToken);
+            //var transaction = await _context.Transactions.Include(t => t.TransactionItems).FirstOrDefaultAsync(t => t.TransactionId == request.TransactionId, cancellationToken);
             if (transaction == null)
                 throw new RecordNotFoundException(nameof(Transaction), request.TransactionId);
 
@@ -31,7 +32,10 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
             var itemIds = transaction.TransactionItems.Select(i => i.ItemId).ToList();
 
             //helper query
-            IQueryable<Stock> stocksQuery = _context.Stocks.Where(s => itemIds.Contains(s.ItemId));
+            var stocks = await _stocksRepository.GetStocksByItemIdsAsync(itemIds, cancellationToken);
+            IQueryable<Stock> stocksQuery = stocks.AsQueryable();
+
+            //IQueryable<Stock> stocksQuery = _context.Stocks.Where(s => itemIds.Contains(s.ItemId));
 
             switch (transaction.Type)
             {
@@ -39,7 +43,8 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                     if (transaction.SourceWarehouseId == null)
                         throw new BusinessException("No source warehouse bound to the transaction.");
 
-                    var stocksToAdjust = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
+                    var stocksToAdjust = stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToList();
+                    //var stocksToAdjust = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
                     foreach (var item in transaction.TransactionItems)
                     {
                         var stock = stocksToAdjust.FirstOrDefault(s => s.ItemId == item.ItemId);
@@ -53,7 +58,8 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                                 Quantity = 0
                             };
                             stocksToAdjust.Add(stock);
-                            _context.Stocks.Add(stock);
+                           await _stocksRepository.AddStock(stock);
+                            //_context.Stocks.Add(stock);
                         }
                         var quantityChange = stock.Quantity + item.Quantity;
                         if (quantityChange < 0)
@@ -67,7 +73,8 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                     if (transaction.SourceWarehouseId == null)
                         throw new BusinessException("No source warehouse bound to the transaction.");
 
-                    var stocksToSend = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
+                    var stocksToSend = stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToList();
+                    //var stocksToSend = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
                     foreach (var item in transaction.TransactionItems)
                     {
                         var stock = stocksToSend.FirstOrDefault(s => s.ItemId == item.ItemId);
@@ -84,8 +91,10 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                     if (transaction.SourceWarehouseId == null || transaction.DestinationWarehouseId == null)
                         throw new BusinessException("Source or destination warehouse not bound to the transaction.");
 
-                    var sourceWarehouseStocks = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
-                    var destinationWarehouseStocks = await stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToListAsync(cancellationToken);
+                    var sourceWarehouseStocks = stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToList();
+                    //var sourceWarehouseStocks = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
+                    var destinationWarehouseStocks = stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToList();
+                    //var destinationWarehouseStocks = await stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToListAsync(cancellationToken);
 
                     foreach (var item in transaction.TransactionItems)
                     {
@@ -103,7 +112,8 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                                 Quantity = 0
                             };
                             destinationWarehouseStocks.Add(destinationStock);
-                            _context.Stocks.Add(destinationStock);
+                            await _stocksRepository.AddStock(destinationStock);
+                            //_context.Stocks.Add(destinationStock);
                         }
                         var quantityChangeSource = sourceStock.Quantity - item.Quantity;
                         if (quantityChangeSource < 0)
@@ -117,7 +127,8 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                 case TransactionType.ReturnFromClient:
                     if (transaction.DestinationWarehouseId == null || transaction.ClientId == null)
                         throw new BusinessException("Return transaction requires destination warehouse and client.");
-                    var stocksReturned = await stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToListAsync(cancellationToken);
+                    var stocksReturned = stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToList();
+                    //var stocksReturned = await stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToListAsync(cancellationToken);
                     foreach(var item in transaction.TransactionItems)
                     {
                         var stock = stocksReturned.FirstOrDefault(s => s.ItemId == item.ItemId);
@@ -131,7 +142,8 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                                 Quantity = 0
                             };
                             stocksReturned.Add(stock);
-                            _context.Stocks.Add(stock);
+                            await _stocksRepository.AddStock(stock);
+                            //_context.Stocks.Add(stock);
                         }
                         stock.Quantity += item.Quantity;
                     }
@@ -145,26 +157,27 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
 
             //ave changes
             await _context.SaveChangesAsync(cancellationToken);
-            return new TransactionDTO
-            {
-                TransactionId = transaction.TransactionId,
-                Type = transaction.Type,
-                Status = transaction.Status,
-                TransactionDate = transaction.TransactionDate,
-                SourceWarehouseId = transaction.SourceWarehouseId,
-                DestinationWarehouseId = transaction.DestinationWarehouseId,
-                ClientId = transaction.ClientId,
-                Items = transaction.TransactionItems.Select(i => new TransactionItemDTO
-                {
-                    TransactionItemId = i.TransactionItemId,
-                    ItemId = i.ItemId,
-                    NameSnapshot = i.NameSnapshot,
-                    SKUSnapshot = i.SKUSnapshot,
-                    UnitOfMeasureSnapshot = i.UnitOfMeasureSnapshot,
-                    UnitCreditValueSnapshot = i.UnitCreditValueSnapshot,
-                    Quantity = i.Quantity
-                }).ToList()
-            };
+            return transaction.TransactionId;
+            //return new TransactionDTO
+            //{
+            //    TransactionId = transaction.TransactionId,
+            //    Type = transaction.Type,
+            //    Status = transaction.Status,
+            //    TransactionDate = transaction.TransactionDate,
+            //    SourceWarehouseId = transaction.SourceWarehouseId,
+            //    DestinationWarehouseId = transaction.DestinationWarehouseId,
+            //    ClientId = transaction.ClientId,
+            //    Items = transaction.TransactionItems.Select(i => new TransactionItemDTO
+            //    {
+            //        TransactionItemId = i.TransactionItemId,
+            //        ItemId = i.ItemId,
+            //        NameSnapshot = i.NameSnapshot,
+            //        SKUSnapshot = i.SKUSnapshot,
+            //        UnitOfMeasureSnapshot = i.UnitOfMeasureSnapshot,
+            //        UnitCreditValueSnapshot = i.UnitCreditValueSnapshot,
+            //        Quantity = i.Quantity
+            //    }).ToList()
+            //};
         }
     }
 }

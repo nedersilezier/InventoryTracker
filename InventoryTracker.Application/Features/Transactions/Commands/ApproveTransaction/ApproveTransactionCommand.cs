@@ -6,7 +6,7 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTransaction
 {
-    public class ApproveTransactionCommand: IRequest<TransactionDTO>
+    public class ApproveTransactionCommand: IRequest<Guid>
     {
         public Guid TransactionId { get; private set; }
         public ApproveTransactionCommand(Guid transactionId)

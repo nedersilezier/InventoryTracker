@@ -10,5 +10,8 @@ namespace InventoryTracker.Application.Common.Interfaces
         Task<bool> ClientCodeExistsAsync(string clientCode, CancellationToken cancellationToken);
         Task AddClient(Client client);
         Task<Client?> GetClientByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<Client?> GetActiveClientByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<bool> ClientExistsAsync(Guid id, CancellationToken cancellationToken);
+        Task<bool> ActiveClientExistsAsync(Guid id, CancellationToken cancellationToken);
     }
 }

@@ -10,8 +10,8 @@ namespace InventoryTracker.WebAdmin.Interfaces
         //Task<IEnumerable<CountryDTO>> GetAllAsync(CancellationToken cancellationToken);
         //Task<CountriesIndexViewModel> GetAllAsync(CancellationToken cancellationToken);
         Task<CountriesIndexViewModel> GetAllAsync(GetCountriesRequest request, CancellationToken cancellationToken);
-        Task<CountryDTO> GetCountryByIdAsync(Guid id, CancellationToken cancellationToken);
-        Task<CountryDTO> CreateCountryAsync(CreateCountryRequest request, CancellationToken cancellationToken);
-        Task<CountryDTO> UpdateCountryAsync(Guid id, UpdateCountryRequest request, CancellationToken cancellationToken);
+        Task<CountryResponseDTO> GetCountryByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<CountryResponseDTO> CreateCountryAsync(CreateCountryRequest request, CancellationToken cancellationToken);
+        Task<CountryResponseDTO> UpdateCountryAsync(Guid id, UpdateCountryRequest request, CancellationToken cancellationToken);
     }
 }

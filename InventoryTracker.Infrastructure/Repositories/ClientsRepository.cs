@@ -16,6 +16,14 @@ namespace InventoryTracker.Infrastructure.Repositories
         {
             return await _context.Clients.AnyAsync(c => c.ClientCode == clientCode, cancellationToken);
         }
+        public async Task<bool> ClientExistsAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await _context.Clients.AnyAsync(c => c.ClientId == id, cancellationToken);
+        }
+        public async Task<bool> ActiveClientExistsAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await _context.Clients.AnyAsync(c => c.ClientId == id && c.IsActive, cancellationToken);
+        }
         public Task AddClient(Client client)
         {
             _context.Clients.Add(client);
@@ -27,6 +35,13 @@ namespace InventoryTracker.Infrastructure.Repositories
                 .Include(c => c.Address)
                 .ThenInclude(a => a.Country)
                 .FirstOrDefaultAsync(c => c.ClientId == id, cancellationToken);
+        }
+        public async Task<Client?> GetActiveClientByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await _context.Clients
+                .Include(c => c.Address)
+                .ThenInclude(a => a.Country)
+                .FirstOrDefaultAsync(c => c.IsActive == true && c.ClientId == id, cancellationToken);
         }
     }
 }

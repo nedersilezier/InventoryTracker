@@ -1,7 +1,5 @@
 ﻿using InventoryTracker.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace InventoryTracker.Application.Common.Interfaces
 {

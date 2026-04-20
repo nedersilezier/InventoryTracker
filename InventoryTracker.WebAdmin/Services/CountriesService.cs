@@ -82,17 +82,17 @@ namespace InventoryTracker.WebAdmin.Services
             };
         }
 
-        public Task<CountryDTO> GetCountryByIdAsync(Guid id, CancellationToken cancellationToken)
+        public Task<CountryResponseDTO> GetCountryByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task<CountryDTO> CreateCountryAsync(CreateCountryRequest request, CancellationToken cancellationToken)
+        public Task<CountryResponseDTO> CreateCountryAsync(CreateCountryRequest request, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task<CountryDTO> UpdateCountryAsync(Guid id, UpdateCountryRequest request, CancellationToken cancellationToken)
+        public Task<CountryResponseDTO> UpdateCountryAsync(Guid id, UpdateCountryRequest request, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

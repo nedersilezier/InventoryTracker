@@ -1,13 +1,10 @@
 ﻿using InventoryTracker.Application.Features.Transactions.DTOs;
 using InventoryTracker.Shared.Enums;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
-    public class CreateTransactionCommand : IRequest<TransactionDTO>
+    public class CreateTransactionCommand : IRequest<Guid>
     {
         public TransactionType Type { get; set; }
         public Guid? ClientId { get; set; }
