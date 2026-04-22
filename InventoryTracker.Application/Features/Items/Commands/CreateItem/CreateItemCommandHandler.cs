@@ -6,7 +6,7 @@ using MediatR;
 
 namespace InventoryTracker.Application.Features.Items.Commands.CreateItem
 {
-    public class CreateItemCommandHandler: IRequestHandler<CreateItemCommand, ItemDTO>
+    public class CreateItemCommandHandler: IRequestHandler<CreateItemCommand, ItemCreatedDTO>
     {
         private readonly IAppDbContext _context;
         private readonly IItemsRepository _itemsRepository;
@@ -15,7 +15,7 @@ namespace InventoryTracker.Application.Features.Items.Commands.CreateItem
             _context = context;
             _itemsRepository = itemsRepository;
         }
-        public async Task<ItemDTO> Handle(CreateItemCommand request, CancellationToken cancellationToken)
+        public async Task<ItemCreatedDTO> Handle(CreateItemCommand request, CancellationToken cancellationToken)
         {
             var skuExists = await _itemsRepository.SKUExistsAsync(request.SKU, cancellationToken);
             if(skuExists)
@@ -36,16 +36,11 @@ namespace InventoryTracker.Application.Features.Items.Commands.CreateItem
             };
             await _itemsRepository.AddItem(item);
             await _context.SaveChangesAsync(cancellationToken);
-            return new ItemDTO
+            return new ItemCreatedDTO
             {
                 ItemId = item.ItemId,
                 Name = item.Name,
-                SKU = item.SKU,
-                Description = item.Description,
-                UnitOfMeasure = item.UnitOfMeasure,
-                CreditValue = item.CreditValue,
-                Weight = item.Weight,
-                IsActive = item.IsActive
+                SKU = item.SKU
             };
         }
     }

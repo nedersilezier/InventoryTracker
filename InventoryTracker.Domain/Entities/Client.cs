@@ -7,6 +7,7 @@ namespace InventoryTracker.Domain.Entities
 {
     public class Client : SoftDeletableEntity
     {
+        //TODO: Add Saldo property
         public Guid ClientId { get; set; }
         public string Name { get; set; } = default!;
         public string ClientCode { get; set; } = default!;

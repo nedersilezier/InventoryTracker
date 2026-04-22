@@ -3,7 +3,7 @@ using MediatR;
 
 namespace InventoryTracker.Application.Features.Items.Commands.CreateItem
 {
-    public class CreateItemCommand: IRequest<ItemDTO>
+    public class CreateItemCommand: IRequest<ItemCreatedDTO>
     {
         public string Name { get; set; } = default!;
         public string SKU { get; set; } = default!;

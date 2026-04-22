@@ -16,6 +16,8 @@ namespace InventoryTracker.Infrastructure.Services
         {
             _context = context;
         }
+        // TODO: Add sorting and filtering by IsActive  
+        // TODO: Add saldo logic
         public async Task<PagedResult<ClientDTO>> GetAllClientsAsync(GetClientsParameters parameters, CancellationToken cancellationToken)
         {
             var query = _context.Clients.AsQueryable();

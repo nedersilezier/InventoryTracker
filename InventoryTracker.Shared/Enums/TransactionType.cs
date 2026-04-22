@@ -4,6 +4,7 @@ using System.Text;
 
 namespace InventoryTracker.Shared.Enums
 {
+    // TODO: Add TransactionType: Settlement
     public enum TransactionType
     {
         IssueToClient = 1,

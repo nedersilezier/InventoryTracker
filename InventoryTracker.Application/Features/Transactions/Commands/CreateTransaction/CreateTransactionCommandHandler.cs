@@ -7,6 +7,11 @@ using InventoryTracker.Application.Common.Exceptions;
 
 namespace InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction
 {
+    // TODO:
+    // - Add TransactionType: Settlement
+    // - When items are not returned but paid for, create settlement transaction
+    // - Ensure Client.Saldo is always derived from transactions
+
     public class CreateTransactionCommandHandler : IRequestHandler<CreateTransactionCommand, Guid>
     {
         private readonly IAppDbContext _context;
