@@ -13,6 +13,7 @@ namespace InventoryTracker.Application.Features.Clients.DTOs
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public bool IsActive { get; set; }
+        public decimal Saldo { get; set; }
 
         public AddressDTO Address { get; set; } = default!;
     }

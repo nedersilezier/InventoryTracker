@@ -46,6 +46,7 @@ namespace InventoryTracker.Infrastructure.Services
                     Email = client.Email,
                     PhoneNumber = client.PhoneNumber,
                     IsActive = client.IsActive,
+                    Saldo = 12345m,
                     Address = new AddressDTO
                     {
                         AddressId = client.Address.AddressId,
@@ -58,7 +59,6 @@ namespace InventoryTracker.Infrastructure.Services
                         CountryName = client.Address.Country.Name
                     }
                 });
-
             }
 
             return new PagedResult<ClientDTO>

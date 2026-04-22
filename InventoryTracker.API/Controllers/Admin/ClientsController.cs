@@ -42,6 +42,7 @@ namespace InventoryTracker.API.Controllers.Admin
                     Email = client.Email,
                     PhoneNumber = client.PhoneNumber,
                     IsActive = client.IsActive,
+                    Saldo = client.Saldo,
                     Address = new AddressResponseDTO
                     {
                         AddressId = client.Address.AddressId,

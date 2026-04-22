@@ -13,6 +13,7 @@ namespace InventoryTracker.Contracts.Responses.Clients
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public bool IsActive { get; set; }
+        public decimal Saldo { get; set; }
 
         public AddressResponseDTO Address { get; set; } = default!;
     }
