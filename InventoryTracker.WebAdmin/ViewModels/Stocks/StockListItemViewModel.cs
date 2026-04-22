@@ -9,6 +9,8 @@
 
         public Guid ItemId { get; set; }
         public string ItemName { get; set; } = default!;
+        public string SKU { get; set; } = default!;
+        public string UnitOfMeasure { get; set; } = default!;
 
         public decimal Quantity { get; set; }
     }

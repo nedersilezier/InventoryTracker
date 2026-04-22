@@ -92,5 +92,14 @@ namespace InventoryTracker.Infrastructure.Services
                 TotalCount = totalCount
             };
         }
+        public async Task<IReadOnlyList<InternalWarehouseSelectDTO>> GetAllWarehousesLookupAsync(CancellationToken cancellationToken)
+        {
+            var warehouses = await _context.Warehouses.AsNoTracking().Where(w => w.IsActive == true).OrderBy(w => w.Name).Select(w => new InternalWarehouseSelectDTO
+            {
+                WarehouseId = w.WarehouseId,
+                Name = w.Name
+            }).ToListAsync(cancellationToken);
+            return warehouses;
+        }
     }
 }

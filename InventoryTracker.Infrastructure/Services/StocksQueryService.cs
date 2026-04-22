@@ -39,7 +39,7 @@ namespace InventoryTracker.Infrastructure.Services
             if (pageNumber > totalPages)
                 pageNumber = totalPages;
 
-            var stocks = await query.OrderBy(s => s.Item.Name).Skip((pageNumber - 1) * parameters.PageSize).Take(parameters.PageSize).ToListAsync(cancellationToken);
+            var stocks = await query.OrderBy(s => s.Warehouse.Name).ThenBy(s => s.Item.Name).Skip((pageNumber - 1) * parameters.PageSize).Take(parameters.PageSize).ToListAsync(cancellationToken);
             var stocksDTO = new List<StockDetailsDTO>();
             foreach (var stock in stocks)
             {

@@ -21,13 +21,13 @@ namespace InventoryTracker.API.Controllers.Admin
         {
             _mediator = mediator;
         }
+
         [HttpGet]
-        [Route("warehouse")]
         public async Task<IActionResult> GetStocksAsync([FromQuery] GetStocksRequest request, CancellationToken cancellationToken)
         {
             var query = new GetStocksQuery
             {
-                WarehouseId = request.WarehouseId,
+                WarehouseId = request.SelectedWarehouseId,
                 PageNumber = request.PageNumber ?? 1,
                 PageSize = request.PageSize ?? 10,
                 SearchTerm = request.SearchTerm
