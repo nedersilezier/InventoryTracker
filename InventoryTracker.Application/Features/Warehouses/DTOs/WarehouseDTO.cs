@@ -13,5 +13,6 @@ namespace InventoryTracker.Application.Features.Warehouses.DTOs
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
         public AddressDTO Address { get; set; } = default!;
+        public int StocksCount { get; set; }
     }
 }

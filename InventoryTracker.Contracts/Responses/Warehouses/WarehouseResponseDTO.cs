@@ -12,5 +12,6 @@ namespace InventoryTracker.Contracts.Responses.Warehouses
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;
         public AddressResponseDTO Address { get; set; } = default!;
+        public int StockCount { get; set; }
     }
 }

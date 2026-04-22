@@ -53,25 +53,31 @@ namespace InventoryTracker.WebAdmin.Services
             }).ToList() ?? new List<UserListItemViewModel>();
             var routeValues = new Dictionary<string, string?>
             {
-                ["pageSize"] = pageSize.ToString()
+                ["PageSize"] = pageSize.ToString()
             };
             if (!string.IsNullOrWhiteSpace(request?.SearchTerm))
             {
-                routeValues["searchTerm"] = request.SearchTerm;
+                routeValues["SearchTerm"] = request.SearchTerm;
             }
             return new UsersIndexViewModel
             {
                 Users = users,
                 SearchTerm = request?.SearchTerm,
                 TotalCount = pagedResponse?.TotalCount ?? 0,
-                Pagination = new PaginationViewModel
+                TableFooter = new TableFooterViewModel
                 {
-                    CurrentPage = pagedResponse?.PageNumber ?? 1,
-                    TotalPages = pagedResponse?.TotalPages ?? 1,
-                    PageSize = pagedResponse?.PageSize ?? 1,
-                    Controller = "Users",
-                    RouteValues = routeValues
-                }
+                    DisplayedCount = users.Count,
+                    TotalCount = pagedResponse?.TotalCount ?? 0,
+                    EntityName = "users",
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = pagedResponse?.PageNumber ?? 1,
+                        TotalPages = pagedResponse?.TotalPages ?? 1,
+                        PageSize = pagedResponse?.PageSize ?? 1,
+                        Controller = "Users",
+                        RouteValues = routeValues
+                    }
+                },
             };
         }
     }

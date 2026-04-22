@@ -58,7 +58,7 @@ namespace InventoryTracker.Infrastructure.Services
             if (pageNumber > totalPages)
                 pageNumber = totalPages;
 
-            query = query.Include(c => c.Address).ThenInclude(a => a.Country);
+            query = query.Include(w => w.Stocks).Include(w => w.Address).ThenInclude(a => a.Country);
             var warehouses = await query.OrderBy(c => c.Name).Skip((pageNumber - 1) * parameters.PageSize).Take(parameters.PageSize).ToListAsync(cancellationToken);
             var warehousesDTO = new List<WarehouseDTO>();
             foreach (var warehouse in warehouses)
@@ -68,6 +68,7 @@ namespace InventoryTracker.Infrastructure.Services
                     WarehouseId = warehouse.WarehouseId,
                     Name = warehouse.Name,
                     Code = warehouse.Code,
+                    StocksCount = warehouse.Stocks.Count,
                     Address = new AddressDTO
                     {
                         AddressId = warehouse.Address.AddressId,

@@ -39,6 +39,7 @@ namespace InventoryTracker.API.Controllers.Admin
                     WarehouseId = i.WarehouseId,
                     Name = i.Name,
                     Code = i.Code,
+                    StockCount = i.StocksCount,
                     Address = new AddressResponseDTO
                     {
                         AddressId = i.Address.AddressId,

@@ -10,6 +10,8 @@
             </div>
 
             <form asp-controller="Users" asp-action="Index" method="get" class="space-y-4">
+                <input type="hidden" asp-for="PageSize" />
+                <input type="hidden" name="PageNumber" value="1" />
                 <div>
                     <label asp-for="SearchTerm"
                            class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
@@ -143,36 +145,7 @@
             </div>
 
             <!-- Footer -->
-            <div class="p-6 border-t border-slate-100 flex items-center justify-between">
-
-                <span class="text-xs text-slate-400">
-                    Showing @Model.Users.Count of @Model.TotalCount items
-                </span>
-
-                <div class="flex items-center gap-4">
-                    <form asp-controller="Users" asp-action="Index" method="get" class="flex items-center gap-2">
-                        <input type="hidden" name="SearchTerm" value="@Model.SearchTerm" />
-                        <input type="hidden" name="PageNumber" value="@Model.Pagination.CurrentPage" />
-
-                        <label for="pageSize" class="text-xs text-slate-500 font-medium">
-                            Rows per page
-                        </label>
-
-                        <select id="pageSize"
-                                name="PageSize"
-                                onchange="this.form.submit()"
-                                class="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200">
-                            <option value="1" selected="@(Model.Pagination.PageSize == 1)">1</option>
-                            <option value="2" selected="@(Model.Pagination.PageSize == 2)">2</option>
-                            <option value="3" selected="@(Model.Pagination.PageSize == 3)">3</option>
-                            <option value="4" selected="@(Model.Pagination.PageSize == 4)">4</option>
-                        </select>
-                    </form>
-
-                    @await Html.PartialAsync("Partials/_Pagination", Model.Pagination)
-                </div>
-
-            </div>
+            @await Html.PartialAsync("Partials/_TableFooter", Model.TableFooter)
         </div>
     </section>
 </div>
