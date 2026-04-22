@@ -3,11 +3,12 @@
     public class TransactionFiltersViewModel
     {
         public string? SearchTerm { get; set; }
-
-        public string? DateRange { get; set; } = "30d";
-
-        public bool IncludeInbound { get; set; } = true;
-        public bool IncludeInternal { get; set; } = true;
-        public bool IncludeOutbound { get; set; } = true;
+        public DateTime? DateFrom { get; set; } = DateTime.Now;
+        public DateTime? DateTo {  get; set; } = DateTime.Now;
+        public bool IncludeAdjustments { get; set; } = true;
+        public bool IncludeReturns { get; set; } = true;
+        public bool IncludeIssues { get; set; } = true;
+        public bool IncludeTransfers { get; set; } = true;
+        public int? PageSize { get; set; }
     }
 }

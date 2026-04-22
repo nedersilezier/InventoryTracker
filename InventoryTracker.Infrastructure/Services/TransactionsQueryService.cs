@@ -1,4 +1,5 @@
-﻿using InventoryTracker.Application.Common.DTOs;
+﻿using Azure.Core;
+using InventoryTracker.Application.Common.DTOs;
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Transactions.DTOs;
 using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions;
@@ -34,6 +35,10 @@ namespace InventoryTracker.Infrastructure.Services
                 query = query.Where(t => selectedTypes.Contains(t.Type));
             else
                 query = query.Where(t => false);
+            if(parameters.DateFrom.HasValue)
+                query = query.Where(t => t.TransactionDate >= parameters.DateFrom.Value);
+            if(parameters.DateTo.HasValue)
+                query = query.Where(t => t.TransactionDate < parameters.DateTo.Value);
 
             if (!string.IsNullOrWhiteSpace(parameters.SearchTerm))
             {
@@ -93,6 +98,50 @@ namespace InventoryTracker.Infrastructure.Services
                 PageSize = parameters.PageSize,
                 TotalCount = totalCount
             };
+        }
+        public async Task<IReadOnlyList<TransactionListDTO>> GetRecentTransactionsAsync(int count, CancellationToken cancellationToken)
+        {
+            var recentTransactions = await _context.Transactions
+                .AsNoTracking()
+                .Include(t => t.Client)
+                .OrderByDescending(t => t.TransactionDate)
+                .Take(count).ToListAsync(cancellationToken);
+            if(recentTransactions == null || recentTransactions.Count == 0)
+                return new List<TransactionListDTO>();
+            var transactionsDTO = new List<TransactionListDTO>();
+            transactionsDTO.AddRange(recentTransactions.Select(transaction => new TransactionListDTO
+            {
+                TransactionId = transaction.TransactionId,
+                Type = transaction.Type,
+                Status = transaction.Status,
+                ClientId = transaction.ClientId,
+                ClientName = transaction.Client != null ? transaction.Client.Name : string.Empty,
+                SourceWarehouseId = transaction.SourceWarehouseId,
+                SourceWarehouseNameSnapshot = transaction.SourceWarehouseNameSnapshot,
+                DestinationWarehouseId = transaction.DestinationWarehouseId,
+                DestinationWarehouseNameSnapshot = transaction.DestinationWarehouseNameSnapshot,
+                TransactionDate = transaction.TransactionDate,
+                ReferenceNumber = transaction.ReferenceNumber,
+                FromDisplay = transaction.Type == TransactionType.Adjustment
+                    ? null
+                    : transaction.Type == TransactionType.ReturnFromClient
+                    ? transaction.Client == null ? null : transaction.Client.Name
+                    : transaction.Type == TransactionType.TransferBetweenWarehouses
+                    ? transaction.SourceWarehouseNameSnapshot
+                    : transaction.Type == TransactionType.IssueToClient
+                    ? transaction.SourceWarehouseNameSnapshot
+                    : null,
+                ToDisplay = transaction.Type == TransactionType.Adjustment
+                    ? transaction.SourceWarehouseNameSnapshot
+                    : transaction.Type == TransactionType.ReturnFromClient
+                    ? transaction.DestinationWarehouseNameSnapshot
+                    : transaction.Type == TransactionType.TransferBetweenWarehouses
+                    ? transaction.DestinationWarehouseNameSnapshot
+                    : transaction.Type == TransactionType.IssueToClient
+                    ? transaction.Client == null ? null : transaction.Client.Name
+                    : null
+            }));
+            return transactionsDTO;
         }
         public async Task<TransactionDTO?> GetTransactionByIdAsync(Guid id, CancellationToken cancellationToken)
         {

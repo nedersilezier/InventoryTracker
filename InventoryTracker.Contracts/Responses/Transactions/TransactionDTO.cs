@@ -12,13 +12,40 @@ namespace InventoryTracker.Contracts.Responses.Transactions
         public TransactionType Type { get; set; }
         public string TypeName
         {
-            get { return Type.ToString(); }
-
+            get
+            {
+                switch(this.Type)
+                {
+                    case TransactionType.Adjustment:
+                        return "Adjustment";
+                    case TransactionType.TransferBetweenWarehouses:
+                        return "Transfer";
+                    case TransactionType.IssueToClient:
+                        return "Issue";
+                    case TransactionType.ReturnFromClient:
+                        return "Return";
+                    default:
+                        return "Unknown";
+                }
+            }
         }
         public TransactionStatus Status { get; set; }
         public string StatusName
         {
-            get { return Status.ToString(); }
+            get
+            {
+                switch(this.Status)
+                {
+                    case TransactionStatus.Draft:
+                        return "Draft";
+                    case TransactionStatus.Approved:
+                        return "Approved";
+                    case TransactionStatus.Cancelled:
+                        return "Cancelled";
+                    default:
+                        return "Unknown";
+                }
+            }
         }
 
         public Guid? ClientId { get; set; }

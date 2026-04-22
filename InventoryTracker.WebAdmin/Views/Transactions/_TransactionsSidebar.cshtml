@@ -8,6 +8,8 @@
     </div>
 
     <form asp-controller="Transactions" asp-action="Index" method="get" class="space-y-6">
+        <input type="hidden" asp-for="PageSize" />
+        <input type="hidden" name="PageNumber" value="1" />
         <div class="space-y-2">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
                 Search
@@ -18,17 +20,25 @@
         </div>
 
         <div class="space-y-2">
-            <label asp-for="DateRange" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                Date Range
+            <label asp-for="DateFrom" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Date from
             </label>
-            <select asp-for="DateRange"
-                    class="w-full bg-white border border-slate-200 rounded-md text-xs py-2 px-3 focus:ring-blue-200">
-                <option class="checked:bg-slate-100" value="7d">Last 7 Days</option>
-                <option class="hover:bg-slate-100" value="30d">Last 30 Days</option>
-                <option class="hover:bg-slate-100" value="90d">Last 90 Days</option>
-                <option class="hover:bg-slate-100" value="month">This Month</option>
-                <option class="hover:bg-slate-100" value="">All Time</option>
-            </select>
+            <input asp-for="DateFrom"
+                   type="date"
+                   id="DateFrom"
+                   class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+            <span asp-validation-for="DateFrom" class="text-xs text-red-500"></span>
+        </div>
+
+        <div class="space-y-2">
+            <label asp-for="DateTo" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                Date to
+            </label>
+            <input asp-for="DateTo"
+                   type="date"
+                   id="DateTo"
+                   class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+            <span asp-validation-for="DateTo" class="text-xs text-red-500"></span>
         </div>
 
         <div class="space-y-2">
@@ -38,18 +48,23 @@
 
             <div class="space-y-2">
                 <label class="flex items-center gap-2 text-xs text-slate-600">
-                    <input asp-for="IncludeInbound" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
-                    Inbound
+                    <input asp-for="IncludeAdjustments" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
+                    Adjustments
                 </label>
 
                 <label class="flex items-center gap-2 text-xs text-slate-600">
-                    <input asp-for="IncludeInternal" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
-                    Internal
+                    <input asp-for="IncludeIssues" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
+                    Issues
                 </label>
 
                 <label class="flex items-center gap-2 text-xs text-slate-600">
-                    <input asp-for="IncludeOutbound" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
-                    Outbound
+                    <input asp-for="IncludeReturns" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
+                    Returns
+                </label>
+
+                <label class="flex items-center gap-2 text-xs text-slate-600">
+                    <input asp-for="IncludeTransfers" class="rounded border-slate-300 text-blue-600 focus:ring-blue-200" />
+                    Transfers
                 </label>
             </div>
         </div>

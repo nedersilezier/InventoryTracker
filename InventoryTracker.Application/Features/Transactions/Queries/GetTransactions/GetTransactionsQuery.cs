@@ -14,5 +14,7 @@ namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransact
         public bool IncludeTransfers { get; set; } = true;
         public bool IncludeIssues { get; set; } = true;
         public bool IncludeReturns { get; set; } = true;
+        public DateTime? DateFrom { get; set; }
+        public DateTime? DateTo { get; set; }
     }
 }

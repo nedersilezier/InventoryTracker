@@ -4,6 +4,15 @@
 <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
+            <colgroup>
+                <col class="w-[12%]" />
+                <col class="w-[9%]" />
+                <col class="w-[23%]" />
+                <col class="w-[23%]" />
+                <col class="w-[14%]" />
+                <col class="w-[9%]" />
+                <col class="w-[10%]" />
+            </colgroup>
             <thead>
                 <tr class="bg-slate-50 border-y border-slate-100">
                     <th class="py-4 px-6 text-[10px] font-bold uppercase tracking-widest text-slate-500">Date & Time</th>
@@ -112,12 +121,8 @@
             </tbody>
         </table>
     </div>
-    <div class="p-6 border-t border-slate-100 flex items-center justify-between">
-        <span class="text-xs text-slate-400">
-            Showing @Model.Transactions.Count of @Model.TotalCount transactions
-        </span>
-        @await Html.PartialAsync("~/Views/Shared/Partials/_Pagination.cshtml", Model.Pagination)
-    </div>
+    <!-- Footer -->
+    @await Html.PartialAsync("Partials/_TableFooter", Model.TableFooter)
 </div>
 @functions {
     private string GetTypeBadgeClass(TransactionType type)

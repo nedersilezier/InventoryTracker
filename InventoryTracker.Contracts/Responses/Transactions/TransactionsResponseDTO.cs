@@ -11,16 +11,9 @@ namespace InventoryTracker.Contracts.Responses.Transactions
         public Guid TransactionId { get; set; }
 
         public TransactionType Type { get; set; }
-        public string TypeName
-        {
-            get { return Type.ToString(); }
-
-        }
+        public string TypeName { get; set; } = default!;
         public TransactionStatus Status { get; set; }
-        public string StatusName
-        {
-            get { return Status.ToString(); }
-        }
+        public string StatusName { get; set; } = default!;
 
         public Guid? ClientId { get; set; }
         public string? ClientName { get; set; }

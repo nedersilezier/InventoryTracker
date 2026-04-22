@@ -9,13 +9,7 @@ namespace InventoryTracker.WebAdmin.ViewModels.Transactions
         public List<TransactionListItemViewModel> Transactions { get; set; } = new();
 
         public int TotalCount { get; set; }
-
-        public int InboundCount { get; set; }
-        public int InternalCount { get; set; }
-        public int OutboundCount { get; set; }
-
-        public decimal TotalCreditValue { get; set; }
-
-        public PaginationViewModel Pagination { get; set; } = new();
+        public int DraftCount { get; set; }
+        public TableFooterViewModel TableFooter { get; set; } = new();
     }
 }

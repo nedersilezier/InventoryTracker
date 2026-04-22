@@ -14,15 +14,18 @@ namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransact
         }
         public async Task<PagedResult<TransactionListDTO>> Handle(GetTransactionsQuery request, CancellationToken cancellationToken)
         {
+
             var parameters = new GetTransactionsParameters
             {
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize,
-                SearchTerm = request.SearchTerm,
+                SearchTerm = request.SearchTerm?.Trim(),
                 IncludeAdjustments = request.IncludeAdjustments,
                 IncludeIssues = request.IncludeIssues,
                 IncludeReturns = request.IncludeReturns,
-                IncludeTransfers = request.IncludeTransfers
+                IncludeTransfers = request.IncludeTransfers,
+                DateFrom = request.DateFrom?.Date,
+                DateTo = request.DateTo?.Date.AddDays(1)
             };
             return await _transactionsQueryService.GetAllTransactionsAsync(parameters, cancellationToken);
         }

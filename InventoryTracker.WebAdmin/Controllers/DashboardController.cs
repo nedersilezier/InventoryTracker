@@ -13,7 +13,7 @@ namespace InventoryTracker.WebAdmin.Controllers
         }
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            var transactions = await _transactionsService.GetAllTransactionsAsync(cancellationToken);
+            var transactions = await _transactionsService.GetRecentTransactionsAsync(5, cancellationToken);
             return View(new DashboardViewModel { RecentTransactions = transactions.ToList() });
         }
     }

@@ -19,8 +19,9 @@
 <body class="bg-surface text-on-surface">
 
     @await Html.PartialAsync("_TopNavbar")
-    <main class="pt-24 pb-12 px-6 max-w-[1440px] mx-auto">
+    <main class="pt-24 pb-12 px-4 max-w-[1440px] mx-auto">
         @RenderBody()
     </main>
+@RenderSection("Scripts", required: false)
 </body>
 </html>

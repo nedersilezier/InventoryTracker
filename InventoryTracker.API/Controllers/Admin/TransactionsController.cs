@@ -35,7 +35,9 @@ namespace InventoryTracker.API.Controllers.Admin
                 IncludeAdjustments = request.IncludeAdjustments,
                 IncludeTransfers = request.IncludeTransfers,
                 IncludeIssues = request.IncludeIssues,
-                IncludeReturns = request.IncludeReturns
+                IncludeReturns = request.IncludeReturns,
+                DateFrom = request.DateFrom,
+                DateTo = request.DateTo
             };
             var transactionsPaged = await _mediator.Send(query, cancellationToken);
             var response = new PagedResponse<TransactionListDTO>
@@ -65,13 +67,22 @@ namespace InventoryTracker.API.Controllers.Admin
         }
 
         [HttpGet]
-        [Route("{id}")]
+        [Route("{count}")]
         public async Task<IActionResult> GetTransactionById(Guid id, CancellationToken cancellationToken)
         {
             var transaction = await _mediator.Send(new GetTransactionByIdQuery(id), cancellationToken);
             if (transaction == null)
                 return NotFound();
             return Ok(transaction);
+        }
+
+        [HttpGet]
+        [Route("recent/{count}")]
+        public async Task<IActionResult> GetRecentTransactions(int count, CancellationToken cancellationToken)
+        {
+            var query = new GetRecentTransactionsQuery { Count = count };
+            var transactions = await _mediator.Send(query, cancellationToken);
+            return Ok(transactions);
         }
 
         [HttpPost]
