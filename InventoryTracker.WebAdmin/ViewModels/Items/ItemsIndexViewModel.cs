@@ -8,14 +8,10 @@ namespace InventoryTracker.WebAdmin.ViewModels.Items
 
         public List<ItemListItemViewModel> Items { get; set; } = new();
 
-        public int TotalCount
-        {
-            get
-            {
-                return Items.Count;
-            }
-        }
+        public int TotalCount { get; set; }
+        public int TotalActiveItems { get; set; }
+        public int PageSize { get; set; }
 
-        public PaginationViewModel Pagination { get; set; } = new();
+        public TableFooterViewModel TableFooter { get; set; } = new();
     }
 }

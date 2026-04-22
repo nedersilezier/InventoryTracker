@@ -1,32 +1,46 @@
-﻿@model InventoryTracker.WebAdmin.ViewModels.Items.ItemsIndexViewModel
+﻿@using InventoryTracker.WebAdmin.ViewModels.Dashboard
+@model InventoryTracker.WebAdmin.ViewModels.Items.ItemsIndexViewModel
 
 <div class="flex gap-8">
     <aside class="hidden lg:block w-64 shrink-0">
-        <div class="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 sticky top-24">
-            <div class="mb-6 px-2">
-                <p class="text-[11px] text-slate-500 font-medium uppercase tracking-wider">
-                    Search and filter
-                </p>
-            </div>
-
-            <form asp-controller="Items" asp-action="Index" method="get" class="space-y-4">
-                <div>
-                    <label asp-for="SearchTerm"
-                           class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
-                        Search
-                    </label>
-
-                    <input asp-for="SearchTerm"
-                           value="@(ViewContext.HttpContext.Request.Query["searchTerm"])"
-                           class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
-                           placeholder="Name, code..." />
+        <div class="sticky top-24">
+            <div class="bg-slate-50 border border-slate-200/60 rounded-2xl p-4">
+                <div class="mb-6 px-2">
+                    <p class="text-[11px] text-slate-500 font-medium uppercase tracking-wider">
+                        Search and filter
+                    </p>
                 </div>
 
-                <button type="submit"
-                        class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold py-3 rounded-full shadow-lg">
-                    Apply Filters
-                </button>
-            </form>
+                <form asp-controller="Items" asp-action="Index" method="get" class="space-y-4">
+                    <input type="hidden" asp-for="PageSize" />
+                    <input type="hidden" name="PageNumber" value="1" />
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                            Search
+                        </label>
+                        <input asp-for="SearchTerm"
+                               class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                               placeholder="Name, code..." />
+                    </div>
+
+                    <button type="submit"
+                            class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white text-xs font-bold py-3 rounded-full shadow-lg">
+                        Apply Filters
+                    </button>
+                </form>
+            </div>
+            <div class="grid grid-rows-2 gap-4 mb-8 mt-8">
+                @await Html.PartialAsync("Partials/_MetricCard",
+                            new MetricCardViewModel { Title = "Total active items", Value = Model.TotalActiveItems.ToString() })
+                <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">
+                        Applied filters
+                    </span>
+                    <div class="text-sm font-semibold text-slate-900 mt-2">
+                        @(string.IsNullOrWhiteSpace(Model.SearchTerm) ? "None" : Model.SearchTerm)
+                    </div>
+                </div>
+            </div>
         </div>
     </aside>
     <section class="flex-1 min-w-0">
@@ -54,14 +68,23 @@
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
-
+                    <colgroup>
+                        <col class="w-[23%]" />
+                        <col class="w-[14%]" />
+                        <col class="w-[12%]" />
+                        <col class="w-[12%]" />
+                        <col class="w-[12%]" />
+                        <col class="w-[5%]" />
+                        <col class="w-[22%]" />
+                    </colgroup>
                     <thead>
                         <tr class="bg-slate-50 border-y border-slate-100">
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Item</th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">SKU</th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Unit</th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Weight</th>
-                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Value</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Credit Value</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Active</th>
                             <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Actions</th>
                         </tr>
                     </thead>
@@ -111,6 +134,11 @@
                                         @item.CreditValue.ToString("C")
                                     </td>
 
+                                    <!-- Active -->
+                                    <td class="px-6 py-5 text-sm font-medium text-slate-900">
+                                        @item.IsActiveDisplay
+                                    </td>
+
                                     <!-- Actions -->
                                     <td class="px-6 py-5 text-right">
                                         <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -155,15 +183,7 @@
             </div>
 
             <!-- Footer -->
-            <div class="p-6 border-t border-slate-100 flex items-center justify-between">
-
-                <span class="text-xs text-slate-400">
-                    Showing @Model.Items.Count of @Model.TotalCount items
-                </span>
-
-                @await Html.PartialAsync("Partials/_Pagination", Model.Pagination)
-
-            </div>
+            @await Html.PartialAsync("Partials/_TableFooter", Model.TableFooter)
         </div>
     </section>
 </div>

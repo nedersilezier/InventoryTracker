@@ -45,6 +45,12 @@ builder.Services.AddHttpClient<IWarehousesService, WarehousesService>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
+// register HttpClient for Items
+builder.Services.AddHttpClient<IItemsService, ItemsService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+});
+
 // Register HttpContextAccessor for accessing cookies in services
 builder.Services.AddHttpContextAccessor();
 

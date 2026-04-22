@@ -21,6 +21,7 @@ namespace InventoryTracker.Infrastructure.Services
         public async Task<PagedResult<ItemDTO>> GetAllItemsAsync(GetItemsParameters parameters, CancellationToken cancellationToken)
         {
             var query = _context.Items.AsQueryable();
+            var totalActive = await query.CountAsync(i => i.IsActive, cancellationToken);
             if (!string.IsNullOrEmpty(parameters.SearchTerm))
             {
                 query = query.Where(i => i.Name.Contains(parameters.SearchTerm)
@@ -58,7 +59,8 @@ namespace InventoryTracker.Infrastructure.Services
                 TotalPages = totalPages,
                 PageNumber = pageNumber,
                 PageSize = parameters.PageSize,
-                TotalCount = totalCount
+                TotalCount = totalCount,
+                TotalActive = totalActive,
             };
         }
         public async Task<ItemDTO?> GetItemByIdAsync(Guid id, CancellationToken cancellationToken)

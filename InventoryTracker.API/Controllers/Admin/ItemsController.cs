@@ -52,7 +52,8 @@ namespace InventoryTracker.API.Controllers.Admin
                 TotalPages = itemsPaged.TotalPages,
                 PageNumber = itemsPaged.PageNumber,
                 PageSize = itemsPaged.PageSize,
-                TotalCount = itemsPaged.TotalCount
+                TotalCount = itemsPaged.TotalCount,
+                TotalActive = itemsPaged.TotalActive
             };
             return Ok(response);
         }

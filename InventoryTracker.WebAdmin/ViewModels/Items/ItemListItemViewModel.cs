@@ -9,6 +9,14 @@
         public string UnitOfMeasure { get; set; } = default!;
         public decimal CreditValue { get; set; }
         public decimal Weight { get; set; }
-        public string Description { get; set; } = default!;
+        public string? Description { get; set; } = default!;
+        public bool IsActive { get; set; }
+        public string IsActiveDisplay
+        {
+            get
+            {
+                return IsActive ? "Yes" : "No";
+            }
+        }
     }
 }
