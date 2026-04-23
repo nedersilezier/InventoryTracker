@@ -69,6 +69,12 @@
                 @successMessage
             </div>
         }
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm">
+                @errorMessage
+            </div>
+        }
         <!-- Table -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
@@ -87,8 +93,8 @@
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Item</th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">SKU</th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Unit</th>
-                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Weight</th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Credit Value</th>
+                            <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Weight</th>
                             <th class="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-500">Active</th>
                             <th class="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500">Actions</th>
                         </tr>
@@ -129,14 +135,14 @@
                                         @item.UnitOfMeasure
                                     </td>
 
-                                    <!-- Weight -->
-                                    <td class="px-6 py-5 text-sm text-slate-700">
-                                        @item.Weight
-                                    </td>
-
                                     <!-- Value -->
                                     <td class="px-6 py-5 text-sm font-medium text-slate-900">
                                         @item.CreditValue.ToString("C")
+                                    </td>
+
+                                    <!-- Weight -->
+                                    <td class="px-6 py-5 text-sm text-slate-700">
+                                        @item.Weight
                                     </td>
 
                                     <!-- Active -->
@@ -152,7 +158,7 @@
                                                    asp-action="Details"
                                                    asp-route-id="@item.ItemId"
                                                    class="p-2 hover:bg-slate-100 rounded-lg">
-                                                <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">details</span>
+                                                <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">Description</span>
                                             </a>
 
                                             <a asp-controller="Items"
@@ -161,12 +167,49 @@
                                                    class="p-2 hover:bg-slate-100 rounded-lg">
                                                 <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">edit</span>
                                             </a>
-                                            <a asp-controller="Items"
-                                                   asp-action="Delete"
-                                                   asp-route-id="@item.ItemId"
-                                                   class="p-2 hover:bg-slate-100 rounded-lg">
-                                                <span class="material-symbols-outlined text-slate-400 hover:text-red-400">delete</span>
-                                            </a>
+                                            @if(item.IsActive)
+                                            {
+                                                <form asp-controller="Items"
+                                                      asp-action="Deactivate"
+                                                      method="post"
+                                                      class="inline">
+    
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden" name="id" value="@item.ItemId" />
+                                                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Items")" />
+
+                                                    <button type="submit"
+                                                            class="p-2 hover:bg-slate-100 rounded-lg group"
+                                                            onclick="return confirm('Are you sure you want to deactivate this item?')">
+                                                        <span class="material-symbols-outlined text-slate-400 hover:text-red-400">
+                                                            Delete
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-controller="Items"
+                                                      asp-action="Activate"
+                                                      method="post"
+                                                      class="inline">
+    
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden" name="id" value="@item.ItemId" />
+                                                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Items")" />
+
+                                                    <button type="submit"
+                                                            class="p-2 hover:bg-slate-100 rounded-lg group"
+                                                            onclick="return confirm('Are you sure you want to activate this item?')">
+                                                        <span class="material-symbols-outlined text-slate-400 hover:text-green-400">
+                                                            restore_from_trash
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                            }
+
 
                                         </div>
                                     </td>

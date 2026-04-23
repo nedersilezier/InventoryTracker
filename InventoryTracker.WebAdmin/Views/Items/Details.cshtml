@@ -1,0 +1,290 @@
+﻿@model InventoryTracker.WebAdmin.ViewModels.Items.ItemDetailsViewModel
+
+@{
+    ViewData["Title"] = "Item Details";
+}
+@{
+    TempData.Remove("SuccessMessage");
+    TempData.Remove("ErrorMessage");
+}
+<div class="max-w-7xl mx-auto px-4 py-0">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+        <div class="space-y-1">
+            <div class="mb-1">
+                <div class="flex items-center gap-2 text-slate-500 mb-2">
+                    <a asp-controller="Items"
+                           asp-action="Index"
+                           class="text-xs font-semibold uppercase tracking-widest hover:text-blue-600 transition-colors">
+                        Items
+                    </a>
+                    <span class="text-sm">›</span>
+                    <span class="text-xs font-semibold text-black uppercase tracking-widest">
+                        Item Details
+                    </span>
+                </div>
+            </div>
+
+            <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                @Model.Name
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a asp-controller="Items"
+                   asp-action="Edit"
+                   asp-route-id="@Model.ItemId"
+                   class="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-300 text-slate-900 font-semibold rounded-full shadow-sm hover:bg-slate-50 transition-all">
+                <span>✎</span>
+                <span>Edit Item</span>
+            </a>
+
+            @if (Model.IsActive)
+            {
+                <form asp-controller="Items" asp-action="Deactivate" asp-route-id="@Model.ItemId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.ItemId" />
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Items", new { id = Model.ItemId })" />
+                    <button type="submit"
+                            class="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white font-semibold rounded-full shadow hover:bg-red-700 transition-all">
+                        <span>⏻</span>
+                        <span>Deactivate</span>
+                    </button>
+                </form>
+             
+            }
+            else
+            {
+                <form asp-controller="Items" asp-action="Activate" asp-route-id="@Model.ItemId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.ItemId" />
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Items", new { id = Model.ItemId })" />
+                    <button type="submit"
+                            class="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white font-semibold rounded-full shadow hover:bg-green-700 transition-all">
+                        <span>⏻</span>
+                        <span>Activate</span>
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-8 space-y-8">
+            <section class="bg-white p-8 rounded-xl shadow-sm relative overflow-hidden border border-slate-100 group">
+                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <span class="material-symbols-outlined text-4xl">
+                        inventory_2
+                    </span>
+                </div>
+
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-1 rounded-full bg-blue-600"></div>
+                        <h3 class="text-xs font-black uppercase tracking-tighter text-slate-500">
+                            Identity
+                        </h3>
+                        <div class="w-10 h-1 rounded-full bg-blue-600"></div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                Item Name
+                            </label>
+                            <p class="text-xl font-bold text-slate-900">
+                                @Model.Name
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                Internal SKU
+                            </label>
+                            <p class="text-xl font-bold text-slate-900 tracking-wide">
+                                @Model.SKU
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2.5">
+                            Detailed Description
+                        </label>
+
+                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-100">
+                            @if (!string.IsNullOrWhiteSpace(Model.Description))
+                            {
+                                <p class="text-slate-800 leading-relaxed text-sm whitespace-pre-line">
+                                    @Model.Description
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="text-slate-400 italic text-sm">
+                                    No description provided.
+                                </p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
+                <div class="col-span-2 bg-white p-6 rounded-xl border border-slate-200/70 flex flex-col justify-between hover:border-blue-200 transition-colors">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        Unit of Measure
+                    </label>
+                    <div>
+                        <p class="text-3xl font-black text-slate-900 mb-1">
+                            @Model.UnitOfMeasure
+                        </p>
+                        
+                    </div>
+                </div>
+
+                <div class="col-span-2 bg-white p-6 rounded-xl border border-slate-200/70 flex flex-col justify-between hover:border-blue-200 transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                            Credit Value
+                        </label>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-black text-slate-900 mb-1">
+                            @Model.CreditValueDisplay
+                        </p>
+                        
+                    </div>
+                </div>
+
+                <div class="col-span-2 bg-white p-6 rounded-xl border border-slate-200/70 flex flex-col justify-between hover:border-blue-200 transition-colors">
+                    <div class="flex justify-between items-start mb-4">
+                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                            Item Weight
+                        </label>
+                    </div>
+                    <div>
+                        <p class="text-3xl font-black text-slate-900 mb-1">
+                            @Model.Weight <span class="text-lg font-bold">kg</span>
+                        </p>
+                        
+                    </div>
+                </div>
+                <div class="md:col-span-4 md:col-start-2">
+                    <div class="@GetStatusFieldBg(Model.IsActive) text-white tracking-wider rounded-2xl p-5 shadow-xl overflow-hidden relative">
+                        <p class="text-[10px] font-black uppercase tracking-widest opacity-80 mb-4">
+                            Item Status
+                        </p>
+
+                        <div class="flex items-end justify-between relative z-10">
+                            <div>
+                                <h4 class="text-3xl font-black tracking-widest">
+                                    @(Model.IsActive ? "ACTIVE" : "INACTIVE")
+                                </h4>
+                            </div>
+                            <span class="text-4xl">
+                                @(Model.IsActive ? "↗" : "–")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <aside class="lg:col-span-4 space-y-5">
+            <div class="bg-slate-100/70 rounded-2xl p-6 border border-slate-200/70">
+                <h3 class="text-sm font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <span>🕘</span>
+                    <span>Audit Trail</span>
+                </h3>
+
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                +
+                            </div>
+                            <div class="w-px h-full bg-slate-300/50 mt-2"></div>
+                        </div>
+                        <div class="pb-6">
+                            <p class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">
+                                Created By
+                            </p>
+                            <p class="text-sm text-slate-900 font-semibold">
+                                @Model.CreatedBy
+                            </p>
+                            <p class="text-[10px] text-slate-500 mt-1">
+                                @Model.CreatedAt.ToString("dd-MM-yyyy · HH:mm")
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-600">
+                                    ✎
+                                </div>
+                                <div class="w-px h-full bg-slate-300/50 mt-2"></div>
+                            </div>
+                            <div class="pb-6">
+                                <p class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">
+                                    Last Updated
+                                </p>
+                                <p class="text-sm text-slate-900 font-semibold">
+                                    @(string.IsNullOrWhiteSpace(Model.UpdatedBy) ? "-" : Model.UpdatedBy)
+                                </p>
+                                <p class="text-[10px] text-slate-500 mt-1">
+                                    @Model.UpdatedAt.Value.ToString("dd-MM-yyyy · HH:mm")
+                                </p>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.DeletedAt.HasValue)
+                    {
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                                    🗑
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">
+                                    Deactivated By
+                                </p>
+                                <p class="text-sm text-slate-900 font-semibold">
+                                    @(string.IsNullOrWhiteSpace(Model.DeletedBy) ? "-" : Model.DeletedBy)
+                                </p>
+                                <p class="text-[10px] text-slate-500 mt-1">
+                                    @Model.DeletedAt.Value.ToString("dd-MM-yyyy · HH:mm")
+                                </p>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.ItemId.HasValue)
+                    {
+                        <div class="bg-white p-4 rounded-xl border border-slate-200/60">
+                            <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
+                                Technical Identifier (GUID)
+                            </label>
+
+                            <div class="flex items-center justify-between gap-3">
+                                <code class="text-[11px] font-mono text-blue-600 font-bold break-all">
+                                    @Model.ItemId
+                                </code>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+@functions {
+    private string GetStatusFieldBg(bool status)
+    {
+        return status ? "bg-gradient-to-r from-green-500 to-green-600 border-green-700" : "bg-gradient-to-r from-red-500 to-red-600 border-red-700";
+    }
+}

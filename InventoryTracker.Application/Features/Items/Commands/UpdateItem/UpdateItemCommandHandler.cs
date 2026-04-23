@@ -42,11 +42,7 @@ namespace InventoryTracker.Application.Features.Items.Commands.UpdateItem
                 UnitOfMeasure = item.UnitOfMeasure,
                 CreditValue = item.CreditValue,
                 Weight = item.Weight,
-                IsActive = item.IsActive,
-                CreatedAt = item.CreatedAt,
-                CreatedBy = item.CreatedBy ?? default!,
-                UpdatedAt = item.UpdatedAt,
-                UpdatedBy = item.UpdatedBy
+                IsActive = item.IsActive
             };
         }
     }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Items.DTOs
 {
-    public class ItemDTO
+    public class ItemDetailsDTO
     {
         public Guid ItemId { get; set; }
         public string Name { get; set; } = default!;
@@ -15,5 +15,12 @@ namespace InventoryTracker.Application.Features.Items.DTOs
         public decimal CreditValue { get; set; }
         public decimal Weight { get; set; }
         public bool IsActive { get; set; }
+
+        public DateTime CreatedAt { get; set; } = default!;
+        public string CreatedBy { get; set; } = default!;
+        public DateTime? UpdatedAt { get; set; } = default!;
+        public string? UpdatedBy { get; set; } = default!;
+        public DateTime? DeletedAt { get; set; } = default!;
+        public string? DeletedBy { get; set; } = default!;
     }
 }

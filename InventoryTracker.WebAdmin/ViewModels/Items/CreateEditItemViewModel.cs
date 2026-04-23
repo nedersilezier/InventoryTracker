@@ -2,8 +2,11 @@
 
 namespace InventoryTracker.WebAdmin.ViewModels.Items
 {
-    public class CreateItemViewModel
+    public class CreateEditItemViewModel
     {
+        [Key]
+        public Guid? ItemId { get; set; }
+
         [Required(ErrorMessage = "Item name is required")]
         [StringLength(150, MinimumLength = 1, ErrorMessage = "Name must be between 1 and 150 characters")]
         public string Name { get; set; } = string.Empty;

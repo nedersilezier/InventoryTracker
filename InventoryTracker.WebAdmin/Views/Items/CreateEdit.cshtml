@@ -1,10 +1,10 @@
-﻿@model InventoryTracker.WebAdmin.ViewModels.Items.CreateItemViewModel
+﻿@model InventoryTracker.WebAdmin.ViewModels.Items.CreateEditItemViewModel
 
 @{
     ViewData["Title"] = "Create New Item";
 }
 
-<div class="max-w-6xl mx-auto px-4 py-0">
+<div class="max-w-7xl mx-auto px-4 py-0">
     <div class="mb-1">
         <div class="flex items-center gap-2 text-slate-500 mb-2">
             <a asp-controller="Items"
@@ -13,15 +13,18 @@
                 Items
             </a>
             <span class="text-sm">›</span>
-            <span class="text-xs font-semibold uppercase tracking-widest">
+            <span class="text-xs font-semibold text-black uppercase tracking-widest">
                 New Item
             </span>
-        </div> 
+        </div>
     </div>
 
-    <form asp-controller="Items" asp-action="Create" method="post" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <form asp-controller="Items" asp-action="@GetFormAction()" method="post" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         @Html.AntiForgeryToken()
-
+        @if (Model.ItemId != null)
+        {
+            <input type="hidden" asp-for="ItemId" />
+        }
         <div class="lg:col-span-8 space-y-6">
             <div class="bg-white rounded-xl p-8 shadow-sm relative overflow-hidden border border-slate-100">
                 <div class="absolute top-0 left-0 w-full h-1 bg-blue-600"></div>
@@ -163,4 +166,12 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+}
+
+
+@functions {
+        private string GetFormAction()
+        {
+            return Model.ItemId == null ? "Create" : "Edit";
+    }
 }

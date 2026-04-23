@@ -1,11 +1,10 @@
-﻿using InventoryTracker.Domain.Entities;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace InventoryTracker.Application.Features.Items.DTOs
+namespace InventoryTracker.Contracts.Responses.Items
 {
-    public class ItemDTO
+    public class ItemDetailsResponseDTO
     {
         public Guid ItemId { get; set; }
         public string Name { get; set; } = default!;
@@ -15,5 +14,11 @@ namespace InventoryTracker.Application.Features.Items.DTOs
         public decimal CreditValue { get; set; }
         public decimal Weight { get; set; }
         public bool IsActive { get; set; }
+        public string CreatedBy { get; set; } = default!;
+        public DateTime CreatedAt { get; set; }
+        public string? UpdatedBy { get; set; } = default!;
+        public DateTime? UpdatedAt { get; set; }
+        public string? DeletedBy { get; set; }
+        public DateTime? DeletedAt { get; set; }
     }
 }

@@ -67,6 +67,17 @@ namespace InventoryTracker.API.Controllers.Admin
                 return NotFound();
             return Ok(item);
         }
+
+        [HttpGet]
+        [Route("{id}/details")]
+        public async Task<IActionResult> GetItemDetailsById(Guid id, CancellationToken cancellationToken)
+        {
+            var item = await _mediator.Send(new GetItemDetailsByIdQuery(id), cancellationToken);
+            if (item == null)
+                return NotFound();
+            return Ok(item);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateItem(CreateItemCommand command, CancellationToken cancellationToken)
         {

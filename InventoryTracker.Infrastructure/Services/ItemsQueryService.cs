@@ -76,13 +76,32 @@ namespace InventoryTracker.Infrastructure.Services
                     Description = i.Description,
                     UnitOfMeasure = i.UnitOfMeasure,
                     CreditValue = i.CreditValue,
+                    Weight = i.Weight
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+            return item;
+        }
+        public async Task<ItemDetailsDTO?> GetItemDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var item = await _context.Items
+                .AsNoTracking()
+                .Where(i => i.ItemId == id)
+                .Select(i => new ItemDetailsDTO
+                {
+                    ItemId = i.ItemId,
+                    Name = i.Name,
+                    SKU = i.SKU,
+                    Description = i.Description,
+                    UnitOfMeasure = i.UnitOfMeasure,
+                    CreditValue = i.CreditValue,
                     Weight = i.Weight,
                     IsActive = i.IsActive,
-                    //test
                     CreatedAt = i.CreatedAt,
                     CreatedBy = i.CreatedBy ?? string.Empty,
                     UpdatedAt = i.UpdatedAt,
-                    UpdatedBy = i.UpdatedBy,
+                    UpdatedBy = i.UpdatedBy ?? string.Empty,
+                    DeletedAt = i.DeletedAt,
+                    DeletedBy = i.DeletedBy ?? string.Empty
                 })
                 .FirstOrDefaultAsync(cancellationToken);
             return item;
