@@ -28,7 +28,7 @@ namespace InventoryTracker.WebAdmin.Services
             if (string.IsNullOrEmpty(accessToken))
                 throw new UnauthorizedAccessException("Access token is missing.");
 
-            var pageSize = request.PageSize ?? 1;
+            var pageSize = request.PageSize ?? 5;
             var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
             if (!string.IsNullOrWhiteSpace(request?.SearchTerm))
             {
@@ -64,6 +64,7 @@ namespace InventoryTracker.WebAdmin.Services
             {
                 Countries = countries,
                 SearchTerm = request?.SearchTerm,
+                PageSize = pagedResponse?.PageSize ?? pageSize,
                 TableFooter = new TableFooterViewModel
                 {
                     DisplayedCount = countries.Count,
@@ -73,7 +74,7 @@ namespace InventoryTracker.WebAdmin.Services
                     {
                         CurrentPage = pagedResponse?.PageNumber ?? 1,
                         TotalPages = pagedResponse?.TotalPages ?? 1,
-                        PageSize = pagedResponse?.PageSize ?? 1,
+                        PageSize = pagedResponse?.PageSize ?? pageSize,
                         Controller = "Countries",
                         Action = "Index",
                         RouteValues = routeValues

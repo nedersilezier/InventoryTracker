@@ -25,7 +25,7 @@ namespace InventoryTracker.WebAdmin.Services
                 throw new UnauthorizedAccessException("Access token is missing.");
 
             //default page size
-            var pageSize = request.PageSize ?? 1;
+            var pageSize = request.PageSize ?? 5;
             var query = new List<string>{ $"pageNumber={request.PageNumber}", $"pageSize={ pageSize }" };
 
             if (!string.IsNullOrWhiteSpace(request?.SearchTerm))
@@ -64,6 +64,7 @@ namespace InventoryTracker.WebAdmin.Services
                 Users = users,
                 SearchTerm = request?.SearchTerm,
                 TotalCount = pagedResponse?.TotalCount ?? 0,
+                PageSize = pagedResponse?.PageSize ?? pageSize,
                 TableFooter = new TableFooterViewModel
                 {
                     DisplayedCount = users.Count,

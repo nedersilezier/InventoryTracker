@@ -28,7 +28,7 @@ namespace InventoryTracker.WebAdmin.Services
             if (string.IsNullOrEmpty(accessToken))
                 throw new UnauthorizedAccessException("Access token is missing.");
 
-            var pageSize = request.PageSize ?? 1;
+            var pageSize = request.PageSize ?? 5;
             var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {

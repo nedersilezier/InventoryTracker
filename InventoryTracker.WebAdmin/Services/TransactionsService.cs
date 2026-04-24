@@ -28,7 +28,7 @@ namespace InventoryTracker.WebAdmin.Services
             if (string.IsNullOrEmpty(accessToken))
                 throw new UnauthorizedAccessException("Access token is missing.");
 
-            var pageSize = request.PageSize;
+            var pageSize = request.PageSize == 0 ? 5 : request.PageSize;
             var query = new List<string>
             { 
                 $"pageNumber={request.PageNumber}", 
@@ -116,7 +116,7 @@ namespace InventoryTracker.WebAdmin.Services
                     {
                         CurrentPage = pagedResponse?.PageNumber ?? 1,
                         TotalPages = pagedResponse?.TotalPages ?? 1,
-                        PageSize = pagedResponse?.PageSize ?? 1,
+                        PageSize = pagedResponse?.PageSize ?? 5,
                         Controller = "Transactions",
                         Action = "Index",
                         RouteValues = routeValues

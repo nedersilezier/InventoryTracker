@@ -8,7 +8,7 @@ namespace InventoryTracker.Contracts.Requests.Transactions
     {
         public string? SearchTerm { get; set; }
         public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 1;
+        public int PageSize { get; set; }
         public bool IncludeAdjustments { get; set; } = true;
         public bool IncludeTransfers { get; set; } = true;
         public bool IncludeIssues { get; set; } = true;

@@ -6,6 +6,7 @@ namespace InventoryTracker.WebAdmin.ViewModels.Countries
     public class CountriesIndexViewModel
     {
         public string? SearchTerm { get; set; }
+        public int PageSize { get; set; }
         public List<CountryListItemViewModel> Countries { get; set; } = new();
         public TableFooterViewModel TableFooter { get; set; } = new();
     }
