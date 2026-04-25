@@ -20,6 +20,15 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
+                if (result.StatusCode == 401)
+                    return RedirectToAction("Login", "Auth");
+                if (result.StatusCode == 403)
+                {
+                    Response.Cookies.Delete("accessToken");
+                    Response.Cookies.Delete("refreshToken");
+                    return RedirectToAction("AccessDenied", "Auth");
+                }
+
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load items.";
 
                 return View(new ItemsIndexViewModel
@@ -53,6 +62,15 @@ namespace InventoryTracker.WebAdmin.Controllers
             var result = await _itemsService.GetDetailsByIdAsync(id, cancellationToken);
             if (!result.Success)
             {
+                if (result.StatusCode == 401)
+                    return RedirectToAction("Login", "Auth");
+                if (result.StatusCode == 403)
+                {
+                    Response.Cookies.Delete("accessToken");
+                    Response.Cookies.Delete("refreshToken");
+                    return RedirectToAction("AccessDenied", "Auth");
+                }
+
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load item.";
                 return RedirectToAction(nameof(Index));
             }
@@ -87,6 +105,15 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
+                if (result.StatusCode == 401)
+                    return RedirectToAction("Login", "Auth");
+                if (result.StatusCode == 403)
+                {
+                    Response.Cookies.Delete("accessToken");
+                    Response.Cookies.Delete("refreshToken");
+                    return RedirectToAction("AccessDenied", "Auth");
+                }
+
                 AddServiceErrorsToModelState(result, "Unable to create item");
                 return View("CreateEdit", vm);
             }
@@ -100,6 +127,15 @@ namespace InventoryTracker.WebAdmin.Controllers
             var result = await _itemsService.GetByIdAsync(id, cancellationToken);
             if (!result.Success)
             {
+                if (result.StatusCode == 401)
+                    return RedirectToAction("Login", "Auth");
+                if (result.StatusCode == 403)
+                {
+                    Response.Cookies.Delete("accessToken");
+                    Response.Cookies.Delete("refreshToken");
+                    return RedirectToAction("AccessDenied", "Auth");
+                }
+
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load item.";
                 return RedirectToAction(nameof(Index));
             }
@@ -127,6 +163,15 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
+                if (result.StatusCode == 401)
+                    return RedirectToAction("Login", "Auth");
+                if (result.StatusCode == 403)
+                {
+                    Response.Cookies.Delete("accessToken");
+                    Response.Cookies.Delete("refreshToken");
+                    return RedirectToAction("AccessDenied", "Auth");
+                }
+
                 AddServiceErrorsToModelState(result, "Unable to update the item");
                 return View("CreateEdit", vm);
             }
@@ -142,6 +187,15 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
+                if (result.StatusCode == 401)
+                    return RedirectToAction("Login", "Auth");
+                if (result.StatusCode == 403)
+                {
+                    Response.Cookies.Delete("accessToken");
+                    Response.Cookies.Delete("refreshToken");
+                    return RedirectToAction("AccessDenied", "Auth");
+                }
+
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to deactivate item.";
             }
             else
@@ -163,6 +217,15 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
+                if (result.StatusCode == 401)
+                    return RedirectToAction("Login", "Auth");
+                if (result.StatusCode == 403)
+                {
+                    Response.Cookies.Delete("accessToken");
+                    Response.Cookies.Delete("refreshToken");
+                    return RedirectToAction("AccessDenied", "Auth");
+                }
+
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to activate item.";
             }
             else

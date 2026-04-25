@@ -67,6 +67,10 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             return RedirectToAction("Login", "Auth");
         }
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
 
         private void AppendAuthCookies(AuthResponseDTO result)
         {

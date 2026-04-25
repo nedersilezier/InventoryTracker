@@ -1,6 +1,8 @@
-using InventoryTracker.WebAdmin.Interfaces;
-using InventoryTracker.WebAdmin.Services;
+using InventoryTracker.APIClient;
 using InventoryTracker.AuthClient;
+using InventoryTracker.WebAdmin.Interfaces;
+using InventoryTracker.WebAdmin.Providers;
+using InventoryTracker.WebAdmin.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"]!;
+
+// Register HttpContextAccessor for accessing cookies in services
+builder.Services.AddHttpContextAccessor();
+
+// Register AccessTokenProvider and HttpMessageHandler for attaching access tokens to outgoing requests
+builder.Services.AddScoped<IAccessTokenProvider, HttpContextAccessTokenProvider>();
+builder.Services.AddTransient<AccessTokenHandler>();
 
 // Register HttpClient for Countries
 builder.Services.AddHttpClient<ICountriesService, CountriesService>(client =>
@@ -49,16 +58,13 @@ builder.Services.AddHttpClient<IWarehousesService, WarehousesService>(client =>
 builder.Services.AddHttpClient<IItemsService, ItemsService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
-});
+}).AddHttpMessageHandler<AccessTokenHandler>();
 
 // register HttpClient for Clients
 builder.Services.AddHttpClient<IClientsService, ClientsService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
 });
-
-// Register HttpContextAccessor for accessing cookies in services
-builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

@@ -15,21 +15,13 @@ namespace InventoryTracker.WebAdmin.Services
     public class ItemsService : IItemsService
     {
         private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public ItemsService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public ItemsService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<ServiceResult<ItemsIndexViewModel>> GetAllAsync(GetItemsRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-
-            if (string.IsNullOrEmpty(accessToken))
-                return ServiceResult<ItemsIndexViewModel>.Fail("Access token is missing.", statusCode: 401);
-
             var pageSize = request.PageSize ?? 5;
             var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
@@ -38,7 +30,6 @@ namespace InventoryTracker.WebAdmin.Services
             }
             var url = $"/api/admin/items?{string.Join("&", query)}";
             using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -93,14 +84,9 @@ namespace InventoryTracker.WebAdmin.Services
         }
         public async Task<ServiceResult<CreateEditItemViewModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-            if (string.IsNullOrWhiteSpace(accessToken))
-                return ServiceResult<CreateEditItemViewModel>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
-
             var url = $"/api/admin/items/{id}";
 
             using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -136,14 +122,9 @@ namespace InventoryTracker.WebAdmin.Services
         }
         public async Task<ServiceResult<ItemDetailsViewModel>> GetDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-            if (string.IsNullOrWhiteSpace(accessToken))
-                return ServiceResult<ItemDetailsViewModel>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
-
             var url = $"/api/admin/items/{id}/details";
 
             using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -179,14 +160,9 @@ namespace InventoryTracker.WebAdmin.Services
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-            if (string.IsNullOrWhiteSpace(accessToken))
-                return ServiceResult<CreateItemResponse>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
-
             var url = $"/api/admin/items";
             using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
 
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
             requestMessage.Content = JsonContent.Create(request);
 
             using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
@@ -205,18 +181,12 @@ namespace InventoryTracker.WebAdmin.Services
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-            if (string.IsNullOrWhiteSpace(accessToken))
-                return ServiceResult<CreateItemResponse>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
-
             var url = $"/api/admin/items/{id}";
 
             using var httpRequest = new HttpRequestMessage(HttpMethod.Put, url)
             {
                 Content = JsonContent.Create(request)
             };
-
-            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
             if (!response.IsSuccessStatusCode)
@@ -251,18 +221,11 @@ namespace InventoryTracker.WebAdmin.Services
 
         private async Task<ServiceResult<CreateItemResponse>> ChangeItemActiveStateAsync(Guid id, string action, string fallbackMessage, CancellationToken cancellationToken)
         {
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-
-            if (string.IsNullOrWhiteSpace(accessToken))
-                return ServiceResult<CreateItemResponse>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
-
             var url = $"/api/admin/items/{id}/{action}";
             using var httpRequest = new HttpRequestMessage(HttpMethod.Patch, url)
             {
                 Content = JsonContent.Create(new { })
             };
-
-            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
 
