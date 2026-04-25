@@ -1,13 +1,12 @@
 ﻿using InventoryTracker.Contracts.Requests.Auth;
 using InventoryTracker.Contracts.Responses;
 using InventoryTracker.AuthClient;
-using InventoryTracker.AuthClient.Exceptions;
 
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryTracker.WebAdmin.Controllers
 {
-    public class AuthController : Controller
+    public class AuthController : BaseController
     {
         private readonly IAuthService _authService;
         public AuthController(IAuthService authService)
@@ -20,20 +19,14 @@ namespace InventoryTracker.WebAdmin.Controllers
             var refreshToken = Request.Cookies["refreshToken"];
             if (!string.IsNullOrEmpty(refreshToken))
             {
-                try
+                var result = await _authService.RefreshTokenAsync(new TokenRefreshRequest { RefreshToken = refreshToken }, cancellationToken);
+                if (result.Success)
                 {
-                    var result = await _authService.RefreshTokenAsync(new TokenRefreshRequest { RefreshToken = refreshToken }, cancellationToken);
-                    if (result != null)
-                    {
-                        AppendAuthCookies(result);
-                        return RedirectToAction("Index", "Dashboard");
-                    }
+                    AppendAuthCookies(result.Data!);
+                    return RedirectToAction("Index", "Dashboard");
                 }
-                catch
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                }
+                Response.Cookies.Delete("accessToken");
+                Response.Cookies.Delete("refreshToken");
             }
             return View(new LoginViewModel());
         }
@@ -46,60 +39,32 @@ namespace InventoryTracker.WebAdmin.Controllers
             {
                 return View(request);
             }
-            try
+
+            var result = await _authService.LoginAsync(request, cancellationToken);
+            if (!result.Success)
             {
-                var result = await _authService.LoginAsync(request, cancellationToken);
-                if (result == null)
-                {
-                    ModelState.AddModelError(string.Empty, "Login failed.");
-                    return View(request);
-                }
-                AppendAuthCookies(result);
-                return RedirectToAction("Index", "Dashboard");
-            }
-            catch (ApiValidationException ex)
-            {
-                foreach (var problem in ex.Errors)
-                {
-                    var key = problem.Key;
-                    foreach (var message in problem.Value)
-                    {
-                        if (string.Equals(key, "General", StringComparison.OrdinalIgnoreCase))
-                        {
-                            ModelState.AddModelError(string.Empty, message);
-                        }
-                        else
-                        {
-                            ModelState.AddModelError(key, message);
-                        }
-                    }
-                }
+                AddServiceErrorsToModelState(result);
                 return View(request);
             }
-            catch (ApiException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return View(request);
-            }
+            AppendAuthCookies(result.Data!);
+            return RedirectToAction("Index", "Dashboard");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout(CancellationToken cancellationToken)
         {
             var refreshToken = Request.Cookies["refreshToken"];
+
             if (!string.IsNullOrEmpty(refreshToken))
             {
-                try
-                {
-                    await _authService.LogoutAsync(new LogoutRequest { RefreshToken = refreshToken }, cancellationToken);
-                }
-                catch
-                {
-                    // Ignore exceptions during logout
-                }
+                await _authService.LogoutAsync(
+                    new LogoutRequest { RefreshToken = refreshToken },
+                    cancellationToken);
             }
+
             Response.Cookies.Delete("accessToken");
             Response.Cookies.Delete("refreshToken");
+
             return RedirectToAction("Login", "Auth");
         }
 

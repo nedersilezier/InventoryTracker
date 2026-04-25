@@ -1,9 +1,8 @@
 ﻿using InventoryTracker.Contracts.Requests.Auth;
 using InventoryTracker.Contracts.Responses;
-using InventoryTracker.AuthClient.Exceptions;
-using System.Net.Http.Headers;
-using System.Text.Json;
+using InventoryTracker.Contracts.Helpers;
 using System.Net.Http.Json;
+using InventoryTracker.APIClient;
 
 namespace InventoryTracker.AuthClient
 {
@@ -14,61 +13,40 @@ namespace InventoryTracker.AuthClient
         {
             _httpClient = httpClient;
         }
-        public async Task<AuthResponseDTO?> LoginAsync(LoginViewModel request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<AuthResponseDTO>> LoginAsync(LoginViewModel request, CancellationToken cancellationToken)
         {
             var response = await _httpClient.PostAsJsonAsync("/api/auth/login", request, cancellationToken);
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<AuthResponseDTO>(cancellationToken: cancellationToken);
-            }
-            await ThrowApiExceptionAsync(response, cancellationToken);
-            throw new Exception("Unreachable?");
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<AuthResponseDTO>(response, "Login failed", cancellationToken);
+
+            var content = await response.Content.ReadFromJsonAsync<AuthResponseDTO>(cancellationToken: cancellationToken);
+            if(content == null)
+                return ServiceResult<AuthResponseDTO>.Fail("Failed to parse authentication response.", statusCode: (int)response.StatusCode);
+
+            return ServiceResult<AuthResponseDTO>.Ok(content);
         }
 
-        public async Task LogoutAsync(LogoutRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult> LogoutAsync(LogoutRequest request, CancellationToken cancellationToken)
         {
-            await _httpClient.PostAsJsonAsync("/api/auth/logout", request, cancellationToken);
+            var response = await _httpClient.PostAsJsonAsync("/api/auth/logout", request, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                var result = await ApiErrorParser.ToFailResult<object>(response, "Logout failed", cancellationToken);
+                return ServiceResult.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
+            }
+            return ServiceResult.Ok();
         }
-        public async Task<AuthResponseDTO?> RefreshTokenAsync(TokenRefreshRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<AuthResponseDTO>> RefreshTokenAsync(TokenRefreshRequest request, CancellationToken cancellationToken)
         {
             var response = await _httpClient.PostAsJsonAsync("/api/auth/refresh", request, cancellationToken);
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<AuthResponseDTO>(cancellationToken: cancellationToken);
-            }
-            await ThrowApiExceptionAsync(response, cancellationToken);
-            throw new Exception("Unreachable?");
-        }
-        private static async Task ThrowApiExceptionAsync(HttpResponseMessage response, CancellationToken cancellationToken)
-        {
-            var raw = await response.Content.ReadAsStringAsync(cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<AuthResponseDTO>(response, "Refresh token invalid or expired", cancellationToken);
 
-            ApiProblemDetails? problem = null;
+            var content = await response.Content.ReadFromJsonAsync<AuthResponseDTO>(cancellationToken: cancellationToken);
+            if (content == null)
+                return ServiceResult<AuthResponseDTO>.Fail("Failed to parse authentication response.", statusCode: (int)response.StatusCode);
 
-            try
-            {
-                problem = JsonSerializer.Deserialize<ApiProblemDetails>(
-                    raw,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-            }
-            catch
-            {
-            }
-
-            if (problem?.Errors is not null && problem.Errors.Count > 0)
-            {
-                throw new ApiValidationException(
-                    problem.Detail ?? problem.Title ?? "Validation failed.",
-                    problem.Errors,
-                    problem.Status ?? (int)response.StatusCode);
-            }
-
-            throw new ApiException(
-                problem?.Detail ?? problem?.Title ?? "Request failed.",
-                problem?.Status ?? (int)response.StatusCode);
+            return ServiceResult<AuthResponseDTO>.Ok(content);
         }
     }
 }

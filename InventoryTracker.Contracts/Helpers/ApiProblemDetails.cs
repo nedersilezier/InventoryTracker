@@ -1,4 +1,4 @@
-﻿namespace InventoryTracker.AuthClient
+﻿namespace InventoryTracker.Contracts.Helpers
 {
     public class ApiProblemDetails
     {

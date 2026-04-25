@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="InventoryTracker.API/InventoryTracker.API.csproj" />
+  <Project Path="InventoryTracker.APIClient/InventoryTracker.APIClient.csproj" Id="472d4393-b5ad-4d5b-8512-a81312ae24ba" />
   <Project Path="InventoryTracker.Application/InventoryTracker.Application.csproj" />
   <Project Path="InventoryTracker.AuthClient/InventoryTracker.AuthClient.csproj" Id="07f358af-2d39-45f5-bb82-324df867a1fe" />
   <Project Path="InventoryTracker.Contracts/InventoryTracker.Contracts.csproj" Id="79fe1455-123c-4694-aabf-1a978347a904" />

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryTracker.WebAdmin.Controllers
 {
-    public class ItemsController : Controller
+    public class ItemsController : BaseController
     {
         private readonly IItemsService _itemsService;
         public ItemsController(IItemsService itemsService)
@@ -16,8 +16,35 @@ namespace InventoryTracker.WebAdmin.Controllers
         }
         public async Task<IActionResult> Index(GetItemsRequest request, CancellationToken cancellationToken)
         {
-            var itemsListViewModel = await _itemsService.GetAllAsync(request, cancellationToken);
-            return View(itemsListViewModel);
+            var result = await _itemsService.GetAllAsync(request, cancellationToken);
+
+            if (!result.Success)
+            {
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load items.";
+
+                return View(new ItemsIndexViewModel
+                {
+                    Items = new List<ItemListItemViewModel>(),
+                    SearchTerm = request.SearchTerm,
+                    PageSize = request.PageSize ?? 5,
+                    TableFooter = new TableFooterViewModel
+                    {
+                        DisplayedCount = 0,
+                        TotalCount = 0,
+                        EntityName = "items",
+                        Pagination = new PaginationViewModel
+                        {
+                            CurrentPage = request.PageNumber,
+                            TotalPages = 1,
+                            PageSize = request.PageSize ?? 5,
+                            Controller = "Items",
+                            Action = "Index"
+                        }
+                    }
+                });
+            }
+
+            return View(result.Data);
         }
 
         [HttpGet]
@@ -60,20 +87,7 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
-                if(result.ValidationErrors != null)
-                {
-                    foreach (var kvp in result.ValidationErrors)
-                    {
-                        foreach (var error in kvp.Value)
-                        {
-                            ModelState.AddModelError(kvp.Key, error);
-                        }
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Unable to create item.");
-                }
+                AddServiceErrorsToModelState(result, "Unable to create item");
                 return View("CreateEdit", vm);
             }
             TempData["SuccessMessage"] = $"Item '{result?.Data?.Name}' created successfully.";
@@ -113,20 +127,7 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
-                if (result.ValidationErrors != null)
-                {
-                    foreach (var kvp in result.ValidationErrors)
-                    {
-                        foreach (var error in kvp.Value)
-                        {
-                            ModelState.AddModelError(kvp.Key, error);
-                        }
-                    }
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, result.ErrorMessage ?? "Unable to update item.");
-                }
+                AddServiceErrorsToModelState(result, "Unable to update the item");
                 return View("CreateEdit", vm);
             }
             TempData["SuccessMessage"] = $"Item '{result?.Data?.Name}' updated successfully.";

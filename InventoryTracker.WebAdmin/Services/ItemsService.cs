@@ -1,12 +1,12 @@
-﻿using InventoryTracker.Contracts.Requests.Items;
+﻿using InventoryTracker.APIClient;
+using InventoryTracker.Contracts.Helpers;
+using InventoryTracker.Contracts.Requests.Items;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Items;
-using InventoryTracker.WebAdmin.Helpers;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using InventoryTracker.WebAdmin.ViewModels.Items;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
@@ -21,14 +21,14 @@ namespace InventoryTracker.WebAdmin.Services
             _httpClient = httpClient;
             _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<ItemsIndexViewModel> GetAllAsync(GetItemsRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<ItemsIndexViewModel>> GetAllAsync(GetItemsRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
 
             if (string.IsNullOrEmpty(accessToken))
-                throw new UnauthorizedAccessException("Access token is missing.");
+                return ServiceResult<ItemsIndexViewModel>.Fail("Access token is missing.", statusCode: 401);
 
             var pageSize = request.PageSize ?? 5;
             var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
@@ -41,7 +41,8 @@ namespace InventoryTracker.WebAdmin.Services
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<ItemsIndexViewModel>(response, "Failed to load items.", cancellationToken);
 
             var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<ItemResponseDTO>>(cancellationToken: cancellationToken)
                 ?? new PagedResponse<ItemResponseDTO>();
@@ -66,7 +67,7 @@ namespace InventoryTracker.WebAdmin.Services
             {
                 routeValues["SearchTerm"] = request.SearchTerm;
             }
-            return new ItemsIndexViewModel
+            var viewModel = new ItemsIndexViewModel
             {
                 Items = items,
                 SearchTerm = request.SearchTerm,
@@ -88,12 +89,13 @@ namespace InventoryTracker.WebAdmin.Services
                     }
                 }
             };
+            return ServiceResult<ItemsIndexViewModel>.Ok(viewModel);
         }
         public async Task<ServiceResult<CreateEditItemViewModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-            if (string.IsNullOrEmpty(accessToken))
-                return ServiceResult<CreateEditItemViewModel>.Fail("Access token is missing.");
+            if (string.IsNullOrWhiteSpace(accessToken))
+                return ServiceResult<CreateEditItemViewModel>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
 
             var url = $"/api/admin/items/{id}";
 
@@ -101,54 +103,42 @@ namespace InventoryTracker.WebAdmin.Services
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                var item = await response.Content.ReadFromJsonAsync<ItemResponseDTO>(cancellationToken: cancellationToken);
-
-                if (item is null)
-                    return ServiceResult<CreateEditItemViewModel>.Fail("Failed to parse item details from server.");
-
-                var vm = new CreateEditItemViewModel
-                {
-                    ItemId = item.ItemId,
-                    Name = item.Name,
-                    SKU = item.SKU,
-                    UnitOfMeasure = item.UnitOfMeasure,
-                    CreditValue = item.CreditValue,
-                    Weight = item.Weight,
-                    Description = item.Description
-                };
-
-                return ServiceResult<CreateEditItemViewModel>.Ok(vm);
+                return await ApiErrorParser.ToFailResult<CreateEditItemViewModel>(
+                    response,
+                    "Failed to load item.",
+                    cancellationToken);
             }
 
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            var item = await response.Content.ReadFromJsonAsync<ItemResponseDTO>(
+                cancellationToken: cancellationToken);
 
-            ProblemDetails? problem = null;
-
-            if (!string.IsNullOrWhiteSpace(responseBody))
+            if (item is null)
             {
-                try
-                {
-                    problem = JsonSerializer.Deserialize<ProblemDetails>(responseBody, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-                }
-                catch (JsonException)
-                {
-                }
+                return ServiceResult<CreateEditItemViewModel>.Fail(
+                    "Failed to parse item details from server.",
+                    statusCode: (int)response.StatusCode);
             }
 
-            return ServiceResult<CreateEditItemViewModel>.Fail(
-                problem?.Detail ?? $"Failed to load item. Status code: {(int)response.StatusCode}");
+            var vm = new CreateEditItemViewModel
+            {
+                ItemId = item.ItemId,
+                Name = item.Name,
+                SKU = item.SKU,
+                UnitOfMeasure = item.UnitOfMeasure,
+                CreditValue = item.CreditValue,
+                Weight = item.Weight,
+                Description = item.Description
+            };
+
+            return ServiceResult<CreateEditItemViewModel>.Ok(vm);
         }
         public async Task<ServiceResult<ItemDetailsViewModel>> GetDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-            if (string.IsNullOrEmpty(accessToken))
-                return ServiceResult<ItemDetailsViewModel>.Fail("Access token is missing.");
+            if (string.IsNullOrWhiteSpace(accessToken))
+                return ServiceResult<ItemDetailsViewModel>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
 
             var url = $"/api/admin/items/{id}/details";
 
@@ -156,55 +146,33 @@ namespace InventoryTracker.WebAdmin.Services
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<ItemDetailsViewModel>(response, "Failed to load item details.", cancellationToken);
 
-            if (response.IsSuccessStatusCode)
+            var item = await response.Content.ReadFromJsonAsync<ItemDetailsResponseDTO>(cancellationToken: cancellationToken);
+
+            if (item is null)
+                return ServiceResult<ItemDetailsViewModel>.Fail("Failed to parse item details from server.", statusCode: (int)response.StatusCode);
+
+            var vm = new ItemDetailsViewModel
             {
-                var item = await response.Content.ReadFromJsonAsync<ItemDetailsResponseDTO>(cancellationToken: cancellationToken);
+                ItemId = item.ItemId,
+                Name = item.Name,
+                SKU = item.SKU,
+                UnitOfMeasure = item.UnitOfMeasure,
+                CreditValue = item.CreditValue,
+                Weight = item.Weight,
+                Description = item.Description,
+                IsActive = item.IsActive,
+                CreatedBy = item.CreatedBy,
+                CreatedAt = item.CreatedAt,
+                UpdatedBy = item.UpdatedBy,
+                UpdatedAt = item.UpdatedAt,
+                DeletedBy = item.DeletedBy,
+                DeletedAt = item.DeletedAt
+            };
 
-                if (item is null)
-                    return ServiceResult<ItemDetailsViewModel>.Fail("Failed to parse item details from server.");
-
-                var vm = new ItemDetailsViewModel
-                {
-                    ItemId = item.ItemId,
-                    Name = item.Name,
-                    SKU = item.SKU,
-                    UnitOfMeasure = item.UnitOfMeasure,
-                    CreditValue = item.CreditValue,
-                    Weight = item.Weight,
-                    Description = item.Description,
-                    IsActive = item.IsActive,
-                    CreatedBy = item.CreatedBy,
-                    CreatedAt = item.CreatedAt,
-                    UpdatedBy = item.UpdatedBy,
-                    UpdatedAt = item.UpdatedAt,
-                    DeletedBy = item.DeletedBy,
-                    DeletedAt = item.DeletedAt
-                };
-
-                return ServiceResult<ItemDetailsViewModel>.Ok(vm);
-            }
-
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            ProblemDetails? problem = null;
-
-            if (!string.IsNullOrWhiteSpace(responseBody))
-            {
-                try
-                {
-                    problem = JsonSerializer.Deserialize<ProblemDetails>(responseBody, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-                }
-                catch (JsonException)
-                {
-                }
-            }
-
-            return ServiceResult<ItemDetailsViewModel>.Fail(
-                problem?.Detail ?? $"Failed to load item. Status code: {(int)response.StatusCode}");
+            return ServiceResult<ItemDetailsViewModel>.Ok(vm);
         }
 
         public async Task<ServiceResult<CreateItemResponse>> CreateItemAsync(CreateItemRequest request, CancellationToken cancellationToken)
@@ -212,28 +180,26 @@ namespace InventoryTracker.WebAdmin.Services
             ArgumentNullException.ThrowIfNull(request);
 
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
+            if (string.IsNullOrWhiteSpace(accessToken))
+                return ServiceResult<CreateItemResponse>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
 
-            if (string.IsNullOrEmpty(accessToken))
-                throw new UnauthorizedAccessException("Access token is missing.");
             var url = $"/api/admin/items";
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            var response = await _httpClient.PostAsJsonAsync(url, request, cancellationToken);
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(cancellationToken);
-                if (content == null)
-                    return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.");
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
 
-                return ServiceResult<CreateItemResponse>.Ok(content);
-            }
-            var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(cancellationToken: cancellationToken);
-            Dictionary<string, string[]>? validationErrors = null;
-            if (problem?.Extensions != null && problem.Extensions.TryGetValue("errors", out var errors))
-            {
-                var json = JsonSerializer.Serialize(errors);
-                validationErrors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(json);
-            }
-            return ServiceResult<CreateItemResponse>.Fail(problem?.Detail ?? "Request failer", validationErrors);
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            requestMessage.Content = JsonContent.Create(request);
+
+            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<CreateItemResponse>(response, "Failed to create item.", cancellationToken);
+
+            var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(cancellationToken: cancellationToken);
+
+            if (content is null)
+                return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
+
+            return ServiceResult<CreateItemResponse>.Ok(content);
         }
         public async Task<ServiceResult<CreateItemResponse>> UpdateItemAsync(Guid id, UpdateItemRequest request, CancellationToken cancellationToken)
         {
@@ -241,7 +207,7 @@ namespace InventoryTracker.WebAdmin.Services
 
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
             if (string.IsNullOrWhiteSpace(accessToken))
-                return ServiceResult<CreateItemResponse>.Fail("Access token is missing.");
+                return ServiceResult<CreateItemResponse>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
 
             var url = $"/api/admin/items/{id}";
 
@@ -250,167 +216,65 @@ namespace InventoryTracker.WebAdmin.Services
                 Content = JsonContent.Create(request)
             };
 
-            httpRequest.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-
-            if (response.IsSuccessStatusCode)
+            if (!response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(cancellationToken: cancellationToken);
-
-                if (content is null)
-                    return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.");
-
-                return ServiceResult<CreateItemResponse>.Ok(content);
+                return await ApiErrorParser.ToFailResult<CreateItemResponse>(
+                    response,
+                    "Failed to update item.",
+                    cancellationToken);
             }
 
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+            var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(
+                cancellationToken: cancellationToken);
 
-            ProblemDetails? problem = null;
-            Dictionary<string, string[]>? validationErrors = null;
-
-            if (!string.IsNullOrWhiteSpace(responseBody))
+            if (content is null)
             {
-                try
-                {
-                    problem = JsonSerializer.Deserialize<ProblemDetails>(responseBody, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    if (problem?.Extensions != null && problem.Extensions.TryGetValue("errors", out var errors))
-                    {
-                        var json = JsonSerializer.Serialize(errors);
-                        validationErrors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(json);
-                    }
-                }
-                catch (JsonException)
-                {
-                }
+                return ServiceResult<CreateItemResponse>.Fail(
+                    "Failed to parse response from server.",
+                    statusCode: (int)response.StatusCode);
             }
 
-            return ServiceResult<CreateItemResponse>.Fail(
-                problem?.Detail ?? $"Request failed. Status code: {(int)response.StatusCode}", validationErrors);
+            return ServiceResult<CreateItemResponse>.Ok(content);
+        }
+        public Task<ServiceResult<CreateItemResponse>> DeactivateItemAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return ChangeItemActiveStateAsync(id, "deactivate", "Failed to deactivate item.", cancellationToken);
         }
 
-        public async Task<ServiceResult<CreateItemResponse>> DeactivateItemAsync(Guid id, CancellationToken cancellationToken)
+        public Task<ServiceResult<CreateItemResponse>> ActivateItemAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return ChangeItemActiveStateAsync(id, "activate", "Failed to activate item.", cancellationToken);
+        }
+
+        private async Task<ServiceResult<CreateItemResponse>> ChangeItemActiveStateAsync(Guid id, string action, string fallbackMessage, CancellationToken cancellationToken)
         {
             var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
 
             if (string.IsNullOrWhiteSpace(accessToken))
-                return ServiceResult<CreateItemResponse>.Fail("Access token is missing.");
+                return ServiceResult<CreateItemResponse>.Fail("Access token is missing.", statusCode: StatusCodes.Status401Unauthorized);
 
-            var url = $"/api/admin/items/{id}/deactivate";
-
+            var url = $"/api/admin/items/{id}/{action}";
             using var httpRequest = new HttpRequestMessage(HttpMethod.Patch, url)
             {
                 Content = JsonContent.Create(new { })
             };
 
-            httpRequest.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
+            httpRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(cancellationToken: cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<CreateItemResponse>(response, fallbackMessage, cancellationToken);
 
-                if (content is null)
-                    return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.");
+            var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(cancellationToken: cancellationToken);
 
-                return ServiceResult<CreateItemResponse>.Ok(content);
-            }
+            if (content is null)
+                return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
 
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            ProblemDetails? problem = null;
-            Dictionary<string, string[]>? validationErrors = null;
-
-            if (!string.IsNullOrWhiteSpace(responseBody))
-            {
-                try
-                {
-                    problem = JsonSerializer.Deserialize<ProblemDetails>(responseBody, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    if (problem?.Extensions != null &&
-                        problem.Extensions.TryGetValue("errors", out var errors))
-                    {
-                        var json = JsonSerializer.Serialize(errors);
-                        validationErrors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(json);
-                    }
-                }
-                catch (JsonException)
-                {
-                }
-            }
-
-            return ServiceResult<CreateItemResponse>.Fail(
-                problem?.Detail ?? $"Request failed. Status code: {(int)response.StatusCode}",
-                validationErrors);
-        }
-        public async Task<ServiceResult<CreateItemResponse>> ActivateItemAsync(Guid id, CancellationToken cancellationToken)
-        {
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-
-            if (string.IsNullOrWhiteSpace(accessToken))
-                return ServiceResult<CreateItemResponse>.Fail("Access token is missing.");
-
-            var url = $"/api/admin/items/{id}/activate";
-
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Patch, url)
-            {
-                Content = JsonContent.Create(new { })
-            };
-
-            httpRequest.Headers.Authorization =
-                new AuthenticationHeaderValue("Bearer", accessToken);
-
-            using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(cancellationToken: cancellationToken);
-
-                if (content is null)
-                    return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.");
-
-                return ServiceResult<CreateItemResponse>.Ok(content);
-            }
-
-            var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-
-            ProblemDetails? problem = null;
-            Dictionary<string, string[]>? validationErrors = null;
-
-            if (!string.IsNullOrWhiteSpace(responseBody))
-            {
-                try
-                {
-                    problem = JsonSerializer.Deserialize<ProblemDetails>(responseBody, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
-
-                    if (problem?.Extensions != null &&
-                        problem.Extensions.TryGetValue("errors", out var errors))
-                    {
-                        var json = JsonSerializer.Serialize(errors);
-                        validationErrors = JsonSerializer.Deserialize<Dictionary<string, string[]>>(json);
-                    }
-                }
-                catch (JsonException)
-                {
-                }
-            }
-
-            return ServiceResult<CreateItemResponse>.Fail(
-                problem?.Detail ?? $"Request failed. Status code: {(int)response.StatusCode}",
-                validationErrors);
+            return ServiceResult<CreateItemResponse>.Ok(content);
         }
     }
 }
