@@ -1,29 +1,25 @@
-﻿using InventoryTracker.Contracts.Requests.Clients;
+﻿using InventoryTracker.APIClient;
+using InventoryTracker.Contracts.Helpers;
+using InventoryTracker.Contracts.Requests.Clients;
 using InventoryTracker.Contracts.Responses.Clients;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.ViewModels.Clients;
+using InventoryTracker.WebAdmin.ViewModels.Common;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
-using System.Net.Http.Headers;
 
 namespace InventoryTracker.WebAdmin.Services
 {
     public class ClientsService: IClientsService
     {
         private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public ClientsService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public ClientsService(HttpClient httpClient)
         {
             _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
         }
-        public async Task<ClientsIndexViewModel> GetAllAsync(GetClientsRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<ClientsIndexViewModel>> GetAllAsync(GetClientsRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-
-            if (string.IsNullOrEmpty(accessToken))
-                throw new UnauthorizedAccessException("Access token is missing.");
 
             var pageSize = request.PageSize ?? 5;
             var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
@@ -33,10 +29,10 @@ namespace InventoryTracker.WebAdmin.Services
             }
             var url = $"/api/admin/clients?{string.Join("&", query)}";
             using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<ClientsIndexViewModel>(response, "Failed to load items.", cancellationToken);
 
             var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<ClientResponseDTO>>(cancellationToken: cancellationToken);
             var clients = pagedResponse?.Items.Select(client => new ClientListItemViewModel
@@ -46,8 +42,10 @@ namespace InventoryTracker.WebAdmin.Services
                 ClientCode = client.ClientCode,
                 Email = client.Email,
                 PhoneNumber = client.PhoneNumber,
-                FullAddress = BuildFullAddress(client.Address),
+                AddressLine1 = BuildAddressLine1(client.Address),
+                AddressLine2 = BuildAddressLine2(client.Address),
                 CountryName = client.Address.CountryName,
+                IsActive = client.IsActive,
                 Saldo = client.Saldo
             }).ToList() ?? new List<ClientListItemViewModel>();
 
@@ -59,7 +57,7 @@ namespace InventoryTracker.WebAdmin.Services
             {
                 routeValues["SearchTerm"] = request.SearchTerm;
             }
-            return new ClientsIndexViewModel
+            var viewModel = new ClientsIndexViewModel
             {
                 Clients = clients,
                 SearchTerm = request.SearchTerm,
@@ -80,9 +78,158 @@ namespace InventoryTracker.WebAdmin.Services
                     }
                 }
             };
+            return ServiceResult<ClientsIndexViewModel>.Ok(viewModel);
+        }
+        public async Task<ServiceResult<CreateEditClientViewModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var url = $"/api/admin/clients/{id}";
+
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+
+            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<CreateEditClientViewModel>(response, "Failed to load client.", cancellationToken);
+
+            var client = await response.Content.ReadFromJsonAsync<ClientResponseDTO>(cancellationToken: cancellationToken);
+
+            if (client is null)
+                return ServiceResult<CreateEditClientViewModel>.Fail("Failed to parse client details from server.",statusCode: (int)response.StatusCode);
+
+            var vm = new CreateEditClientViewModel
+            {
+                ClientId = client.ClientId,
+                Name = client.Name,
+                ClientCode = client.ClientCode,
+                Email = client.Email,
+                PhoneNumber = client.PhoneNumber,
+                Address = new AddressViewModel
+                {
+                    Street = client.Address.Street,
+                    HouseNumber = client.Address.HouseNumber,
+                    ApartmentNumber = client.Address.ApartmentNumber,
+                    PostalCode = client.Address.PostalCode,
+                    City = client.Address.City,
+                    CountryId = client.Address.CountryId
+                },
+            };
+
+            return ServiceResult<CreateEditClientViewModel>.Ok(vm);
+        }
+        public async Task<ServiceResult<ClientDetailsViewModel>> GetDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var url = $"/api/admin/clients/{id}/details";
+
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+
+            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<ClientDetailsViewModel>(response, "Failed to load client details.", cancellationToken);
+
+            var client = await response.Content.ReadFromJsonAsync<ClientDetailsResponseDTO>(cancellationToken: cancellationToken);
+
+            if (client is null)
+                return ServiceResult<ClientDetailsViewModel>.Fail("Failed to parse client details from server.", statusCode: (int)response.StatusCode);
+
+            var vm = new ClientDetailsViewModel
+            {
+                ClientId = client.ClientId,
+                Name = client.Name,
+                ClientCode = client.ClientCode,
+                Email = client.Email,
+                PhoneNumber = client.PhoneNumber,
+                IsActive = client.IsActive,
+                Saldo = client.Saldo,
+                CreatedBy = client.CreatedBy,
+                CreatedAt = client.CreatedAt,
+                UpdatedBy = client.UpdatedBy,
+                UpdatedAt = client.UpdatedAt,
+                DeletedBy = client.DeletedBy,
+                DeletedAt = client.DeletedAt,
+                Address = new AddressDetailsViewModel
+                {
+                    Street = client.Address.Street,
+                    HouseNumber = client.Address.HouseNumber,
+                    ApartmentNumber = client.Address.ApartmentNumber,
+                    PostalCode = client.Address.PostalCode,
+                    City = client.Address.City,
+                    CountryName = client.Address.CountryName
+                }
+            };
+            return ServiceResult<ClientDetailsViewModel>.Ok(vm);
+        }
+        public async Task<ServiceResult<CreateClientResponse>> CreateClientAsync(CreateClientRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            var url = $"/api/admin/clients";
+            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
+
+            requestMessage.Content = JsonContent.Create(request);
+
+            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<CreateClientResponse>(response, "Failed to create client.", cancellationToken);
+
+            var content = await response.Content.ReadFromJsonAsync<CreateClientResponse>(cancellationToken: cancellationToken);
+
+            if (content is null)
+                return ServiceResult<CreateClientResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
+
+            return ServiceResult<CreateClientResponse>.Ok(content);
+        }
+        public async Task<ServiceResult<CreateClientResponse>> UpdateClientAsync(Guid id, UpdateClientRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            var url = $"/api/admin/clients/{id}";
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Put, url)
+            {
+                Content = JsonContent.Create(request)
+            };
+
+            using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<CreateClientResponse>(response, "Failed to update client.", cancellationToken);
+
+            var content = await response.Content.ReadFromJsonAsync<CreateClientResponse>(cancellationToken: cancellationToken);
+
+            if (content is null)
+                return ServiceResult<CreateClientResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
+
+            return ServiceResult<CreateClientResponse>.Ok(content);
+        }
+        public Task<ServiceResult<CreateClientResponse>> DeactivateClientAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return ChangeClientActiveStateAsync(id, "deactivate", "Failed to deactivate client.", cancellationToken);
+        }
+
+        public Task<ServiceResult<CreateClientResponse>> ActivateClientAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return ChangeClientActiveStateAsync(id, "activate", "Failed to activate client.", cancellationToken);
         }
         #region Helpers
-        private static string BuildFullAddress(AddressResponseDTO a)
+        private async Task<ServiceResult<CreateClientResponse>> ChangeClientActiveStateAsync(Guid id, string action, string fallbackMessage, CancellationToken cancellationToken)
+        {
+            var url = $"/api/admin/clients/{id}/{action}";
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Patch, url)
+            {
+                Content = JsonContent.Create(new { })
+            };
+
+            using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+                return await ApiErrorParser.ToFailResult<CreateClientResponse>(response, fallbackMessage, cancellationToken);
+
+            var content = await response.Content.ReadFromJsonAsync<CreateClientResponse>(cancellationToken: cancellationToken);
+
+            if (content is null)
+                return ServiceResult<CreateClientResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
+
+            return ServiceResult<CreateClientResponse>.Ok(content);
+        }
+        private static string BuildAddressLine1(AddressResponseDTO a)
         {
             if (a == null) return string.Empty;
 
@@ -93,17 +240,13 @@ namespace InventoryTracker.WebAdmin.Services
                 street += $"/{a.ApartmentNumber}";
             }
 
-            var cityPart = $"{a.PostalCode} {a.City}".Trim();
+            return street;
+        }
 
-            var parts = new List<string>();
-
-            if (!string.IsNullOrWhiteSpace(street))
-                parts.Add(street);
-
-            if (!string.IsNullOrWhiteSpace(cityPart))
-                parts.Add(cityPart);
-
-            return string.Join(", ", parts);
+        private static string BuildAddressLine2(AddressResponseDTO a)
+        {
+            if (a == null) return string.Empty;
+            return $"{a.PostalCode} {a.City}".Trim();
         }
         #endregion
     }

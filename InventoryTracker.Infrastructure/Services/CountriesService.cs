@@ -1,16 +1,10 @@
 ﻿using InventoryTracker.Application.Common.DTOs;
 using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Application.Common.Interfaces;
-using InventoryTracker.Application.Features.Countries.Commands.CreateCountry;
-using InventoryTracker.Application.Features.Countries.Commands.UpdateCountry;
 using InventoryTracker.Application.Features.Countries.DTOs;
-using InventoryTracker.Application.Features.Countries.Queries.GetCountries;
 using InventoryTracker.Domain.Entities;
 using InventoryTracker.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Infrastructure.Services
 {
@@ -57,6 +51,15 @@ namespace InventoryTracker.Infrastructure.Services
                 PageSize = parameters.PageSize,
                 TotalCount = totalCount
             };
+        }
+        public async Task<IReadOnlyList<InternalCountrySelectDTO>> GetAllCountriesLookupAsync(CancellationToken cancellationToken)
+        {
+            var countries = await _context.Countries.AsNoTracking().OrderBy(w => w.Name).Select(w => new InternalCountrySelectDTO
+            {
+                CountryId = w.CountryId,
+                CountryName = w.Name
+            }).ToListAsync(cancellationToken);
+            return countries;
         }
         public async Task<CountryDTO?> GetCountryByIdAsync(Guid id, CancellationToken cancellationToken)
         {

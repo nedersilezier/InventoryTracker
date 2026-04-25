@@ -1,12 +1,9 @@
 ﻿using InventoryTracker.Contracts.Requests.Countries;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Countries;
-using InventoryTracker.Contracts.Responses.Users;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.ViewModels.Countries;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Metrics;
 using System.Net.Http.Headers;
 
 namespace InventoryTracker.WebAdmin.Services

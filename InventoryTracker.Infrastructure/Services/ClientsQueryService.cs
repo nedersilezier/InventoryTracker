@@ -103,5 +103,39 @@ namespace InventoryTracker.Infrastructure.Services
                 throw new RecordNotFoundException(nameof(Client), id);
             return client;
         }
+        public async Task<ClientDetailsDTO?> GetClientDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var item = await _context.Clients
+                .AsNoTracking()
+                .Where(c => c.ClientId == id)
+                .Select(c => new ClientDetailsDTO
+                {
+                    ClientId = c.ClientId,
+                    Name = c.Name,
+                    ClientCode = c.ClientCode,
+                    Email = c.Email,
+                    PhoneNumber = c.PhoneNumber,
+                    Saldo = 12345m,
+                    IsActive = c.IsActive,
+                    Address = new AddressDTO
+                    {
+                        AddressId = c.Address.AddressId,
+                        Street = c.Address.Street,
+                        City = c.Address.City,
+                        HouseNumber = c.Address.HouseNumber,
+                        ApartmentNumber = c.Address.ApartmentNumber,
+                        PostalCode = c.Address.PostalCode,
+                        CountryName = c.Address.Country.Name,
+                    },
+                    CreatedAt = c.CreatedAt,
+                    CreatedBy = c.CreatedBy ?? string.Empty,
+                    UpdatedAt = c.UpdatedAt,
+                    UpdatedBy = c.UpdatedBy ?? string.Empty,
+                    DeletedAt = c.DeletedAt,
+                    DeletedBy = c.DeletedBy ?? string.Empty
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+            return item;
+        }
     }
 }

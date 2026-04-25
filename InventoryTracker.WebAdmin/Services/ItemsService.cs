@@ -6,9 +6,6 @@ using InventoryTracker.Contracts.Responses.Items;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using InventoryTracker.WebAdmin.ViewModels.Items;
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace InventoryTracker.WebAdmin.Services
 {
@@ -190,22 +187,13 @@ namespace InventoryTracker.WebAdmin.Services
 
             using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
             if (!response.IsSuccessStatusCode)
-            {
-                return await ApiErrorParser.ToFailResult<CreateItemResponse>(
-                    response,
-                    "Failed to update item.",
-                    cancellationToken);
-            }
+                return await ApiErrorParser.ToFailResult<CreateItemResponse>(response, "Failed to update item.", cancellationToken);
 
             var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(
                 cancellationToken: cancellationToken);
 
             if (content is null)
-            {
-                return ServiceResult<CreateItemResponse>.Fail(
-                    "Failed to parse response from server.",
-                    statusCode: (int)response.StatusCode);
-            }
+                return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
 
             return ServiceResult<CreateItemResponse>.Ok(content);
         }

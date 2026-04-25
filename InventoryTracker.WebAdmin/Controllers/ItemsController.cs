@@ -14,6 +14,8 @@ namespace InventoryTracker.WebAdmin.Controllers
         {
             _itemsService = itemsService;
         }
+
+        [HttpGet]
         public async Task<IActionResult> Index(GetItemsRequest request, CancellationToken cancellationToken)
         {
             var result = await _itemsService.GetAllAsync(request, cancellationToken);
@@ -147,7 +149,7 @@ namespace InventoryTracker.WebAdmin.Controllers
         public async Task<IActionResult> Edit(CreateEditItemViewModel vm, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
-                return View(vm);
+                return View("CreateEdit", vm);
 
             var request = new UpdateItemRequest
             {

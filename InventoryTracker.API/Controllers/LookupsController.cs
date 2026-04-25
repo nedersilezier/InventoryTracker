@@ -1,4 +1,6 @@
-﻿using InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses;
+﻿using InventoryTracker.Application.Features.Countries.Queries.GetCountries;
+using InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses;
+using InventoryTracker.Contracts.Responses.Countries;
 using InventoryTracker.Contracts.Responses.Warehouses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -27,9 +29,16 @@ namespace InventoryTracker.API.Controllers
             }).ToList();
             return Ok(response);
         }
-        public IActionResult Index()
+        [HttpGet("countries")]
+        public async Task<IActionResult> GetActiveCountries(CancellationToken cancellationToken)
         {
-            return View();
+            var countries = await _mediator.Send(new GetCountriesSelectQuery(), cancellationToken);
+            var response = countries.Select(c => new CountryResponseSelectDTO
+            {
+                CountryId = c.CountryId,
+                CountryName = c.CountryName
+            }).ToList();
+            return Ok(response);
         }
     }
 }

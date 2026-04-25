@@ -1,25 +1,26 @@
-﻿@model InventoryTracker.WebAdmin.ViewModels.Items.ItemDetailsViewModel
+﻿@model InventoryTracker.WebAdmin.ViewModels.Clients.ClientDetailsViewModel
 
 @{
-    ViewData["Title"] = "Item Details";
+    ViewData["Title"] = "Client Details";
 }
 @{
     TempData.Remove("SuccessMessage");
     TempData.Remove("ErrorMessage");
 }
+
 <div class="max-w-7xl mx-auto px-4 py-0">
     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
         <div class="space-y-1">
             <div class="mb-1">
                 <div class="flex items-center gap-2 text-slate-500 mb-2">
-                    <a asp-controller="Items"
+                    <a asp-controller="Clients"
                            asp-action="Index"
                            class="text-xs font-semibold uppercase tracking-widest hover:text-blue-600 transition-colors">
-                        Items
+                        Clients
                     </a>
                     <span class="text-sm">›</span>
                     <span class="text-xs font-semibold text-black uppercase tracking-widest">
-                        Item Details
+                        Client Details
                     </span>
                 </div>
             </div>
@@ -36,34 +37,33 @@
         </div>
 
         <div class="flex items-center gap-3">
-            <a asp-controller="Items"
+            <a asp-controller="Clients"
                    asp-action="Edit"
-                   asp-route-id="@Model.ItemId"
+                   asp-route-id="@Model.ClientId"
                    class="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-300 text-slate-900 font-semibold rounded-full shadow-sm hover:bg-slate-50 transition-all">
                 <span>✎</span>
-                <span>Edit Item</span>
+                <span>Edit Client</span>
             </a>
 
             @if (Model.IsActive)
             {
-                <form asp-controller="Items" asp-action="Deactivate" asp-route-id="@Model.ItemId" method="post">
+                <form asp-controller="Clients" asp-action="Deactivate" asp-route-id="@Model.ClientId" method="post">
                     @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.ItemId" />
-                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Items", new { id = Model.ItemId })" />
+                    <input type="hidden" name="id" value="@Model.ClientId" />
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Clients", new { id = Model.ClientId })" />
                     <button type="submit"
                             class="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white font-semibold rounded-full shadow hover:bg-red-700 transition-all">
                         <span>⏻</span>
                         <span>Deactivate</span>
                     </button>
                 </form>
-             
             }
             else
             {
-                <form asp-controller="Items" asp-action="Activate" asp-route-id="@Model.ItemId" method="post">
+                <form asp-controller="Clients" asp-action="Activate" asp-route-id="@Model.ClientId" method="post">
                     @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" value="@Model.ItemId" />
-                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Items", new { id = Model.ItemId })" />
+                    <input type="hidden" name="id" value="@Model.ClientId" />
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Clients", new { id = Model.ClientId })" />
                     <button type="submit"
                             class="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white font-semibold rounded-full shadow hover:bg-green-700 transition-all">
                         <span>⏻</span>
@@ -77,23 +77,20 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div class="lg:col-span-8 space-y-8">
             <section class="bg-white p-8 rounded-xl shadow-sm relative overflow-hidden border border-slate-100 group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <span class="material-symbols-outlined text-4xl">
-                        inventory_2
-                    </span>
+                <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full transition-transform group-hover:scale-110 duration-500">
                 </div>
 
                 <div class="relative z-10">
-                    <div class="flex items-center gap-3 mb-6">
+                    <div class="flex items-center gap-3 mb-8">
                         <h3 class="text-xs font-black uppercase tracking-widest text-slate-500">
                             Identity
                         </h3>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
-                                Item Name
+                                Name
                             </label>
                             <p class="text-xl font-bold text-slate-900">
                                 @Model.Name
@@ -102,77 +99,112 @@
 
                         <div>
                             <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
-                                Internal SKU
+                                Client Code
                             </label>
                             <p class="text-xl font-bold text-slate-900 tracking-wide">
-                                @Model.SKU
+                                @Model.ClientCode
                             </p>
-                        </div>
-                    </div>
-
-                    <div class="mt-8">
-                        <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2.5">
-                            Detailed Description
-                        </label>
-
-                        <div class="bg-slate-50 p-6 rounded-lg border border-slate-100">
-                            @if (!string.IsNullOrWhiteSpace(Model.Description))
-                            {
-                                <p class="text-slate-800 leading-relaxed text-sm whitespace-pre-line">
-                                    @Model.Description
-                                </p>
-                            }
-                            else
-                            {
-                                <p class="text-slate-400 italic text-sm">
-                                    No description provided.
-                                </p>
-                            }
                         </div>
                     </div>
                 </div>
             </section>
 
-            <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
-                <div class="col-span-2 bg-white p-6 rounded-xl border border-slate-200/70 flex flex-col justify-between hover:border-blue-200 transition-colors">
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                        Unit of Measure
-                    </label>
-                    <div>
-                        <p class="text-3xl font-black text-slate-900 mb-1">
-                            @Model.UnitOfMeasure
-                        </p>
-                        
-                    </div>
-                </div>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <section class="bg-white p-8 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-8">
+                        Contact &amp; Financials
+                    </h3>
 
-                <div class="col-span-2 bg-white p-6 rounded-xl border border-slate-200/70 flex flex-col justify-between hover:border-blue-200 transition-colors">
-                    <div class="flex justify-between items-start mb-4">
-                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                            Credit Value
-                        </label>
-                    </div>
-                    <div>
-                        <p class="text-3xl font-black text-slate-900 mb-1">
-                            @Model.CreditValueDisplay
-                        </p>
-                        
-                    </div>
-                </div>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                Email
+                            </label>
+                            @if (!string.IsNullOrWhiteSpace(Model.Email))
+                            {
+                                <a href="mailto:@Model.Email" class="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 transition-colors break-all">
+                                    <span class="material-symbols-outlined text-[18px]">mail</span>
+                                    <span>@Model.Email</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <p class="text-sm text-slate-400 italic">No email provided.</p>
+                            }
+                        </div>
 
-                <div class="col-span-2 bg-white p-6 rounded-xl border border-slate-200/70 flex flex-col justify-between hover:border-blue-200 transition-colors">
-                    <div class="flex justify-between items-start mb-4">
-                        <label class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                            Item Weight
-                        </label>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                Phone
+                            </label>
+                            @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+                            {
+                                <a href="tel:@Model.PhoneNumber" class="inline-flex items-center gap-2 text-slate-900 font-semibold hover:text-blue-600 transition-colors">
+                                    <span class="material-symbols-outlined text-[18px]">call</span>
+                                    <span>@Model.PhoneNumber</span>
+                                </a>
+                            }
+                            else
+                            {
+                                <p class="text-sm text-slate-400 italic">No phone number provided.</p>
+                            }
+                        </div>
+
+                        <div class="pt-5 mt-5 border-t border-slate-100">
+                            <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                Current Saldo
+                            </label>
+                            <p class="text-3xl font-black text-slate-900 tracking-tight">
+                                @Model.Saldo.ToString("N2")
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="text-3xl font-black text-slate-900 mb-1">
-                            @Model.Weight <span class="text-lg font-bold">kg</span>
-                        </p>
-                        
+                </section>
+
+                <section class="bg-white p-8 rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-8">
+                        Physical Address
+                    </h3>
+
+                    <div class="flex gap-4 flex-1">
+                        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-blue-600">location_city</span>
+                        </div>
+                        <div>
+                            @if (Model.Address is not null)
+                            {
+                                <p class="text-slate-900 font-bold">
+                                    @Model.Address.Street @Model.Address.HouseNumber
+                                </p>
+
+                                @if (!string.IsNullOrWhiteSpace(Model.Address.ApartmentNumber))
+                                {
+                                    <p class="text-sm text-slate-600">
+                                        Apt./Suite @Model.Address.ApartmentNumber
+                                    </p>
+                                }
+
+                                <p class="text-sm text-slate-600">
+                                    @Model.Address.PostalCode @Model.Address.City
+                                </p>
+                                <p class="text-sm text-slate-700 font-semibold">
+                                    @Model.Address.CountryName
+                                </p>
+                            }
+                            else
+                            {
+                                <p class="text-sm text-slate-400 italic">No address provided.</p>
+                            }
+                        </div>
                     </div>
-                </div>
+
+                    <div class="mt-6 h-32 w-full rounded-lg bg-slate-100 relative overflow-hidden">
+                        <div class="absolute inset-0 opacity-40 grayscale bg-[radial-gradient(circle_at_25%_25%,#cbd5e1_0,#cbd5e1_2px,transparent_2px),linear-gradient(90deg,transparent_0,transparent_18px,#e2e8f0_18px,#e2e8f0_20px,transparent_20px),linear-gradient(0deg,transparent_0,transparent_18px,#e2e8f0_18px,#e2e8f0_20px,transparent_20px)] bg-[length:32px_32px]"></div>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="material-symbols-outlined text-blue-600 text-4xl" style="font-variation-settings: 'FILL' 1;">location_on</span>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
 
@@ -254,7 +286,7 @@
                         </label>
 
                         <code class="text-[11px] font-mono text-blue-600 font-bold break-all">
-                            @Model.ItemId
+                            @Model.ClientId
                         </code>
                     </div>
                 </div>
@@ -262,6 +294,7 @@
         </aside>
     </div>
 </div>
+
 @functions {
     private string GetStatusBadgeClasses(bool isActive)
     {

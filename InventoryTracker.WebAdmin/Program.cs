@@ -64,7 +64,13 @@ builder.Services.AddHttpClient<IItemsService, ItemsService>(client =>
 builder.Services.AddHttpClient<IClientsService, ClientsService>(client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
-});
+}).AddHttpMessageHandler<AccessTokenHandler>();
+
+// register HttpClient for lookups
+builder.Services.AddHttpClient<ILookupsService, LookupsService>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+}).AddHttpMessageHandler<AccessTokenHandler>();
 
 var app = builder.Build();
 

@@ -1,0 +1,218 @@
+﻿@model InventoryTracker.WebAdmin.ViewModels.Clients.CreateEditClientViewModel
+
+@{
+    ViewData["Title"] = Model.ClientId == null ? "Add New Client" : "Edit Client";
+}
+
+<div class="max-w-7xl mx-auto px-4 py-0">
+    <div class="mb-6">
+        <div class="flex items-center gap-2 text-slate-500 mb-2">
+            <a asp-controller="Clients"
+                   asp-action="Index"
+                   class="text-xs font-semibold uppercase tracking-widest hover:text-blue-600 transition-colors">
+                Clients
+            </a>
+            <span class="text-sm">›</span>
+            <span class="text-xs font-semibold text-black uppercase tracking-widest">
+                @(Model.ClientId == null ? "New Client" : "Edit Client")
+            </span>
+        </div>
+    </div>
+
+    <form asp-controller="Clients" asp-action="@GetFormAction()" method="post" class="space-y-8">
+        @Html.AntiForgeryToken()
+
+        @if (Model.ClientId != null)
+        {
+            <input type="hidden" asp-for="ClientId" />
+        }
+
+        @if (Model.Address.AddressId != null)
+        {
+            <input type="hidden" asp-for="Address.AddressId" />
+        }
+
+        <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700">
+                    <span class="material-symbols-outlined">badge</span>
+                </div>
+
+                <h2 class="text-2xl font-bold text-slate-900">
+                    Client Identity &amp; Contact
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div class="flex flex-col gap-2">
+                    <label asp-for="Name" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Client Name
+                    </label>
+                    <input asp-for="Name"
+                           class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                           placeholder="Example Name" />
+                    <span asp-validation-for="Name" class="text-sm text-red-600"></span>
+                    <span class="text-[0.7rem] text-slate-400 italic">
+                        Required: official client or company name.
+                    </span>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label asp-for="ClientCode" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Client Code
+                    </label>
+                    <input asp-for="ClientCode"
+                           class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                           placeholder="e.g. ACM-001" />
+                    <span asp-validation-for="ClientCode" class="text-sm text-red-600"></span>
+                    <span class="text-[0.7rem] text-slate-400 italic">
+                        Required: unique identifier.
+                    </span>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label asp-for="Email" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Email Address
+                    </label>
+                    <input asp-for="Email"
+                           type="email"
+                           class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                           placeholder="client@example.com" />
+                    <span asp-validation-for="Email" class="text-sm text-red-600"></span>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label asp-for="PhoneNumber" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Phone Number
+                    </label>
+                    <input asp-for="PhoneNumber"
+                           type="tel"
+                           class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                           placeholder="+31 00 00 00 00" />
+                    <span asp-validation-for="PhoneNumber" class="text-sm text-red-600"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-8 shadow-sm border border-slate-100">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-600">
+                    <span class="material-symbols-outlined">location_on</span>
+                </div>
+
+                <h2 class="text-2xl font-bold text-slate-900">
+                    Physical Address
+                </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-x-6 gap-y-6">
+                <div class="md:col-span-8 flex flex-col gap-2">
+                    <label asp-for="Address.Street" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Street
+                    </label>
+                    <input asp-for="Address.Street"
+                           class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                           placeholder="Main Street" />
+                    <span asp-validation-for="Address.Street" class="text-sm text-red-600"></span>
+                </div>
+
+                <div class="md:col-span-4 flex flex-col gap-2">
+                    <label asp-for="Address.HouseNumber" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        House Number
+                    </label>
+                    <input asp-for="Address.HouseNumber"
+                           class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                           placeholder="123" />
+                    <span asp-validation-for="Address.HouseNumber" class="text-sm text-red-600"></span>
+                </div>
+
+                <div class="md:col-span-4 flex flex-col gap-2">
+                    <label asp-for="Address.ApartmentNumber" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Apartment / Suite
+                    </label>
+                    <input asp-for="Address.ApartmentNumber"
+                           class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                           placeholder="Suite 4B" />
+                    <span asp-validation-for="Address.ApartmentNumber" class="text-sm text-red-600"></span>
+                </div>
+
+                <div class="md:col-span-4 flex flex-col gap-2">
+                    <label asp-for="Address.PostalCode" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Postal Code
+                    </label>
+                    <input asp-for="Address.PostalCode"
+                           class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                           placeholder="00-000" />
+                    <span asp-validation-for="Address.PostalCode" class="text-sm text-red-600"></span>
+                </div>
+
+                <div class="md:col-span-4 flex flex-col gap-2">
+                    <label asp-for="Address.City" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        City
+                    </label>
+                    <input asp-for="Address.City"
+                           class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                           placeholder="Amsterdam" />
+                    <span asp-validation-for="Address.City" class="text-sm text-red-600"></span>
+                </div>
+
+                <div class="md:col-span-12 flex flex-col gap-2">
+                    <label asp-for="Address.CountryId" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        Country
+                    </label>
+
+                    <div class="relative">
+                        <select asp-for="Address.CountryId"
+                                asp-items="Model.AvailableCountries"
+                                class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 appearance-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all cursor-pointer">
+                            <option value="">Select a country</option>
+                        </select>
+
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                            ⌄
+                        </span>
+                    </div>
+
+                    <span asp-validation-for="Address.CountryId" class="text-sm text-red-600"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-8">
+                <div asp-validation-summary="ModelOnly"
+                     class="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                </div>
+            </div>
+            <div class="lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <div class="lg:col-span-2 space-y-3">
+                    <a asp-controller="Clients"
+                           asp-action="Index"
+                           class="w-full bg-slate-200 text-slate-600 font-bold py-4 rounded-full hover:bg-slate-300 transition-all text-center block">
+                        Cancel
+                    </a>
+                </div>
+
+                <div class="lg:col-span-2 space-y-3">
+                    <button type="submit"
+                            class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 rounded-full shadow hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                        <span>💾</span>
+                        <span>Save Client</span>
+                    </button>
+                </div>
+            </div>
+            
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+@functions {
+    private string GetFormAction()
+    {
+        return Model.ClientId == null ? "Create" : "Edit";
+    }
+}

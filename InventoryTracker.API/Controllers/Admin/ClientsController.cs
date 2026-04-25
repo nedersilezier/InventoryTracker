@@ -1,14 +1,14 @@
-﻿using InventoryTracker.Contracts.Requests.Clients;
-using InventoryTracker.Application.Features.Clients.Commands.ActivateClient;
+﻿using InventoryTracker.Application.Features.Clients.Commands.ActivateClient;
 using InventoryTracker.Application.Features.Clients.Commands.CreateClient;
 using InventoryTracker.Application.Features.Clients.Commands.DeactivateClient;
 using InventoryTracker.Application.Features.Clients.Commands.UpdateClient;
 using InventoryTracker.Application.Features.Clients.Queries.GetClients;
+using InventoryTracker.Contracts.Requests.Clients;
+using InventoryTracker.Contracts.Responses.Clients;
+using InventoryTracker.Contracts.Responses.Common;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using InventoryTracker.Contracts.Responses.Common;
-using InventoryTracker.Contracts.Responses.Clients;
 
 namespace InventoryTracker.API.Controllers.Admin
 {
@@ -71,6 +71,17 @@ namespace InventoryTracker.API.Controllers.Admin
                 return NotFound();
             return Ok(client);
         }
+
+        [HttpGet]
+        [Route("{id}/details")]
+        public async Task<IActionResult> GetClientDetailsById(Guid id, CancellationToken cancellationToken)
+        {
+            var client = await _mediator.Send(new GetClientDetailsByIdQuery(id), cancellationToken);
+            if (client == null)
+                return NotFound();
+            return Ok(client);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateClient(CreateClientCommand command, CancellationToken cancellationToken)
         {

@@ -4,7 +4,7 @@ namespace InventoryTracker.WebAdmin.ViewModels.Items
 {
     public class ItemDetailsViewModel
     {
-        public Guid? ItemId { get; set; }
+        public Guid ItemId { get; set; }
         public string Name { get; set; } = default!;
         public string SKU { get; set; } = default!;
         public string? Description { get; set; }
