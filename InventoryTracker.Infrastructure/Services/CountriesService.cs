@@ -77,7 +77,7 @@ namespace InventoryTracker.Infrastructure.Services
                 throw new RecordNotFoundException(nameof(Country), id);
             return country;
         }
-        public async Task<CountryDTO> CreateCountryAsync(CreateCountryParameters parameters, CancellationToken cancellationToken)
+        public async Task<CountryCreatedDTO> CreateCountryAsync(CreateCountryParameters parameters, CancellationToken cancellationToken)
         {
             var countryCodeExists = await _context.Countries.AnyAsync(c => c.Code == parameters.Code, cancellationToken);
             if (countryCodeExists)
@@ -91,11 +91,10 @@ namespace InventoryTracker.Infrastructure.Services
 
             _context.Countries.Add(country);
             await _context.SaveChangesAsync(cancellationToken);
-            return new CountryDTO
+            return new CountryCreatedDTO
             {
                 CountryId = country.CountryId,
                 Name = country.Name,
-                Code = country.Code
             };
         }
         public async Task<CountryDTO?> UpdateCountryAsync(UpdateCountryParameters parameters, CancellationToken cancellationToken)

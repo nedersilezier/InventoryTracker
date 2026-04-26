@@ -86,7 +86,8 @@ namespace InventoryTracker.API.Controllers.Admin
         public async Task<IActionResult> CreateClient(CreateClientCommand command, CancellationToken cancellationToken)
         {
             var client = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetClientById), new { id = client.ClientId }, client);
+            var response = new CreateClientResponse { ClientId = client.ClientId, ClientCode = client.ClientCode, ClientName = client.Name };
+            return CreatedAtAction(nameof(GetClientById), new { id = client.ClientId }, response);
         }
         [HttpPut]
         [Route("{id}")]
@@ -112,7 +113,8 @@ namespace InventoryTracker.API.Controllers.Admin
             var client = await _mediator.Send(command, cancellationToken);
             if (client == null)
                 return NotFound();
-            return Ok(client);
+            var response = new CreateClientResponse { ClientId = client.ClientId, ClientCode = client.ClientCode, ClientName = client.Name };
+            return Ok(response);
         }
 
         [HttpPatch]

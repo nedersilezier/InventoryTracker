@@ -65,7 +65,18 @@
                 </a>
             </div>
         </div>
-
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
+                @successMessage
+            </div>
+        }
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm">
+                @errorMessage
+            </div>
+        }
         <!-- Table -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
@@ -159,12 +170,22 @@
                                                    class="p-2 hover:bg-slate-100 rounded-lg">
                                                 <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">edit</span>
                                             </a>
-                                            <a asp-controller="Countries"
-                                                   asp-action="Delete"
-                                                   asp-route-id="@country.CountryId"
-                                                   class="p-2 hover:bg-slate-100 rounded-lg">
-                                                <span class="material-symbols-outlined text-slate-400 hover:text-red-400">delete</span>
-                                            </a>
+                                            <form asp-controller="Countries"
+                                                  asp-action="Delete"
+                                                  method="post"
+                                                  class="inline">
+    
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden" name="id" value="@country.CountryId" />
+                                                <button type="submit"
+                                                        class="p-2 hover:bg-slate-100 rounded-lg group"
+                                                        onclick="return confirm('Are you sure you want to permamently delete this country?')">
+                                                    <span class="material-symbols-outlined text-slate-400 hover:text-red-400">
+                                                        delete
+                                                    </span>
+                                                </button>
+                                            </form>
 
                                         </div>
                                     </td>

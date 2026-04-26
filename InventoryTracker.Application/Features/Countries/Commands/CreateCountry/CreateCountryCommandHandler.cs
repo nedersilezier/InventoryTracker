@@ -7,14 +7,14 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Countries.Commands.CreateCountry
 {
-    public class CreateCountryCommandHandler: IRequestHandler<CreateCountryCommand, CountryDTO>
+    public class CreateCountryCommandHandler: IRequestHandler<CreateCountryCommand, CountryCreatedDTO>
     {
         private readonly ICountriesService _countriesService;
         public CreateCountryCommandHandler(ICountriesService countriesService)
         {
             _countriesService = countriesService;
         }
-        public async Task<CountryDTO> Handle(CreateCountryCommand request, CancellationToken cancellationToken)
+        public async Task<CountryCreatedDTO> Handle(CreateCountryCommand request, CancellationToken cancellationToken)
         {
             request.Name = request.Name.Trim();
             var nameSplit = request.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);

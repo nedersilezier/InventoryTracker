@@ -26,12 +26,6 @@ builder.Services.AddHttpClient<ApiHttpClient>(client =>
 builder.Services.AddScoped<IAccessTokenProvider, HttpContextAccessTokenProvider>();
 builder.Services.AddTransient<AccessTokenHandler>();
 
-// Register HttpClient for Countries
-builder.Services.AddHttpClient<ICountriesService, CountriesService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-
 // Register HttpClient for Auth
 builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
 {
@@ -64,6 +58,9 @@ builder.Services.AddScoped<IWarehousesService, WarehousesService>();
 
 //register StocksService
 builder.Services.AddScoped<IStocksService, StocksService>();
+
+//register CountriesService
+builder.Services.AddScoped<ICountriesService, CountriesService>();
 
 var app = builder.Build();
 

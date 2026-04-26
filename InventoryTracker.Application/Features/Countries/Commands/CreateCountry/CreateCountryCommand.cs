@@ -6,7 +6,7 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Countries.Commands.CreateCountry
 {
-    public class CreateCountryCommand: IRequest<CountryDTO>
+    public class CreateCountryCommand: IRequest<CountryCreatedDTO>
     {
         public string Name { get; set; } = default!;
         public string Code { get; set; } = default!;

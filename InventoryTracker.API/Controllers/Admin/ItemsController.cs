@@ -6,6 +6,7 @@ using InventoryTracker.Application.Features.Items.Commands.UpdateItem;
 using InventoryTracker.Application.Features.Items.Queries.GetItems;
 using InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses;
 using InventoryTracker.Contracts.Requests.Items;
+using InventoryTracker.Contracts.Responses.Clients;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Items;
 using InventoryTracker.Contracts.Responses.Warehouses;
@@ -82,7 +83,8 @@ namespace InventoryTracker.API.Controllers.Admin
         public async Task<IActionResult> CreateItem(CreateItemCommand command, CancellationToken cancellationToken)
         {
             var item = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetItemById), new { id = item.ItemId }, item);
+            var response = new CreateItemResponse { ItemId = item.ItemId, Name = item.Name, SKU = item.SKU };
+            return CreatedAtAction(nameof(GetItemById), new { id = item.ItemId }, response);
         }
         [HttpPut]
         [Route("{id}")]
@@ -101,7 +103,8 @@ namespace InventoryTracker.API.Controllers.Admin
             var item = await _mediator.Send(command, cancellationToken);
             if (item == null)
                 return NotFound();
-            return Ok(item);
+            var response = new CreateItemResponse { ItemId = item.ItemId, Name = item.Name, SKU = item.SKU };
+            return Ok(response);
         }
        
         [HttpPatch]

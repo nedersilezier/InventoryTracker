@@ -24,11 +24,15 @@ namespace InventoryTracker.APIClient
             if (!response.IsSuccessStatusCode)
                 return await ApiErrorParser.ToFailResult<T>(response, fallbackMessage, cancellationToken);
 
+            if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
+            {
+                return ServiceResult<T>.Ok(default!);
+            }
             var content = await response.Content.ReadFromJsonAsync<T>(cancellationToken: cancellationToken);
 
             if (content is null)
                 return ServiceResult<T>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
-
+                
             return ServiceResult<T>.Ok(content);
         }
 
@@ -50,6 +54,11 @@ namespace InventoryTracker.APIClient
         public Task<ServiceResult<T>> PatchAsync<T>(string url, object? body, string fallbackMessage, CancellationToken cancellationToken)
         {
             return SendAsync<T>(HttpMethod.Patch, url, body ?? new { }, fallbackMessage, cancellationToken);
+        }
+
+        public Task<ServiceResult<T>> DeleteAsync<T>(string url, string fallbackMessage, CancellationToken cancellationToken)
+        {
+            return SendAsync<T>(HttpMethod.Delete, url, body: null, fallbackMessage, cancellationToken);
         }
     }
 }

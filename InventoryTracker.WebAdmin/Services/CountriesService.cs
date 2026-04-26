@@ -1,29 +1,29 @@
-﻿using InventoryTracker.Contracts.Requests.Countries;
+﻿using InventoryTracker.APIClient;
+using InventoryTracker.Contracts.Helpers;
+using InventoryTracker.Contracts.Requests.Clients;
+using InventoryTracker.Contracts.Requests.Countries;
+using InventoryTracker.Contracts.Responses.Clients;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Countries;
 using InventoryTracker.WebAdmin.Interfaces;
+using InventoryTracker.WebAdmin.ViewModels.Clients;
+using InventoryTracker.WebAdmin.ViewModels.Common;
 using InventoryTracker.WebAdmin.ViewModels.Countries;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
-using System.Net.Http.Headers;
 
 namespace InventoryTracker.WebAdmin.Services
 {
     public class CountriesService : ICountriesService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public CountriesService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        private readonly ApiHttpClient _apiClient;
+        public CountriesService(ApiHttpClient apiClient)
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            _apiClient = apiClient;
         }
 
-        public async Task<CountriesIndexViewModel> GetAllAsync(GetCountriesRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<CountriesIndexViewModel>> GetAllAsync(GetCountriesRequest request, CancellationToken cancellationToken)
         {
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-
-            if (string.IsNullOrEmpty(accessToken))
-                throw new UnauthorizedAccessException("Access token is missing.");
+            ArgumentNullException.ThrowIfNull(request);
 
             var pageSize = request.PageSize ?? 5;
             var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
@@ -32,14 +32,13 @@ namespace InventoryTracker.WebAdmin.Services
                 query.Add($"searchTerm={Uri.EscapeDataString(request.SearchTerm)}");
             }
             var url = $"/api/admin/countries?{string.Join("&", query)}";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            var result = await _apiClient.GetAsync<PagedResponse<CountryResponseDTO>>(url, "Failed to load countries.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<CountriesIndexViewModel>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
+            var pagedResponse = result.Data!;
 
-            var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<CountryResponseDTO>>(cancellationToken: cancellationToken);
-            var countries = pagedResponse?.Items.Select(country => new CountryListItemViewModel
+            var countries = pagedResponse.Items.Select(country => new CountryListItemViewModel
             {
                 CountryId = country.CountryId,
                 Name = country.Name,
@@ -57,7 +56,7 @@ namespace InventoryTracker.WebAdmin.Services
             {
                 routeValues["SearchTerm"] = request.SearchTerm;
             }
-            return new CountriesIndexViewModel
+            var viewModel = new CountriesIndexViewModel
             {
                 Countries = countries,
                 SearchTerm = request?.SearchTerm,
@@ -78,21 +77,39 @@ namespace InventoryTracker.WebAdmin.Services
                     }
                 }
             };
+            return ServiceResult<CountriesIndexViewModel>.Ok(viewModel);
         }
 
-        public Task<CountryResponseDTO> GetCountryByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<ServiceResult<CreateEditCountryViewModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var result = await _apiClient.GetAsync<CountryResponseDTO>($"/api/admin/countries/{id}", "Failed to load country.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<CreateEditCountryViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
+
+            var country = result.Data!;
+            var vm = new CreateEditCountryViewModel
+            {
+                CountryId = country.CountryId,
+                Name = country.Name,
+                CountryCode = country.Code
+            };
+
+            return ServiceResult<CreateEditCountryViewModel>.Ok(vm);
+        }
+        public async Task<ServiceResult<CreateCountryResponse>> CreateCountryAsync(CreateCountryRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            return await _apiClient.PostAsync<CreateCountryResponse>("/api/admin/countries", request, "Failed to create country.", cancellationToken);
+        }
+        public async Task<ServiceResult<CreateCountryResponse>> UpdateCountryAsync(Guid id, UpdateCountryRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            return await _apiClient.PutAsync<CreateCountryResponse>($"/api/admin/countries/{id}", request, "Failed to update country.", cancellationToken);
         }
 
-        public Task<CountryResponseDTO> CreateCountryAsync(CreateCountryRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<object>> DeleteCountryAsync(Guid id, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<CountryResponseDTO> UpdateCountryAsync(Guid id, UpdateCountryRequest request, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
+            return await _apiClient.DeleteAsync<object>($"/api/admin/countries/{id}", fallbackMessage: "Failed to delete country.", cancellationToken: cancellationToken);
         }
     }
 }

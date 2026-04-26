@@ -67,7 +67,8 @@ namespace InventoryTracker.API.Controllers.Admin
         public async Task<IActionResult> CreateCountry(CreateCountryCommand command, CancellationToken cancellationToken)
         {
             var country = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetCountryById), new { id = country.CountryId }, country);
+            var response = new CreateCountryResponse { CountryId = country.CountryId, Name = country.Name };
+            return CreatedAtAction(nameof(GetCountryById), new { id = country.CountryId }, response);
         }
         [HttpPut]
         [Route("{id}")]
@@ -82,7 +83,8 @@ namespace InventoryTracker.API.Controllers.Admin
             var country = await _mediator.Send(command, cancellationToken);
             if (country == null)
                 return NotFound();
-            return Ok(country);
+            var response = new CreateCountryResponse { CountryId = country.CountryId, Name = country.Name };
+            return Ok(response);
         }
 
         [HttpDelete]

@@ -1,14 +1,16 @@
-﻿using InventoryTracker.Contracts.Requests.Warehouses;
-using InventoryTracker.Application.Features.Warehouses.Commands.ActivateWarehouse;
+﻿using InventoryTracker.Application.Features.Warehouses.Commands.ActivateWarehouse;
 using InventoryTracker.Application.Features.Warehouses.Commands.CreateWarehouse;
 using InventoryTracker.Application.Features.Warehouses.Commands.DeactivateWarehouse;
 using InventoryTracker.Application.Features.Warehouses.Commands.UpdateWarehouse;
 using InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses;
+using InventoryTracker.Contracts.Requests.Warehouses;
+using InventoryTracker.Contracts.Responses.Common;
+using InventoryTracker.Contracts.Responses.Items;
+using InventoryTracker.Contracts.Responses.Warehouses;
+using InventoryTracker.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using InventoryTracker.Contracts.Responses.Common;
-using InventoryTracker.Contracts.Responses.Warehouses;
 
 namespace InventoryTracker.API.Controllers.Admin
 {
@@ -85,7 +87,8 @@ namespace InventoryTracker.API.Controllers.Admin
         public async Task<IActionResult> CreateWarehouse(CreateWarehouseCommand command, CancellationToken cancellationToken)
         {
             var warehouse = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetWarehouseById), new { id = warehouse.WarehouseId }, warehouse);
+            var response = new CreateWarehouseResponse { WarehouseId = warehouse.WarehouseId, Name = warehouse.Name, Code = warehouse.Code };
+            return CreatedAtAction(nameof(GetWarehouseById), new { id = warehouse.WarehouseId }, response);
         }
 
         [HttpPut]
@@ -110,7 +113,8 @@ namespace InventoryTracker.API.Controllers.Admin
             var warehouse = await _mediator.Send(command, cancellationToken);
             if (warehouse == null)
                 return NotFound();
-            return Ok(warehouse);
+            var response = new CreateWarehouseResponse { WarehouseId = warehouse.WarehouseId, Name = warehouse.Name, Code = warehouse.Code };
+            return Ok(response);
         }
 
         [HttpPatch]
