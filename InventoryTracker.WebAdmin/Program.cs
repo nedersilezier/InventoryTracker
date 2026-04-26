@@ -11,8 +11,16 @@ builder.Services.AddControllersWithViews();
 
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"]!;
 
+// !!! TO BE REMOVED after all services are updated to use ApiHttpClient
 // Register HttpContextAccessor for accessing cookies in services
 builder.Services.AddHttpContextAccessor();
+
+// Register universal ApiHttpClient
+builder.Services.AddHttpClient<ApiHttpClient>(client =>
+{
+    client.BaseAddress = new Uri(apiBaseUrl);
+})
+.AddHttpMessageHandler<AccessTokenHandler>();
 
 // Register AccessTokenProvider and HttpMessageHandler for attaching access tokens to outgoing requests
 builder.Services.AddScoped<IAccessTokenProvider, HttpContextAccessTokenProvider>();
@@ -54,23 +62,14 @@ builder.Services.AddHttpClient<IWarehousesService, WarehousesService>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-// register HttpClient for Items
-builder.Services.AddHttpClient<IItemsService, ItemsService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-}).AddHttpMessageHandler<AccessTokenHandler>();
+//register ItemsService
+builder.Services.AddScoped<IItemsService, ItemsService>();
 
-// register HttpClient for Clients
-builder.Services.AddHttpClient<IClientsService, ClientsService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-}).AddHttpMessageHandler<AccessTokenHandler>();
+//register ClientsService
+builder.Services.AddScoped<IClientsService, ClientsService>();
 
-// register HttpClient for lookups
-builder.Services.AddHttpClient<ILookupsService, LookupsService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-}).AddHttpMessageHandler<AccessTokenHandler>();
+//register LookupsService
+builder.Services.AddScoped<ILookupsService, LookupsService>();
 
 var app = builder.Build();
 

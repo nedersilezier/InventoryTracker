@@ -7,24 +7,18 @@ namespace InventoryTracker.WebAdmin.Services
 {
     public class LookupsService: ILookupsService
     {
-        private readonly HttpClient _httpClient;
-        public LookupsService(HttpClient httpClient)
+        private ApiHttpClient _apiClient;
+        public LookupsService(HttpClient httpClient, ApiHttpClient apiClient)
         {
-            _httpClient = httpClient;
+            _apiClient = apiClient;
         }
         public async Task<ServiceResult<List<CountryResponseSelectDTO>>> GetCountriesAsync(CancellationToken cancellationToken)
         {
-            var url = $"/api/lookups/countries";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            var result = await _apiClient.GetAsync<List<CountryResponseSelectDTO>>("/api/lookups/countries", "Failed to load countries.", cancellationToken);
+            if(!result.Success)
+                return ServiceResult<List<CountryResponseSelectDTO>>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
 
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<List<CountryResponseSelectDTO>>(response, "Failed to load countries.", cancellationToken);
-
-            var countries = await response.Content.ReadFromJsonAsync<List<CountryResponseSelectDTO>>(cancellationToken: cancellationToken)
-                ?? new List<CountryResponseSelectDTO>();
-            
-            return ServiceResult<List<CountryResponseSelectDTO>>.Ok(countries);
+            return ServiceResult<List<CountryResponseSelectDTO>>.Ok(result.Data!);
         }
     }
 }

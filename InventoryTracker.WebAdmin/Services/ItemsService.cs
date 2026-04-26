@@ -11,31 +11,33 @@ namespace InventoryTracker.WebAdmin.Services
 {
     public class ItemsService : IItemsService
     {
-        private readonly HttpClient _httpClient;
-        public ItemsService(HttpClient httpClient)
+        private readonly ApiHttpClient _apiClient;
+
+        public ItemsService(ApiHttpClient apiClient)
         {
-            _httpClient = httpClient;
+            _apiClient = apiClient;
         }
         public async Task<ServiceResult<ItemsIndexViewModel>> GetAllAsync(GetItemsRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+
             var pageSize = request.PageSize ?? 5;
-            var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
+
+            var query = new List<string>{ $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
+
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-            {
                 query.Add($"searchTerm={Uri.EscapeDataString(request.SearchTerm)}");
-            }
+
             var url = $"/api/admin/items?{string.Join("&", query)}";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
 
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<ItemsIndexViewModel>(response, "Failed to load items.", cancellationToken);
+            var result = await _apiClient.GetAsync<PagedResponse<ItemResponseDTO>>(url, "Failed to load items.", cancellationToken);
 
-            var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<ItemResponseDTO>>(cancellationToken: cancellationToken)
-                ?? new PagedResponse<ItemResponseDTO>();
+            if (!result.Success)
+                return ServiceResult<ItemsIndexViewModel>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
 
-            var items = pagedResponse?.Items.Select(item => new ItemListItemViewModel
+            var pagedResponse = result.Data!;
+
+            var items = pagedResponse.Items.Select(item => new ItemListItemViewModel
             {
                 ItemId = item.ItemId,
                 Name = item.Name,
@@ -45,16 +47,16 @@ namespace InventoryTracker.WebAdmin.Services
                 Weight = item.Weight,
                 Description = item.Description,
                 IsActive = item.IsActive
-            }).ToList() ?? new List<ItemListItemViewModel>();
+            }).ToList();
 
             var routeValues = new Dictionary<string, string?>
             {
                 ["PageSize"] = pageSize.ToString()
             };
+
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-            {
                 routeValues["SearchTerm"] = request.SearchTerm;
-            }
+
             var viewModel = new ItemsIndexViewModel
             {
                 Items = items,
@@ -70,39 +72,24 @@ namespace InventoryTracker.WebAdmin.Services
                     {
                         CurrentPage = pagedResponse?.PageNumber ?? 1,
                         TotalPages = pagedResponse?.TotalPages ?? 1,
-                        PageSize = pagedResponse?.PageSize ?? 1,
+                        PageSize = pagedResponse?.PageSize ?? 5,
                         Controller = "Items",
                         Action = "Index",
                         RouteValues = routeValues
                     }
                 }
             };
+
             return ServiceResult<ItemsIndexViewModel>.Ok(viewModel);
         }
         public async Task<ServiceResult<CreateEditItemViewModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var url = $"/api/admin/items/{id}";
+            var result = await _apiClient.GetAsync<ItemResponseDTO>($"/api/admin/items/{id}", "Failed to load item.", cancellationToken);
 
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            if (!result.Success)
+                return ServiceResult<CreateEditItemViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
 
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return await ApiErrorParser.ToFailResult<CreateEditItemViewModel>(
-                    response,
-                    "Failed to load item.",
-                    cancellationToken);
-            }
-
-            var item = await response.Content.ReadFromJsonAsync<ItemResponseDTO>(
-                cancellationToken: cancellationToken);
-
-            if (item is null)
-            {
-                return ServiceResult<CreateEditItemViewModel>.Fail(
-                    "Failed to parse item details from server.",
-                    statusCode: (int)response.StatusCode);
-            }
+            var item = result.Data!;
 
             var vm = new CreateEditItemViewModel
             {
@@ -119,18 +106,12 @@ namespace InventoryTracker.WebAdmin.Services
         }
         public async Task<ServiceResult<ItemDetailsViewModel>> GetDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var url = $"/api/admin/items/{id}/details";
+            var result = await _apiClient.GetAsync<ItemDetailsResponseDTO>($"/api/admin/items/{id}/details", "Failed to load item details.", cancellationToken);
 
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+            if (!result.Success)
+                return ServiceResult<ItemDetailsViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
 
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<ItemDetailsViewModel>(response, "Failed to load item details.", cancellationToken);
-
-            var item = await response.Content.ReadFromJsonAsync<ItemDetailsResponseDTO>(cancellationToken: cancellationToken);
-
-            if (item is null)
-                return ServiceResult<ItemDetailsViewModel>.Fail("Failed to parse item details from server.", statusCode: (int)response.StatusCode);
+            var item = result.Data!;
 
             var vm = new ItemDetailsViewModel
             {
@@ -157,75 +138,22 @@ namespace InventoryTracker.WebAdmin.Services
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var url = $"/api/admin/items";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
-
-            requestMessage.Content = JsonContent.Create(request);
-
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<CreateItemResponse>(response, "Failed to create item.", cancellationToken);
-
-            var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(cancellationToken: cancellationToken);
-
-            if (content is null)
-                return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
-
-            return ServiceResult<CreateItemResponse>.Ok(content);
+            return await _apiClient.PostAsync<CreateItemResponse>("/api/admin/items", request, "Failed to create item.", cancellationToken);
         }
         public async Task<ServiceResult<CreateItemResponse>> UpdateItemAsync(Guid id, UpdateItemRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var url = $"/api/admin/items/{id}";
-
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Put, url)
-            {
-                Content = JsonContent.Create(request)
-            };
-
-            using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<CreateItemResponse>(response, "Failed to update item.", cancellationToken);
-
-            var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(
-                cancellationToken: cancellationToken);
-
-            if (content is null)
-                return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
-
-            return ServiceResult<CreateItemResponse>.Ok(content);
+            return await _apiClient.PutAsync<CreateItemResponse>($"/api/admin/items/{id}", request, "Failed to update item.",    cancellationToken);
         }
-        public Task<ServiceResult<CreateItemResponse>> DeactivateItemAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<ServiceResult<CreateItemResponse>> DeactivateItemAsync(Guid id, CancellationToken cancellationToken)
         {
-            return ChangeItemActiveStateAsync(id, "deactivate", "Failed to deactivate item.", cancellationToken);
+            return await _apiClient.PatchAsync<CreateItemResponse>($"/api/admin/items/{id}/deactivate", null, "Failed to deactivate item.", cancellationToken);
         }
 
-        public Task<ServiceResult<CreateItemResponse>> ActivateItemAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<ServiceResult<CreateItemResponse>> ActivateItemAsync(Guid id, CancellationToken cancellationToken)
         {
-            return ChangeItemActiveStateAsync(id, "activate", "Failed to activate item.", cancellationToken);
-        }
-
-        private async Task<ServiceResult<CreateItemResponse>> ChangeItemActiveStateAsync(Guid id, string action, string fallbackMessage, CancellationToken cancellationToken)
-        {
-            var url = $"/api/admin/items/{id}/{action}";
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Patch, url)
-            {
-                Content = JsonContent.Create(new { })
-            };
-
-            using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<CreateItemResponse>(response, fallbackMessage, cancellationToken);
-
-            var content = await response.Content.ReadFromJsonAsync<CreateItemResponse>(cancellationToken: cancellationToken);
-
-            if (content is null)
-                return ServiceResult<CreateItemResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
-
-            return ServiceResult<CreateItemResponse>.Ok(content);
+            return await _apiClient.PatchAsync<CreateItemResponse>($"/api/admin/items/{id}/activate", null, "Failed to activate item.", cancellationToken);
         }
     }
 }

@@ -10,12 +10,12 @@ using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 
 namespace InventoryTracker.WebAdmin.Services
 {
-    public class ClientsService: IClientsService
+    public class ClientsService : IClientsService
     {
-        private readonly HttpClient _httpClient;
-        public ClientsService(HttpClient httpClient)
+        private readonly ApiHttpClient _apiClient;
+        public ClientsService(HttpClient httpClient, ApiHttpClient apiClient)
         {
-            _httpClient = httpClient;
+            _apiClient = apiClient;
         }
         public async Task<ServiceResult<ClientsIndexViewModel>> GetAllAsync(GetClientsRequest request, CancellationToken cancellationToken)
         {
@@ -24,17 +24,15 @@ namespace InventoryTracker.WebAdmin.Services
             var pageSize = request.PageSize ?? 5;
             var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
-            {
                 query.Add($"searchTerm={Uri.EscapeDataString(request.SearchTerm)}");
-            }
+
             var url = $"/api/admin/clients?{string.Join("&", query)}";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
 
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<ClientsIndexViewModel>(response, "Failed to load items.", cancellationToken);
+            var result = await _apiClient.GetAsync<PagedResponse<ClientResponseDTO>>(url, "Failed to load clients.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<ClientsIndexViewModel>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
 
-            var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<ClientResponseDTO>>(cancellationToken: cancellationToken);
+            var pagedResponse = result.Data!;
             var clients = pagedResponse?.Items.Select(client => new ClientListItemViewModel
             {
                 ClientId = client.ClientId,
@@ -82,19 +80,11 @@ namespace InventoryTracker.WebAdmin.Services
         }
         public async Task<ServiceResult<CreateEditClientViewModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var url = $"/api/admin/clients/{id}";
+            var result = await _apiClient.GetAsync<ClientResponseDTO>($"/api/admin/clients/{id}", "Failed to load client.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<CreateEditClientViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
 
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<CreateEditClientViewModel>(response, "Failed to load client.", cancellationToken);
-
-            var client = await response.Content.ReadFromJsonAsync<ClientResponseDTO>(cancellationToken: cancellationToken);
-
-            if (client is null)
-                return ServiceResult<CreateEditClientViewModel>.Fail("Failed to parse client details from server.",statusCode: (int)response.StatusCode);
-
+            var client = result.Data!;
             var vm = new CreateEditClientViewModel
             {
                 ClientId = client.ClientId,
@@ -117,19 +107,11 @@ namespace InventoryTracker.WebAdmin.Services
         }
         public async Task<ServiceResult<ClientDetailsViewModel>> GetDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
         {
-            var url = $"/api/admin/clients/{id}/details";
+            var result = await _apiClient.GetAsync<ClientDetailsResponseDTO>($"/api/admin/clients/{id}/details", "Failed to load client details.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<ClientDetailsViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
 
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<ClientDetailsViewModel>(response, "Failed to load client details.", cancellationToken);
-
-            var client = await response.Content.ReadFromJsonAsync<ClientDetailsResponseDTO>(cancellationToken: cancellationToken);
-
-            if (client is null)
-                return ServiceResult<ClientDetailsViewModel>.Fail("Failed to parse client details from server.", statusCode: (int)response.StatusCode);
-
+            var client = result.Data!;
             var vm = new ClientDetailsViewModel
             {
                 ClientId = client.ClientId,
@@ -160,75 +142,23 @@ namespace InventoryTracker.WebAdmin.Services
         public async Task<ServiceResult<CreateClientResponse>> CreateClientAsync(CreateClientRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-
-            var url = $"/api/admin/clients";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, url);
-
-            requestMessage.Content = JsonContent.Create(request);
-
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<CreateClientResponse>(response, "Failed to create client.", cancellationToken);
-
-            var content = await response.Content.ReadFromJsonAsync<CreateClientResponse>(cancellationToken: cancellationToken);
-
-            if (content is null)
-                return ServiceResult<CreateClientResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
-
-            return ServiceResult<CreateClientResponse>.Ok(content);
+            return await _apiClient.PostAsync<CreateClientResponse>("/api/admin/clients", request, "Failed to create client.", cancellationToken);
         }
         public async Task<ServiceResult<CreateClientResponse>> UpdateClientAsync(Guid id, UpdateClientRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-
-            var url = $"/api/admin/clients/{id}";
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Put, url)
-            {
-                Content = JsonContent.Create(request)
-            };
-
-            using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<CreateClientResponse>(response, "Failed to update client.", cancellationToken);
-
-            var content = await response.Content.ReadFromJsonAsync<CreateClientResponse>(cancellationToken: cancellationToken);
-
-            if (content is null)
-                return ServiceResult<CreateClientResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
-
-            return ServiceResult<CreateClientResponse>.Ok(content);
+            return await _apiClient.PutAsync<CreateClientResponse>($"/api/admin/clients/{id}", request, "Failed to update client.", cancellationToken);
         }
-        public Task<ServiceResult<CreateClientResponse>> DeactivateClientAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<ServiceResult<CreateClientResponse>> DeactivateClientAsync(Guid id, CancellationToken cancellationToken)
         {
-            return ChangeClientActiveStateAsync(id, "deactivate", "Failed to deactivate client.", cancellationToken);
+            return await _apiClient.PatchAsync<CreateClientResponse>($"/api/admin/clients/{id}/deactivate", null, "Failed to deactivate client.", cancellationToken);
         }
 
-        public Task<ServiceResult<CreateClientResponse>> ActivateClientAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<ServiceResult<CreateClientResponse>> ActivateClientAsync(Guid id, CancellationToken cancellationToken)
         {
-            return ChangeClientActiveStateAsync(id, "activate", "Failed to activate client.", cancellationToken);
+            return await _apiClient.PatchAsync<CreateClientResponse>($"/api/admin/clients/{id}/activate", null, "Failed to activate client.", cancellationToken);
         }
         #region Helpers
-        private async Task<ServiceResult<CreateClientResponse>> ChangeClientActiveStateAsync(Guid id, string action, string fallbackMessage, CancellationToken cancellationToken)
-        {
-            var url = $"/api/admin/clients/{id}/{action}";
-            using var httpRequest = new HttpRequestMessage(HttpMethod.Patch, url)
-            {
-                Content = JsonContent.Create(new { })
-            };
-
-            using var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
-
-            if (!response.IsSuccessStatusCode)
-                return await ApiErrorParser.ToFailResult<CreateClientResponse>(response, fallbackMessage, cancellationToken);
-
-            var content = await response.Content.ReadFromJsonAsync<CreateClientResponse>(cancellationToken: cancellationToken);
-
-            if (content is null)
-                return ServiceResult<CreateClientResponse>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
-
-            return ServiceResult<CreateClientResponse>.Ok(content);
-        }
         private static string BuildAddressLine1(AddressResponseDTO a)
         {
             if (a == null) return string.Empty;
