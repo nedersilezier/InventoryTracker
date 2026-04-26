@@ -1,8 +1,6 @@
 ﻿using InventoryTracker.Contracts.Requests.Clients;
 using InventoryTracker.Contracts.Requests.Common;
-using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.WebAdmin.Interfaces;
-using InventoryTracker.WebAdmin.Services;
 using InventoryTracker.WebAdmin.ViewModels.Clients;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using Microsoft.AspNetCore.Mvc;
@@ -27,14 +25,9 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
-                if (result.StatusCode == 401)
-                    return RedirectToAction("Login", "Auth");
-                if (result.StatusCode == 403)
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                    return RedirectToAction("AccessDenied", "Auth");
-                }
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
 
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load clients.";
 
@@ -68,14 +61,9 @@ namespace InventoryTracker.WebAdmin.Controllers
             var result = await _clientsService.GetDetailsByIdAsync(id, cancellationToken);
             if (!result.Success)
             {
-                if (result.StatusCode == 401)
-                    return RedirectToAction("Login", "Auth");
-                if (result.StatusCode == 403)
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                    return RedirectToAction("AccessDenied", "Auth");
-                }
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
 
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load client.";
                 return RedirectToAction(nameof(Index));
@@ -89,14 +77,10 @@ namespace InventoryTracker.WebAdmin.Controllers
             var countriesResult = await _lookupsService.GetCountriesAsync(cancellationToken);
             if (!countriesResult.Success)
             {
-                if (countriesResult.StatusCode == 401)
-                    return RedirectToAction("Login", "Auth");
-                if (countriesResult.StatusCode == 403)
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                    return RedirectToAction("AccessDenied", "Auth");
-                }
+                var authFailure = HandleAuthFailure(countriesResult);
+                if (authFailure is not null)
+                    return authFailure;
+
                 TempData["ErrorMessage"] = countriesResult.ErrorMessage ?? "Unable to load countries.";
                 return RedirectToAction(nameof(Index));
             }
@@ -140,14 +124,9 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
-                if (result.StatusCode == 401)
-                    return RedirectToAction("Login", "Auth");
-                if (result.StatusCode == 403)
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                    return RedirectToAction("AccessDenied", "Auth");
-                }
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
 
                 AddServiceErrorsToModelState(result, "Unable to create client");
                 return View("CreateEdit", vm);
@@ -162,14 +141,9 @@ namespace InventoryTracker.WebAdmin.Controllers
             var result = await _clientsService.GetByIdAsync(id, cancellationToken);
             if (!result.Success)
             {
-                if (result.StatusCode == 401)
-                    return RedirectToAction("Login", "Auth");
-                if (result.StatusCode == 403)
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                    return RedirectToAction("AccessDenied", "Auth");
-                }
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
 
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load client.";
                 return RedirectToAction(nameof(Index));
@@ -208,14 +182,10 @@ namespace InventoryTracker.WebAdmin.Controllers
                 var countriesResult = await _lookupsService.GetCountriesAsync(cancellationToken);
                 if (!countriesResult.Success)
                 {
-                    if (countriesResult.StatusCode == 401)
-                        return RedirectToAction("Login", "Auth");
-                    if (countriesResult.StatusCode == 403)
-                    {
-                        Response.Cookies.Delete("accessToken");
-                        Response.Cookies.Delete("refreshToken");
-                        return RedirectToAction("AccessDenied", "Auth");
-                    }
+                    var authFailure = HandleAuthFailure(countriesResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
                     TempData["ErrorMessage"] = countriesResult.ErrorMessage ?? "Unable to load available countries.";
                     return RedirectToAction(nameof(Index));
                 }
@@ -274,14 +244,9 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
-                if (result.StatusCode == 401)
-                    return RedirectToAction("Login", "Auth");
-                if (result.StatusCode == 403)
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                    return RedirectToAction("AccessDenied", "Auth");
-                }
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
 
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to deactivate client.";
             }
@@ -304,14 +269,9 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
-                if (result.StatusCode == 401)
-                    return RedirectToAction("Login", "Auth");
-                if (result.StatusCode == 403)
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                    return RedirectToAction("AccessDenied", "Auth");
-                }
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
 
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to activate client.";
             }

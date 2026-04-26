@@ -36,5 +36,19 @@ namespace InventoryTracker.WebAdmin.Controllers
                 ModelState.AddModelError(string.Empty, fallbackMessage);
             }
         }
+        protected IActionResult? HandleAuthFailure<T>(ServiceResult<T> result)
+        {
+            if (result.StatusCode == 401)
+                return RedirectToAction("Login", "Auth");
+
+            if (result.StatusCode == 403)
+            {
+                Response.Cookies.Delete("accessToken");
+                Response.Cookies.Delete("refreshToken");
+                return RedirectToAction("AccessDenied", "Auth");
+            }
+
+            return null;
+        }
     }
 }
