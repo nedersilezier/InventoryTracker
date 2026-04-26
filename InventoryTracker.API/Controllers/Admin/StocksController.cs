@@ -28,7 +28,7 @@ namespace InventoryTracker.API.Controllers.Admin
             var query = new GetStocksQuery
             {
                 WarehouseId = request.SelectedWarehouseId,
-                PageNumber = request.PageNumber ?? 1,
+                PageNumber = request.PageNumber,
                 PageSize = request.PageSize ?? 10,
                 SearchTerm = request.SearchTerm
             };

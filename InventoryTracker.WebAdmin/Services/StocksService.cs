@@ -1,32 +1,25 @@
-﻿using InventoryTracker.Contracts.Requests.Stocks;
+﻿using InventoryTracker.APIClient;
+using InventoryTracker.Contracts.Helpers;
+using InventoryTracker.Contracts.Requests.Stocks;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Stocks;
-using InventoryTracker.Contracts.Responses.Warehouses;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using InventoryTracker.WebAdmin.ViewModels.Stocks;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Net.Http.Headers;
 
 namespace InventoryTracker.WebAdmin.Services
 {
     public class StocksService: IStocksService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public StocksService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        private readonly ApiHttpClient _apiClient;
+        public StocksService(ApiHttpClient apiClient)
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            _apiClient = apiClient;
         }
 
-        public async Task<StocksIndexViewModel> GetAllAsync(GetStocksRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<StocksIndexViewModel>> GetAllAsync(GetStocksRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-
-            if (string.IsNullOrEmpty(accessToken))
-                throw new UnauthorizedAccessException("Access token is missing.");
 
             var pageSize = request.PageSize ?? 5;
             var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
@@ -39,13 +32,13 @@ namespace InventoryTracker.WebAdmin.Services
                 query.Add($"selectedWarehouseId={request.SelectedWarehouseId}");
             }
             var url = $"/api/admin/stocks?{string.Join("&", query)}";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            
 
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            response.EnsureSuccessStatusCode();
+            var result = await _apiClient.GetAsync<PagedResponse<StocksResponseDTO>>(url, "Failed to load stocks.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<StocksIndexViewModel>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
 
-            var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<StocksResponseDTO>>(cancellationToken: cancellationToken);
+            var pagedResponse = result.Data!;
             var stocks = pagedResponse?.Items.Select(stock => new StockListItemViewModel
             {
                 StockId = stock.StockId,
@@ -57,16 +50,6 @@ namespace InventoryTracker.WebAdmin.Services
                 WarehouseName = stock.WarehouseName,
                 Quantity = stock.Quantity
             }).ToList() ?? new List<StockListItemViewModel>();
-
-            // get warehouses for select list
-            var urlForSelect = $"/api/lookups/warehouses";
-            using var requestMessageForSelect = new HttpRequestMessage(HttpMethod.Get, urlForSelect);
-            requestMessageForSelect.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-
-            using var responseForSelect = await _httpClient.SendAsync(requestMessageForSelect, cancellationToken);
-            responseForSelect.EnsureSuccessStatusCode();
-            var warehouses = await responseForSelect.Content.ReadFromJsonAsync<List<WarehouseResponseSelectDTO>>(cancellationToken: cancellationToken)
-                ?? new List<WarehouseResponseSelectDTO>();
 
             var routeValues = new Dictionary<string, string?>
             {
@@ -80,22 +63,10 @@ namespace InventoryTracker.WebAdmin.Services
             {
                 routeValues["SelectedWarehouseId"] = request.SelectedWarehouseId.ToString();
             }
-            var warehousesSelectList = new List<SelectListItem>();
-            warehousesSelectList.Add(new SelectListItem
-            {
-                Text = "All Warehouses",
-                Value = ""
-            });
-            warehousesSelectList.AddRange(warehouses.Select(w => new SelectListItem
-            {
-                Text = w.Name,
-                Value = w.WarehouseId.ToString(),
-            }).ToList());
 
-            return new StocksIndexViewModel
+            var viewModel = new StocksIndexViewModel
             {
                 Stocks = stocks,
-                Warehouses = warehousesSelectList,
                 SearchTerm = request.SearchTerm,
                 SelectedWarehouseId = request.SelectedWarehouseId,
                 PageSize = pageSize,
@@ -115,6 +86,7 @@ namespace InventoryTracker.WebAdmin.Services
                     }
                 }
             };
+            return ServiceResult<StocksIndexViewModel>.Ok(viewModel);
         }
     }
 }

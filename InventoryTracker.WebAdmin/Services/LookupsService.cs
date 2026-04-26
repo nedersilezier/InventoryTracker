@@ -1,6 +1,7 @@
 ﻿using InventoryTracker.APIClient;
 using InventoryTracker.Contracts.Helpers;
 using InventoryTracker.Contracts.Responses.Countries;
+using InventoryTracker.Contracts.Responses.Warehouses;
 using InventoryTracker.WebAdmin.Interfaces;
 
 namespace InventoryTracker.WebAdmin.Services
@@ -19,6 +20,15 @@ namespace InventoryTracker.WebAdmin.Services
                 return ServiceResult<List<CountryResponseSelectDTO>>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
 
             return ServiceResult<List<CountryResponseSelectDTO>>.Ok(result.Data!);
+        }
+
+        public async Task<ServiceResult<List<WarehouseResponseSelectDTO>>> GetWarehousesAsync(CancellationToken cancellationToken)
+        {
+            var result = await _apiClient.GetAsync<List<WarehouseResponseSelectDTO>>("/api/lookups/warehouses", "Failed to load warehouses.", cancellationToken);
+            if(!result.Success)
+                return ServiceResult<List<WarehouseResponseSelectDTO>>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
+
+            return ServiceResult<List<WarehouseResponseSelectDTO>>.Ok(result.Data!);
         }
     }
 }

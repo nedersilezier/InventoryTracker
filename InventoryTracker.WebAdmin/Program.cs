@@ -50,12 +50,6 @@ builder.Services.AddHttpClient<IUsersService, UsersService>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-// Register HttpClient for Stocks
-builder.Services.AddHttpClient<IStocksService, StocksService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-
 //register ItemsService
 builder.Services.AddScoped<IItemsService, ItemsService>();
 
@@ -67,6 +61,9 @@ builder.Services.AddScoped<ILookupsService, LookupsService>();
 
 //register WarehousesService
 builder.Services.AddScoped<IWarehousesService, WarehousesService>();
+
+//register StocksService
+builder.Services.AddScoped<IStocksService, StocksService>();
 
 var app = builder.Build();
 
