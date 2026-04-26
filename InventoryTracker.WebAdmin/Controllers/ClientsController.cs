@@ -1,4 +1,5 @@
-﻿using InventoryTracker.Contracts.Requests.Clients;
+﻿using InventoryTracker.Contracts.Helpers;
+using InventoryTracker.Contracts.Requests.Clients;
 using InventoryTracker.Contracts.Requests.Common;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.ViewModels.Clients;
@@ -74,26 +75,24 @@ namespace InventoryTracker.WebAdmin.Controllers
         [HttpGet]
         public async Task<IActionResult> Create(CancellationToken cancellationToken)
         {
-            var countriesResult = await _lookupsService.GetCountriesAsync(cancellationToken);
+            var countriesResult = await GetCountrySelectListAsync(null, cancellationToken);
+
             if (!countriesResult.Success)
             {
                 var authFailure = HandleAuthFailure(countriesResult);
                 if (authFailure is not null)
                     return authFailure;
 
-                TempData["ErrorMessage"] = countriesResult.ErrorMessage ?? "Unable to load countries.";
+                TempData["ErrorMessage"] = countriesResult.ErrorMessage;
                 return RedirectToAction(nameof(Index));
             }
-            var createItemViewModel = new CreateEditClientViewModel();
-            var countriesSelectItems = new List<SelectListItem>();
 
-            countriesSelectItems.AddRange(countriesResult.Data!.Select(c => new SelectListItem
+            var viewModel = new CreateEditClientViewModel
             {
-                Value = c.CountryId.ToString(),
-                Text = c.CountryName
-            }));
-            createItemViewModel.AvailableCountries = countriesSelectItems;
-            return View("CreateEdit", createItemViewModel);
+                AvailableCountries = countriesResult.Data!
+            };
+
+            return View("CreateEdit", viewModel);
         }
 
         [HttpPost]
@@ -101,8 +100,22 @@ namespace InventoryTracker.WebAdmin.Controllers
         public async Task<IActionResult> Create(CreateEditClientViewModel vm, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
-                return View("CreateEdit", vm);
+            {
+                var countriesResult = await GetCountrySelectListAsync(null, cancellationToken);
 
+                if (!countriesResult.Success)
+                {
+                    var authFailure = HandleAuthFailure(countriesResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = countriesResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+                vm.AvailableCountries = countriesResult.Data!;
+                return View("CreateEdit", vm);
+            }
+            
             var request = new CreateClientRequest
             {
                 Name = vm.Name,
@@ -148,28 +161,19 @@ namespace InventoryTracker.WebAdmin.Controllers
                 TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load client.";
                 return RedirectToAction(nameof(Index));
             }
-            var countriesResult = await _lookupsService.GetCountriesAsync(cancellationToken);
+            var countriesResult = await GetCountrySelectListAsync(null, cancellationToken);
+
             if (!countriesResult.Success)
             {
-                if (countriesResult.StatusCode == 401)
-                    return RedirectToAction("Login", "Auth");
-                if (countriesResult.StatusCode == 403)
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                    return RedirectToAction("AccessDenied", "Auth");
-                }
-                TempData["ErrorMessage"] = countriesResult.ErrorMessage ?? "Unable to load available countries.";
+                var authFailure = HandleAuthFailure(countriesResult);
+                if (authFailure is not null)
+                    return authFailure;
+
+                TempData["ErrorMessage"] = countriesResult.ErrorMessage;
                 return RedirectToAction(nameof(Index));
             }
-            var countriesSelectItems = new List<SelectListItem>();
-            countriesSelectItems.AddRange(countriesResult.Data!.Select(c => new SelectListItem
-            {
-                Value = c.CountryId.ToString(),
-                Text = c.CountryName,
-                Selected = c.CountryId == result.Data!.Address.CountryId
-            }));
-            result.Data!.AvailableCountries = countriesSelectItems;
+
+            result.Data!.AvailableCountries = countriesResult.Data!;
             return View("CreateEdit", result.Data);
         }
 
@@ -179,24 +183,19 @@ namespace InventoryTracker.WebAdmin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var countriesResult = await _lookupsService.GetCountriesAsync(cancellationToken);
+                var countriesResult = await GetCountrySelectListAsync(null, cancellationToken);
+
                 if (!countriesResult.Success)
                 {
                     var authFailure = HandleAuthFailure(countriesResult);
                     if (authFailure is not null)
                         return authFailure;
 
-                    TempData["ErrorMessage"] = countriesResult.ErrorMessage ?? "Unable to load available countries.";
+                    TempData["ErrorMessage"] = countriesResult.ErrorMessage;
                     return RedirectToAction(nameof(Index));
                 }
-                var countriesSelectItems = new List<SelectListItem>();
-                countriesSelectItems.AddRange(countriesResult.Data!.Select(c => new SelectListItem
-                {
-                    Value = c.CountryId.ToString(),
-                    Text = c.CountryName,
-                    Selected = c.CountryId == vm.Address.CountryId
-                }));
-                vm.AvailableCountries = countriesSelectItems;
+
+                vm.AvailableCountries = countriesResult.Data!;
                 return View("CreateEdit", vm);
             }
             var request = new UpdateClientRequest
@@ -220,14 +219,9 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             if (!result.Success)
             {
-                if (result.StatusCode == 401)
-                    return RedirectToAction("Login", "Auth");
-                if (result.StatusCode == 403)
-                {
-                    Response.Cookies.Delete("accessToken");
-                    Response.Cookies.Delete("refreshToken");
-                    return RedirectToAction("AccessDenied", "Auth");
-                }
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
 
                 AddServiceErrorsToModelState(result, "Unable to update the client");
                 return View("CreateEdit", vm);
@@ -285,5 +279,26 @@ namespace InventoryTracker.WebAdmin.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        #region Helpers
+        private async Task<ServiceResult<List<SelectListItem>>> GetCountrySelectListAsync(Guid? selectedCountryId, CancellationToken cancellationToken)
+        {
+            var countriesResult = await _lookupsService.GetCountriesAsync(cancellationToken);
+
+            if (!countriesResult.Success)
+                return ServiceResult<List<SelectListItem>>.Fail(countriesResult.ErrorMessage ?? "Unable to load countries.", countriesResult.ValidationErrors, countriesResult.StatusCode);
+
+            var items = countriesResult.Data!
+                .Select(c => new SelectListItem
+                {
+                    Value = c.CountryId.ToString(),
+                    Text = c.CountryName,
+                    Selected = selectedCountryId.HasValue && c.CountryId == selectedCountryId.Value
+                })
+                .ToList();
+
+            return ServiceResult<List<SelectListItem>>.Ok(items);
+        }
+        #endregion
     }
 }
