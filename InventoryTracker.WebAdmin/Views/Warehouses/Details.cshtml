@@ -1,0 +1,343 @@
+﻿@model InventoryTracker.WebAdmin.ViewModels.Warehouses.WarehouseDetailsViewModel
+
+@{
+    ViewData["Title"] = "Warehouse Details";
+}
+@{
+    TempData.Remove("SuccessMessage");
+    TempData.Remove("ErrorMessage");
+}
+
+<div class="max-w-7xl mx-auto px-4 py-0">
+    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+        <div class="space-y-1">
+            <div class="mb-1">
+                <div class="flex items-center gap-2 text-slate-500 mb-2">
+                    <a asp-controller="Warehouses"
+                           asp-action="Index"
+                           class="text-xs font-semibold uppercase tracking-widest hover:text-blue-600 transition-colors">
+                        Warehouses
+                    </a>
+                    <span class="text-sm">›</span>
+                    <span class="text-xs font-semibold text-black uppercase tracking-widest">
+                        Warehouse Details
+                    </span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                    @Model.Name
+                </h1>
+
+                <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest @GetStatusBadgeClasses(Model.IsActive)">
+                    @(Model.IsActive ? "Active" : "Inactive")
+                </span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a asp-controller="Warehouses"
+                   asp-action="Edit"
+                   asp-route-id="@Model.WarehouseId"
+                   class="flex items-center gap-2 px-5 py-2.5 bg-white border border-slate-300 text-slate-900 font-semibold rounded-full shadow-sm hover:bg-slate-50 transition-all">
+                <span>✎</span>
+                <span>Edit Warehouse</span>
+            </a>
+
+            @if (Model.IsActive)
+            {
+                <form asp-controller="Warehouses" asp-action="Deactivate" asp-route-id="@Model.WarehouseId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.WarehouseId" />
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Warehouses", new { id = Model.WarehouseId })" />
+                    <button type="submit"
+                            class="flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white font-semibold rounded-full shadow hover:bg-red-700 transition-all">
+                        <span>⏻</span>
+                        <span>Deactivate</span>
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form asp-controller="Warehouses" asp-action="Activate" asp-route-id="@Model.WarehouseId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.WarehouseId" />
+                    <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Warehouses", new { id = Model.WarehouseId })" />
+                    <button type="submit"
+                            class="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white font-semibold rounded-full shadow hover:bg-green-700 transition-all">
+                        <span>⏻</span>
+                        <span>Activate</span>
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-8 space-y-8">
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+                <section class="xl:col-span-8 bg-white p-8 rounded-xl shadow-sm relative overflow-hidden border border-slate-100 group">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full transition-transform group-hover:scale-110 duration-500">
+                    </div>
+
+                    <div class="relative z-10">
+                        <div class="flex items-start justify-between gap-6 mb-8">
+                            <div>
+                                <h3 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">
+                                    Identity
+                                </h3>
+                            </div>
+
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                <span class="material-symbols-outlined text-blue-600">domain</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                    Official Name
+                                </label>
+                                <p class="text-lg font-bold text-slate-900">
+                                    @Model.Name
+                                </p>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                    Internal Code
+                                </label>
+                                <p class="text-lg font-bold text-slate-900 tracking-wide">
+                                    @Model.WarehouseCode
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="xl:col-span-4 bg-gradient-to-br from-blue-600 to-blue-700 p-8 rounded-xl shadow-sm text-white relative overflow-hidden flex flex-col">
+                    <div class="relative z-10">
+                        <h3 class="text-xs font-black uppercase tracking-widest text-white/80 mb-4">
+                            Stock Overview
+                        </h3>
+                    </div>
+                    <div class="mt-auto">
+                        <p class="text-4xl font-black tracking-tight mb-1">
+                            @Model.StockCount.ToString("N0")
+                        </p>
+
+                        <p class="text-sm text-white/90 font-medium leading-relaxed">
+                            Items currently in stock
+                        </p>
+                    </div>
+
+                    <span class="material-symbols-outlined absolute -bottom-7 -right-7 text-[9rem] opacity-10 rotate-12" style="font-variation-settings: 'FILL' 1;">
+                        inventory
+                    </span>
+                </section>
+            </div>
+
+            <section class="bg-white p-8 rounded-xl shadow-sm border border-slate-100 overflow-hidden">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-8">
+                    <div>
+                        <h3 class="text-xs font-black uppercase tracking-widest text-slate-500 mb-3">
+                            Address
+                        </h3>
+                    </div>
+
+                    @if (Model.Address is not null)
+                    {
+                        <a href="https://www.google.com/maps/search/?api=1&query=@Uri.EscapeDataString($"{Model.Address.Street} {Model.Address.HouseNumber}, {Model.Address.PostalCode} {Model.Address.City}, {Model.Address.CountryName}")"
+                               target="_blank"
+                               rel="noopener"
+                               class="inline-flex items-center gap-1 text-blue-600 text-xs font-black uppercase tracking-wider hover:text-blue-700 transition-colors">
+                            <span class="material-symbols-outlined text-[16px]">directions</span>
+                            <span>Open in Maps</span>
+                        </a>
+                    }
+                </div>
+
+                @if (Model.Address is not null)
+                {
+                    <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-stretch">
+                        <div class="xl:col-span-7 space-y-7">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                        Street
+                                    </label>
+                                    <p class="text-slate-900 font-bold">
+                                        @Model.Address.Street
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                        House Number
+                                    </label>
+                                    <p class="text-slate-900 font-bold">
+                                        @Model.Address.HouseNumber
+                                    </p>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Address.ApartmentNumber))
+                            {
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                        Apartment / Suite / Office
+                                    </label>
+                                    <p class="text-slate-900 font-bold">
+                                        @Model.Address.ApartmentNumber
+                                    </p>
+                                </div>
+                            }
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                        Postal Code
+                                    </label>
+                                    <p class="text-slate-900 font-bold">
+                                        @Model.Address.PostalCode
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                        City
+                                    </label>
+                                    <p class="text-slate-900 font-bold">
+                                        @Model.Address.City
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1.5">
+                                        Country
+                                    </label>
+                                    <p class="text-slate-900 font-bold">
+                                        @Model.Address.CountryName
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="xl:col-span-5 h-48 xl:h-auto min-h-[176px] rounded-xl bg-slate-100 relative overflow-hidden border border-slate-100">
+                            <div class="absolute inset-0 opacity-40 grayscale bg-[radial-gradient(circle_at_25%_25%,#cbd5e1_0,#cbd5e1_2px,transparent_2px),linear-gradient(90deg,transparent_0,transparent_18px,#e2e8f0_18px,#e2e8f0_20px,transparent_20px),linear-gradient(0deg,transparent_0,transparent_18px,#e2e8f0_18px,#e2e8f0_20px,transparent_20px)] bg-[length:32px_32px]"></div>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-lg border-2 border-white">
+                                    <span class="material-symbols-outlined text-white text-[22px]" style="font-variation-settings: 'FILL' 1;">location_on</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="rounded-xl bg-slate-50 p-6 text-sm text-slate-400 italic">
+                        No address provided.
+                    </div>
+                }
+            </section>
+        </div>
+
+        <aside class="lg:col-span-4 space-y-5">
+            <div class="bg-slate-100/70 rounded-2xl p-6 border border-slate-200/70 h-full">
+                <h3 class="text-sm font-bold text-slate-900 mb-6 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[18px]">history</span>
+                    <span>Audit Trail</span>
+                </h3>
+
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="flex flex-col items-center">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold">
+                                +
+                            </div>
+                            <div class="w-px h-full bg-slate-300/50 mt-2"></div>
+                        </div>
+                        <div class="pb-6">
+                            <p class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">
+                                Created By
+                            </p>
+                            <p class="text-sm text-slate-900 font-semibold">
+                                @Model.CreatedBy
+                            </p>
+                            <p class="text-[10px] text-slate-500 mt-1">
+                                @Model.CreatedAt.ToString("dd-MM-yyyy · HH:mm")
+                            </p>
+                        </div>
+                    </div>
+
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 font-bold">
+                                    ✎
+                                </div>
+                                <div class="w-px h-full bg-slate-300/50 mt-2"></div>
+                            </div>
+                            <div class="pb-6">
+                                <p class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">
+                                    Last Updated
+                                </p>
+                                <p class="text-sm text-slate-900 font-semibold">
+                                    @(string.IsNullOrWhiteSpace(Model.UpdatedBy) ? "-" : Model.UpdatedBy)
+                                </p>
+                                <p class="text-[10px] text-slate-500 mt-1">
+                                    @Model.UpdatedAt.Value.ToString("dd-MM-yyyy · HH:mm")
+                                </p>
+                            </div>
+                        </div>
+                    }
+
+                    @if (Model.DeletedAt.HasValue)
+                    {
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold">
+                                    ×
+                                </div>
+                            </div>
+                            <div class="pb-6">
+                                <p class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">
+                                    Deactivated By
+                                </p>
+                                <p class="text-sm text-slate-900 font-semibold">
+                                    @(string.IsNullOrWhiteSpace(Model.DeletedBy) ? "-" : Model.DeletedBy)
+                                </p>
+                                <p class="text-[10px] text-slate-500 mt-1">
+                                    @Model.DeletedAt.Value.ToString("dd-MM-yyyy · HH:mm")
+                                </p>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200/60">
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">
+                            Technical Identifier (GUID)
+                        </label>
+
+                        <div class="flex items-center justify-between gap-3">
+                            <code class="text-[11px] font-mono text-blue-600 font-bold break-all">
+                                @Model.WarehouseId
+                            </code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeClasses(bool isActive)
+    {
+        return isActive
+            ? "bg-blue-50 text-blue-600 border border-blue-200"
+            : "bg-red-50 text-red-600 border border-red-200";
+    }
+}

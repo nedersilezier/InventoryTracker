@@ -1,52 +1,48 @@
-﻿using InventoryTracker.Contracts.Requests.Warehouses;
+﻿using InventoryTracker.APIClient;
+using InventoryTracker.Contracts.Helpers;
+using InventoryTracker.Contracts.Requests.Warehouses;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Warehouses;
 using InventoryTracker.WebAdmin.Interfaces;
+using InventoryTracker.WebAdmin.ViewModels.Common;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using InventoryTracker.WebAdmin.ViewModels.Warehouses;
-using System.Net.Http.Headers;
 
 namespace InventoryTracker.WebAdmin.Services
 {
     public class WarehousesService: IWarehousesService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public WarehousesService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        private readonly ApiHttpClient _apiClient;
+        public WarehousesService(ApiHttpClient apiClient)
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            _apiClient = apiClient;
         }
-        public async Task<WarehousesIndexViewModel> GetAllAsync(GetWarehousesRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<WarehousesIndexViewModel>> GetAllAsync(GetWarehousesRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-
-            if (string.IsNullOrEmpty(accessToken))
-                throw new UnauthorizedAccessException("Access token is missing.");
-
             var pageSize = request.PageSize ?? 5;
             var query = new List<string> { $"pageNumber={request.PageNumber}", $"pageSize={pageSize}" };
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 query.Add($"searchTerm={Uri.EscapeDataString(request.SearchTerm)}");
             }
+
             var url = $"/api/admin/warehouses?{string.Join("&", query)}";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var result = await _apiClient.GetAsync<PagedResponse<WarehouseResponseDTO>>(url, "Failed to load warehouses.", cancellationToken);
+            if(!result.Success)
+                return ServiceResult<WarehousesIndexViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
 
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<WarehouseResponseDTO>>(cancellationToken: cancellationToken);
+            var pagedResponse = result.Data!;
             var warehouses = pagedResponse?.Items.Select(warehouse => new WarehouseListItemViewModel
             {
                 WarehouseId = warehouse.WarehouseId,
                 Name = warehouse.Name,
                 Code = warehouse.Code,
-                FullAddress = BuildFullAddress(warehouse.Address),
+                AddressLine1 = BuildAddressLine1(warehouse.Address),
+                AddressLine2 = BuildAddressLine2(warehouse.Address),
                 CountryName = warehouse.Address.CountryName,
-                StockEntriesCount = warehouse.StockCount
+                StockEntriesCount = warehouse.StockCount,
+                IsActive = warehouse.IsActive
             }).ToList() ?? new List<WarehouseListItemViewModel>();
 
             var routeValues = new Dictionary<string, string?>
@@ -57,7 +53,7 @@ namespace InventoryTracker.WebAdmin.Services
             {
                 routeValues["SearchTerm"] = request.SearchTerm;
             }
-            return new WarehousesIndexViewModel
+            var viewModel = new WarehousesIndexViewModel
             {
                 Warehouses = warehouses,
                 SearchTerm = request.SearchTerm,
@@ -66,7 +62,7 @@ namespace InventoryTracker.WebAdmin.Services
                 {
                     DisplayedCount = warehouses.Count,
                     TotalCount = pagedResponse?.TotalCount ?? 0,
-                    EntityName = "countries",
+                    EntityName = "warehouses",
                     Pagination = new PaginationViewModel
                     {
                         CurrentPage = pagedResponse?.PageNumber ?? 1,
@@ -78,9 +74,86 @@ namespace InventoryTracker.WebAdmin.Services
                     }
                 }
             };
+            return ServiceResult<WarehousesIndexViewModel>.Ok(viewModel);
+        }
+        public async Task<ServiceResult<CreateEditWarehouseViewModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _apiClient.GetAsync<WarehouseResponseDTO>($"/api/admin/warehouses/{id}", "Failed to load warehouse.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<CreateEditWarehouseViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
+
+            var warehouse = result.Data!;
+            var vm = new CreateEditWarehouseViewModel
+            {
+                WarehouseId = warehouse.WarehouseId,
+                Name = warehouse.Name,
+                WarehouseCode = warehouse.Code,
+                Address = new AddressViewModel
+                {
+                    Street = warehouse.Address.Street,
+                    HouseNumber = warehouse.Address.HouseNumber,
+                    ApartmentNumber = warehouse.Address.ApartmentNumber,
+                    PostalCode = warehouse.Address.PostalCode,
+                    City = warehouse.Address.City,
+                    CountryId = warehouse.Address.CountryId
+                },
+            };
+
+            return ServiceResult<CreateEditWarehouseViewModel>.Ok(vm);
+        }
+        public async Task<ServiceResult<WarehouseDetailsViewModel>> GetDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _apiClient.GetAsync<WarehouseDetailsResponseDTO>($"/api/admin/warehouses/{id}/details", "Failed to load warehouse details.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<WarehouseDetailsViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
+
+            var warehouse = result.Data!;
+            var vm = new WarehouseDetailsViewModel
+            {
+                WarehouseId = warehouse.WarehouseId,
+                Name = warehouse.Name,
+                WarehouseCode = warehouse.Code,
+                StockCount = warehouse.StocksCount,
+                IsActive = warehouse.IsActive,
+                CreatedBy = warehouse.CreatedBy,
+                CreatedAt = warehouse.CreatedAt,
+                UpdatedBy = warehouse.UpdatedBy,
+                UpdatedAt = warehouse.UpdatedAt,
+                DeletedBy = warehouse.DeletedBy,
+                DeletedAt = warehouse.DeletedAt,
+                Address = new AddressDetailsViewModel
+                {
+                    Street = warehouse.Address.Street,
+                    HouseNumber = warehouse.Address.HouseNumber,
+                    ApartmentNumber = warehouse.Address.ApartmentNumber,
+                    PostalCode = warehouse.Address.PostalCode,
+                    City = warehouse.Address.City,
+                    CountryName = warehouse.Address.CountryName
+                }
+            };
+            return ServiceResult<WarehouseDetailsViewModel>.Ok(vm);
+        }
+        public async Task<ServiceResult<CreateWarehouseResponse>> CreateWarehouseAsync(CreateWarehouseRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            return await _apiClient.PostAsync<CreateWarehouseResponse>("/api/admin/warehouses", request, "Failed to create warehouse.", cancellationToken);
+        }
+        public async Task<ServiceResult<CreateWarehouseResponse>> UpdateWarehouseAsync(Guid id, UpdateWarehouseRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            return await _apiClient.PutAsync<CreateWarehouseResponse>($"/api/admin/warehouses/{id}", request, "Failed to update warehouse.", cancellationToken);
+        }
+        public async Task<ServiceResult<CreateWarehouseResponse>> DeactivateWarehouseAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await _apiClient.PatchAsync<CreateWarehouseResponse>($"/api/admin/warehouses/{id}/deactivate", null, "Failed to deactivate warehouse.", cancellationToken);
+        }
+
+        public async Task<ServiceResult<CreateWarehouseResponse>> ActivateWarehouseAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await _apiClient.PatchAsync<CreateWarehouseResponse>($"/api/admin/warehouses/{id}/activate", null, "Failed to activate warehouse.", cancellationToken);
         }
         #region Helpers
-        private static string BuildFullAddress(AddressResponseDTO a)
+        private static string BuildAddressLine1(AddressResponseDTO a)
         {
             if (a == null) return string.Empty;
 
@@ -91,17 +164,13 @@ namespace InventoryTracker.WebAdmin.Services
                 street += $"/{a.ApartmentNumber}";
             }
 
-            var cityPart = $"{a.PostalCode} {a.City}".Trim();
+            return street;
+        }
 
-            var parts = new List<string>();
-
-            if (!string.IsNullOrWhiteSpace(street))
-                parts.Add(street);
-
-            if (!string.IsNullOrWhiteSpace(cityPart))
-                parts.Add(cityPart);
-
-            return string.Join(", ", parts);
+        private static string BuildAddressLine2(AddressResponseDTO a)
+        {
+            if (a == null) return string.Empty;
+            return $"{a.PostalCode} {a.City}".Trim();
         }
         #endregion
     }

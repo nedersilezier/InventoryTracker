@@ -40,6 +40,7 @@ namespace InventoryTracker.API.Controllers.Admin
                     Name = i.Name,
                     Code = i.Code,
                     StockCount = i.StocksCount,
+                    IsActive = i.IsActive,
                     Address = new AddressResponseDTO
                     {
                         AddressId = i.Address.AddressId,
@@ -65,6 +66,16 @@ namespace InventoryTracker.API.Controllers.Admin
         public async Task<IActionResult> GetWarehouseById(Guid id, CancellationToken cancellationToken)
         {
             var warehouse = await _mediator.Send(new GetWarehouseByIdQuery(id), cancellationToken);
+            if (warehouse == null)
+                return NotFound();
+            return Ok(warehouse);
+        }
+
+        [HttpGet]
+        [Route("{id}/details")]
+        public async Task<IActionResult> GetWarehouseDetailsById(Guid id, CancellationToken cancellationToken)
+        {
+            var warehouse = await _mediator.Send(new GetWarehouseDetailsByIdQuery(id), cancellationToken);
             if (warehouse == null)
                 return NotFound();
             return Ok(warehouse);

@@ -16,6 +16,11 @@ namespace InventoryTracker.Infrastructure.Repositories
         {
             return await _context.Clients.AnyAsync(c => c.ClientCode == clientCode, cancellationToken);
         }
+
+        public async Task<bool> ClientCodeExistsForUpdateAsync(string clientCode, Guid id, CancellationToken cancellationToken)
+        {
+            return await _context.Clients.AnyAsync(c => c.ClientCode == clientCode && c.ClientId != id, cancellationToken);
+        }
         public async Task<bool> ClientExistsAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _context.Clients.AnyAsync(c => c.ClientId == id, cancellationToken);

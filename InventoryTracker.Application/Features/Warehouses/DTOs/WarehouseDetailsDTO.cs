@@ -1,12 +1,11 @@
 ﻿using InventoryTracker.Application.Common.DTOs;
-using InventoryTracker.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace InventoryTracker.Application.Features.Warehouses.DTOs
 {
-    public class WarehouseDTO
+    public class WarehouseDetailsDTO
     {
         public Guid WarehouseId { get; set; }
 
@@ -15,5 +14,11 @@ namespace InventoryTracker.Application.Features.Warehouses.DTOs
         public AddressDTO Address { get; set; } = default!;
         public int StocksCount { get; set; }
         public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; } = default!;
+        public string CreatedBy { get; set; } = default!;
+        public DateTime? UpdatedAt { get; set; } = default!;
+        public string? UpdatedBy { get; set; } = default!;
+        public DateTime? DeletedAt { get; set; } = default!;
+        public string? DeletedBy { get; set; } = default!;
     }
 }

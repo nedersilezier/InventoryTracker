@@ -24,7 +24,7 @@ namespace InventoryTracker.Application.Features.Warehouses.Commands.UpdateWareho
             if (warehouse == null)
                 throw new RecordNotFoundException(nameof(Warehouse), request.WarehouseId);
 
-            var warehouseCodeExists = await _warehousesRepository.WarehouseCodeExistsAsync(request.Code, cancellationToken);
+            var warehouseCodeExists = await _warehousesRepository.WarehouseCodeExistsForUpdateAsync(request.Code, request.WarehouseId, cancellationToken);
             if (warehouseCodeExists)
                 throw new BusinessException($"Another warehouse with code {request.Code} already exists.");
 

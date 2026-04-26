@@ -27,6 +27,10 @@ namespace InventoryTracker.Application.Features.Clients.Commands.UpdateClient
             if (client == null)
                 throw new RecordNotFoundException(nameof(Client), request.ClientId);
 
+            var clientCodeExists = await _clientsRepository.ClientCodeExistsForUpdateAsync(request.ClientCode, request.ClientId, cancellationToken);
+            if(clientCodeExists)
+                throw new BusinessException($"Another client with code {request.ClientCode} already exists.");
+
             var country = await _countriesRepository.GetCountryByIdAsync(request.Address.CountryId, cancellationToken);
             if (country == null)
                 throw new RecordNotFoundException(nameof(Country), request.Address.CountryId);

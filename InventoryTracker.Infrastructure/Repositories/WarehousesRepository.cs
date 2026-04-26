@@ -30,6 +30,10 @@ namespace InventoryTracker.Infrastructure.Repositories
         {
             return await _context.Warehouses.AnyAsync(w => w.Code == code, cancellationToken);
         }
+        public async Task<bool> WarehouseCodeExistsForUpdateAsync(string code, Guid id, CancellationToken cancellationToken)
+        {
+            return await _context.Warehouses.AnyAsync(w => w.Code == code && w.WarehouseId != id, cancellationToken);
+        }
         public async Task<bool> WarehouseExistsAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _context.Warehouses.AnyAsync(w => w.WarehouseId == id, cancellationToken);

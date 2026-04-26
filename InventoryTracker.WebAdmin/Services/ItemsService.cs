@@ -133,7 +133,6 @@ namespace InventoryTracker.WebAdmin.Services
 
             return ServiceResult<ItemDetailsViewModel>.Ok(vm);
         }
-
         public async Task<ServiceResult<CreateItemResponse>> CreateItemAsync(CreateItemRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -150,7 +149,6 @@ namespace InventoryTracker.WebAdmin.Services
         {
             return await _apiClient.PatchAsync<CreateItemResponse>($"/api/admin/items/{id}/deactivate", null, "Failed to deactivate item.", cancellationToken);
         }
-
         public async Task<ServiceResult<CreateItemResponse>> ActivateItemAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _apiClient.PatchAsync<CreateItemResponse>($"/api/admin/items/{id}/activate", null, "Failed to activate item.", cancellationToken);

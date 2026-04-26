@@ -127,8 +127,13 @@
                                         @warehouse.Code
                                     </td>
 
-                                    <td class="px-6 py-5 text-sm text-slate-700">
-                                        @warehouse.FullAddress
+                                    <td class="px-6 py-5">
+                                        <div class="text-sm text-slate-700">
+                                            @(warehouse.AddressLine1 ?? "-")
+                                        </div>
+                                        <div class="text-sm text-slate-400">
+                                            @(warehouse.AddressLine2 ?? "-")
+                                        </div>
                                     </td>
 
                                     <td class="px-6 py-5 text-sm text-slate-700">
@@ -147,7 +152,7 @@
                                                    asp-action="Details"
                                                    asp-route-id="@warehouse.WarehouseId"
                                                    class="p-2 hover:bg-slate-100 rounded-lg">
-                                                <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">details</span>
+                                                <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">Description</span>
                                             </a>
 
                                             <a asp-controller="Warehouses"
@@ -156,12 +161,48 @@
                                                    class="p-2 hover:bg-slate-100 rounded-lg">
                                                 <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">edit</span>
                                             </a>
-                                            <a asp-controller="Warehouses"
-                                                   asp-action="Delete"
-                                                   asp-route-id="@warehouse.WarehouseId"
-                                                   class="p-2 hover:bg-slate-100 rounded-lg">
-                                                <span class="material-symbols-outlined text-slate-400 hover:text-red-400">delete</span>
-                                            </a>
+                                            @if (warehouse.IsActive)
+                                            {
+                                                <form asp-controller="Warehouses"
+                                                      asp-action="Deactivate"
+                                                      method="post"
+                                                      class="inline">
+    
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden" name="id" value="@warehouse.WarehouseId" />
+                                                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Warehouses")" />
+
+                                                    <button type="submit"
+                                                            class="p-2 hover:bg-slate-100 rounded-lg group"
+                                                            onclick="return confirm('Are you sure you want to deactivate this warehouse?')">
+                                                        <span class="material-symbols-outlined text-slate-400 hover:text-red-400">
+                                                            Delete
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-controller="Warehouses"
+                                                      asp-action="Activate"
+                                                      method="post"
+                                                      class="inline">
+    
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden" name="id" value="@warehouse.WarehouseId" />
+                                                    <input type="hidden" name="returnUrl" value="@Url.Action("Index", "Warehouses")" />
+
+                                                    <button type="submit"
+                                                            class="p-2 hover:bg-slate-100 rounded-lg group"
+                                                            onclick="return confirm('Are you sure you want to activate this warehouse?')">
+                                                        <span class="material-symbols-outlined text-slate-400 hover:text-green-400">
+                                                            restore_from_trash
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                            }
                                         </div>
                                     </td>
                                 </tr>

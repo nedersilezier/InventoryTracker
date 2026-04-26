@@ -42,6 +42,38 @@ namespace InventoryTracker.Infrastructure.Services
                 }).FirstOrDefaultAsync(cancellationToken);
             return warehouse;
         }
+        public async Task<WarehouseDetailsDTO?> GetWarehouseDetailsByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var warehouse = await _context.Warehouses
+                .AsNoTracking()
+                .Where(w => w.WarehouseId == id)
+                .Select(w => new WarehouseDetailsDTO
+                {
+                    WarehouseId = w.WarehouseId,
+                    Name = w.Name,
+                    Code = w.Code,
+                    IsActive = w.IsActive,
+                    StocksCount = w.Stocks.Count,
+                    Address = new AddressDTO
+                    {
+                        AddressId = w.Address.AddressId,
+                        Street = w.Address.Street,
+                        City = w.Address.City,
+                        HouseNumber = w.Address.HouseNumber,
+                        ApartmentNumber = w.Address.ApartmentNumber,
+                        PostalCode = w.Address.PostalCode,
+                        CountryName = w.Address.Country.Name,
+                        CountryId = w.Address.Country.CountryId
+                    },
+                    CreatedAt = w.CreatedAt,
+                    CreatedBy = w.CreatedBy ?? string.Empty,
+                    UpdatedAt = w.UpdatedAt,
+                    UpdatedBy = w.UpdatedBy ?? string.Empty,
+                    DeletedAt = w.DeletedAt,
+                    DeletedBy = w.DeletedBy ?? string.Empty
+                }).FirstOrDefaultAsync(cancellationToken);
+            return warehouse;
+        }
         public async Task<PagedResult<WarehouseDTO>> GetAllWarehousesAsync(GetWarehousesParameters parameters, CancellationToken cancellationToken)
         {
             var query = _context.Warehouses.AsQueryable();
@@ -69,6 +101,7 @@ namespace InventoryTracker.Infrastructure.Services
                     Name = warehouse.Name,
                     Code = warehouse.Code,
                     StocksCount = warehouse.Stocks.Count,
+                    IsActive = warehouse.IsActive,
                     Address = new AddressDTO
                     {
                         AddressId = warehouse.Address.AddressId,

@@ -110,7 +110,6 @@ namespace InventoryTracker.WebAdmin.Services
             var result = await _apiClient.GetAsync<ClientDetailsResponseDTO>($"/api/admin/clients/{id}/details", "Failed to load client details.", cancellationToken);
             if (!result.Success)
                 return ServiceResult<ClientDetailsViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
-
             var client = result.Data!;
             var vm = new ClientDetailsViewModel
             {
