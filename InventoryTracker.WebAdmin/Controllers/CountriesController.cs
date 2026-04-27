@@ -1,14 +1,8 @@
-﻿using InventoryTracker.Contracts.Requests.Clients;
-using InventoryTracker.Contracts.Requests.Common;
-using InventoryTracker.Contracts.Requests.Countries;
-using InventoryTracker.Contracts.Requests.Items;
+﻿using InventoryTracker.Contracts.Requests.Countries;
 using InventoryTracker.WebAdmin.Filters;
 using InventoryTracker.WebAdmin.Interfaces;
-using InventoryTracker.WebAdmin.Services;
-using InventoryTracker.WebAdmin.ViewModels.Clients;
 using InventoryTracker.WebAdmin.ViewModels.Countries;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
-using InventoryTracker.WebAdmin.ViewModels.Items;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryTracker.WebAdmin.Controllers

@@ -1,10 +1,9 @@
-﻿using InventoryTracker.Application.Common.DTOs;
-using InventoryTracker.Application.Features.Users.Commands.CreateUser;
+﻿using InventoryTracker.Application.Features.Users.Commands.CreateUser;
+using InventoryTracker.Application.Features.Users.Queries.GetRoles;
 using InventoryTracker.Application.Features.Users.Queries.GetUsers;
 using InventoryTracker.Contracts.Requests.Users;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Users;
-using InventoryTracker.Infrastructure.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -55,14 +54,24 @@ namespace InventoryTracker.API.Controllers.Admin
             return Ok(response);
         }
 
+        [HttpGet]
+        [Route("roles")]
+        public async Task<IActionResult> GetRoles(CancellationToken cancellationToken)
+        {
+            var roles = await _mediator.Send(new GetRolesQuery(), cancellationToken);
+            var response = roles.Select(r => new RoleResponseDTO { Name = r.Name });
+            return Ok(response);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateUser(CreateUserCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
+            var response = new UserCreatedResponse { UserId = result.UserId!, Email = result.Email };
             //To be changed to:
             //return CreatedAtAction(nameof(GetUserById), new { id = result.UserId }, result);
 
-            return Ok(result);
+            return Ok(response);
         }
     }
 }

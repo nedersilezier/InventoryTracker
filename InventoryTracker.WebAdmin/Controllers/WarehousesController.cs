@@ -141,6 +141,18 @@ namespace InventoryTracker.WebAdmin.Controllers
                     return authFailure;
 
                 AddServiceErrorsToModelState(result, "Unable to create warehouse");
+                var countriesResult = await GetCountrySelectListAsync(null, cancellationToken);
+
+                if (!countriesResult.Success)
+                {
+                    authFailure = HandleAuthFailure(countriesResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = countriesResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+                vm.AvailableCountries = countriesResult.Data!;
                 return View("CreateEdit", vm);
             }
             TempData["SuccessMessage"] = $"Warehouse '{result?.Data?.Name}' created successfully.";
@@ -221,6 +233,19 @@ namespace InventoryTracker.WebAdmin.Controllers
                     return authFailure;
 
                 AddServiceErrorsToModelState(result, "Unable to update the warehouse");
+                var countriesResult = await GetCountrySelectListAsync(null, cancellationToken);
+
+                if (!countriesResult.Success)
+                {
+                    authFailure = HandleAuthFailure(countriesResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = countriesResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                vm.AvailableCountries = countriesResult.Data!;
                 return View("CreateEdit", vm);
             }
             TempData["SuccessMessage"] = $"Warehouse '{result?.Data?.Name}' updated successfully.";

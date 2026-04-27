@@ -142,6 +142,18 @@ namespace InventoryTracker.WebAdmin.Controllers
                     return authFailure;
 
                 AddServiceErrorsToModelState(result, "Unable to create client");
+                var countriesResult = await GetCountrySelectListAsync(null, cancellationToken);
+
+                if (!countriesResult.Success)
+                {
+                    authFailure = HandleAuthFailure(countriesResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = countriesResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+                vm.AvailableCountries = countriesResult.Data!;
                 return View("CreateEdit", vm);
             }
             TempData["SuccessMessage"] = $"Client '{result?.Data?.ClientName}' created successfully.";
@@ -224,6 +236,18 @@ namespace InventoryTracker.WebAdmin.Controllers
                     return authFailure;
 
                 AddServiceErrorsToModelState(result, "Unable to update the client");
+                var countriesResult = await GetCountrySelectListAsync(null, cancellationToken);
+
+                if (!countriesResult.Success)
+                {
+                    authFailure = HandleAuthFailure(countriesResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = countriesResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+                vm.AvailableCountries = countriesResult.Data!;
                 return View("CreateEdit", vm);
             }
             TempData["SuccessMessage"] = $"Client '{result?.Data?.ClientName}' updated successfully.";

@@ -1,29 +1,25 @@
-﻿using InventoryTracker.Contracts.Requests.Users;
-using InventoryTracker.Contracts.Responses.Users;
+﻿using InventoryTracker.APIClient;
+using InventoryTracker.Contracts.Helpers;
+using InventoryTracker.Contracts.Requests.Users;
+using InventoryTracker.Contracts.Requests.Warehouses;
 using InventoryTracker.Contracts.Responses.Common;
+using InventoryTracker.Contracts.Responses.Users;
+using InventoryTracker.Contracts.Responses.Warehouses;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using InventoryTracker.WebAdmin.ViewModels.Users;
-using System.Net.Http.Headers;
 
 namespace InventoryTracker.WebAdmin.Services
 {
     public class UsersService : IUsersService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        public UsersService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        private readonly ApiHttpClient _apiClient;
+        public UsersService(ApiHttpClient apiClient)
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            _apiClient = apiClient;
         }
-        public async Task<UsersIndexViewModel> GetAllAsync(GetUsersRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<UsersIndexViewModel>> GetAllAsync(GetUsersRequest request, CancellationToken cancellationToken)
         {
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-
-            if (string.IsNullOrEmpty(accessToken))
-                throw new UnauthorizedAccessException("Access token is missing.");
-
             //default page size
             var pageSize = request.PageSize ?? 5;
             var query = new List<string>{ $"pageNumber={request.PageNumber}", $"pageSize={ pageSize }" };
@@ -33,13 +29,11 @@ namespace InventoryTracker.WebAdmin.Services
                 query.Add($"searchTerm={Uri.EscapeDataString(request.SearchTerm)}");
             }
             var url = $"/api/admin/users?{string.Join("&", query)}";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            var result = await _apiClient.GetAsync<PagedResponse<UserResponseDTO>>(url, "Failed to load users from the server.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<UsersIndexViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
 
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            response.EnsureSuccessStatusCode();
-
-            var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<UserResponseDTO>>(cancellationToken: cancellationToken);
+            var pagedResponse = result.Data!;
             var users = pagedResponse?.Items.Select(u => new UserListItemViewModel
             {
                 UserId = u.UserId,
@@ -59,7 +53,7 @@ namespace InventoryTracker.WebAdmin.Services
             {
                 routeValues["SearchTerm"] = request.SearchTerm;
             }
-            return new UsersIndexViewModel
+            var viewModel = new UsersIndexViewModel
             {
                 Users = users,
                 SearchTerm = request?.SearchTerm,
@@ -80,6 +74,12 @@ namespace InventoryTracker.WebAdmin.Services
                     }
                 },
             };
+            return ServiceResult<UsersIndexViewModel>.Ok(viewModel);
+        }
+        public async Task<ServiceResult<UserCreatedResponse>> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            return await _apiClient.PostAsync<UserCreatedResponse>("/api/admin/users", request, "Failed to create user.", cancellationToken);
         }
     }
 }

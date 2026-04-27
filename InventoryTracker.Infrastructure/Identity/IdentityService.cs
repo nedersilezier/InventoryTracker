@@ -1,17 +1,12 @@
 ﻿using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Application.Common.Interfaces;
-using InventoryTracker.Application.Features.Auth.Commands.Login;
 using InventoryTracker.Application.Features.Auth.DTOs;
-using InventoryTracker.Application.Features.Users.Commands.CreateUser;
 using InventoryTracker.Application.Features.Users.DTOs;
 using InventoryTracker.Infrastructure.Identity.Entities;
 using InventoryTracker.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
 
 namespace InventoryTracker.Infrastructure.Identity
 {
@@ -39,7 +34,11 @@ namespace InventoryTracker.Infrastructure.Identity
             _context = context;
             _refreshTokenGenerator = refreshTokenGenerator;
         }
-
+        public async Task<IReadOnlyList<RoleDTO>> GetRolesAsync(CancellationToken cancellationToken)
+        {
+            var roles = await _roleManager.Roles.Select(r => new RoleDTO { Name = r.Name ?? string.Empty }).ToListAsync(cancellationToken);
+            return roles;
+        }
         public async Task<CreateUserResult> CreateUserAsync(string? firstName, string? lastName, string email, string password, string? phoneNumber, string role)
         {
             //ensure email and username are unique and role exists before creating the user
@@ -99,7 +98,6 @@ namespace InventoryTracker.Infrastructure.Identity
             if (!addToRoleResult.Succeeded)
             {
                 await _userManager.DeleteAsync(user);
-
                 return new CreateUserResult
                 {
                     Succeeded = false,
@@ -111,13 +109,7 @@ namespace InventoryTracker.Infrastructure.Identity
             {
                 Succeeded = true,
                 UserId = user.Id,
-                Email = user.Email,
-                UserName = user.UserName,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                PhoneNumber = user.PhoneNumber,
-                Role = role,
-                IsActive = user.IsActive
+                Email = user.Email
             };
         }
         public async Task<AuthResponseDTO> LoginAsync(string email, string password, CancellationToken cancellationToken)

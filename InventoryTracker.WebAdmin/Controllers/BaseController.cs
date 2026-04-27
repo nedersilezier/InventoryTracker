@@ -8,6 +8,15 @@ namespace InventoryTracker.WebAdmin.Controllers
         protected void AddServiceErrorsToModelState<T>(ServiceResult<T> result, string fallbackMessage = "Operation failed.")
         {
             var hasAnyError = false;
+            if (!string.IsNullOrWhiteSpace(result.ErrorMessage))
+            {
+                ModelState.AddModelError(string.Empty, result.ErrorMessage);
+                hasAnyError = true;
+            }
+            if (!hasAnyError)
+            {
+                ModelState.AddModelError(string.Empty, fallbackMessage);
+            }
 
             if (result.ValidationErrors is not null)
             {
@@ -23,18 +32,7 @@ namespace InventoryTracker.WebAdmin.Controllers
                         hasAnyError = true;
                     }
                 }
-            }
-
-            if (!string.IsNullOrWhiteSpace(result.ErrorMessage))
-            {
-                ModelState.AddModelError(string.Empty, result.ErrorMessage);
-                hasAnyError = true;
-            }
-
-            if (!hasAnyError)
-            {
-                ModelState.AddModelError(string.Empty, fallbackMessage);
-            }
+            } 
         }
         protected IActionResult? HandleAuthFailure<T>(ServiceResult<T> result)
         {

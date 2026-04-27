@@ -50,7 +50,18 @@
                 </a>
             </div>
         </div>
-
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
+                @successMessage
+            </div>
+        }
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm">
+                @errorMessage
+            </div>
+        }
         <!-- Table -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">

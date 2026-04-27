@@ -1,13 +1,9 @@
 ﻿using InventoryTracker.APIClient;
 using InventoryTracker.Contracts.Helpers;
-using InventoryTracker.Contracts.Requests.Clients;
 using InventoryTracker.Contracts.Requests.Countries;
-using InventoryTracker.Contracts.Responses.Clients;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Countries;
 using InventoryTracker.WebAdmin.Interfaces;
-using InventoryTracker.WebAdmin.ViewModels.Clients;
-using InventoryTracker.WebAdmin.ViewModels.Common;
 using InventoryTracker.WebAdmin.ViewModels.Countries;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 

@@ -1,20 +1,15 @@
-﻿using InventoryTracker.Application.Features.Users.DTOs;
-using MediatR;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace InventoryTracker.Application.Features.Users.Commands.CreateUser
+namespace InventoryTracker.Contracts.Requests.Users
 {
-    public class CreateUserCommand: IRequest<UserCreatedDTO>
+    public class CreateUserRequest
     {
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string Email { get; set; } = default!;
-        public string UserName
-        {
-            get { return Email; }
-        }
         public string Password { get; set; } = default!;
         public string? PhoneNumber { get; set; }
         public string Role { get; set; } = default!;

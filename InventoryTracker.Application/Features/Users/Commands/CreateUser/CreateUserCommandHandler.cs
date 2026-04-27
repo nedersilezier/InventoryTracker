@@ -10,7 +10,7 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Users.Commands.CreateUser
 {
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserDTO>
+    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserCreatedDTO>
     {
         private readonly IIdentityService _identityService;
 
@@ -19,7 +19,7 @@ namespace InventoryTracker.Application.Features.Users.Commands.CreateUser
             _identityService = identityService;
         }
 
-        public async Task<UserDTO> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<UserCreatedDTO> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
             var result = await _identityService
                 .CreateUserAsync(
@@ -36,16 +36,10 @@ namespace InventoryTracker.Application.Features.Users.Commands.CreateUser
                 throw new ValidationException(failures);
             }
 
-            return new UserDTO
+            return new UserCreatedDTO
             {
-                UserId = result.UserId!,
-                Email = result.Email!,
-                UserName = result.UserName!,
-                FirstName = result.FirstName!,
-                LastName = result.LastName!,
-                PhoneNumber = result.PhoneNumber!,
-                Role = result.Role!,
-                IsActive = result.IsActive
+                UserId = result.UserId,
+                Email = result.Email!
             };
         }
     }

@@ -26,7 +26,6 @@ namespace InventoryTracker.APIClient
                 {
                 }
             }
-
             return ServiceResult<T>.Fail(
                 problem?.Detail ?? problem?.Title ?? fallbackMessage,
                 problem?.Errors,

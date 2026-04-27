@@ -15,7 +15,7 @@ namespace InventoryTracker.API.Controllers.Admin
 {
     [ApiController]
     [Route("api/admin/countries")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class CountriesController : ControllerBase
     {
         private readonly IMediator _mediator;
