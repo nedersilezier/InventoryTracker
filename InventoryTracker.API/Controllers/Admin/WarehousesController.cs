@@ -2,12 +2,12 @@
 using InventoryTracker.Application.Features.Warehouses.Commands.CreateWarehouse;
 using InventoryTracker.Application.Features.Warehouses.Commands.DeactivateWarehouse;
 using InventoryTracker.Application.Features.Warehouses.Commands.UpdateWarehouse;
-using InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses;
+using InventoryTracker.Application.Features.Warehouses.Queries.GetAll;
+using InventoryTracker.Application.Features.Warehouses.Queries.GetById;
+using InventoryTracker.Application.Features.Warehouses.Queries.GetDetails;
 using InventoryTracker.Contracts.Requests.Warehouses;
 using InventoryTracker.Contracts.Responses.Common;
-using InventoryTracker.Contracts.Responses.Items;
 using InventoryTracker.Contracts.Responses.Warehouses;
-using InventoryTracker.Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

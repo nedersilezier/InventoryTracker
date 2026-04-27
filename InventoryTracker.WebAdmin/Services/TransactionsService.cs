@@ -1,32 +1,27 @@
-﻿using InventoryTracker.Contracts.Requests.Transactions;
+﻿using InventoryTracker.APIClient;
+using InventoryTracker.Contracts.Helpers;
+using InventoryTracker.Contracts.Requests.Transactions;
+using InventoryTracker.Contracts.Requests.Warehouses;
 using InventoryTracker.Contracts.Responses.Common;
-using InventoryTracker.Contracts.Responses.Countries;
 using InventoryTracker.Contracts.Responses.Transactions;
+using InventoryTracker.Contracts.Responses.Warehouses;
 using InventoryTracker.WebAdmin.Interfaces;
-using InventoryTracker.WebAdmin.ViewModels.Countries;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using InventoryTracker.WebAdmin.ViewModels.Transactions;
-using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
 
 namespace InventoryTracker.WebAdmin.Services
 {
     public class TransactionsService : ITransactionsService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ApiHttpClient _apiClient;
 
-        public TransactionsService(HttpClient httpClient, IHttpContextAccessor httpContextAccessor)
+        public TransactionsService(ApiHttpClient apiClient)
         {
-            _httpClient = httpClient;
-            _httpContextAccessor = httpContextAccessor;
+            _apiClient = apiClient;
         }
-        public async Task<TransactionsIndexViewModel> GetAllTransactionsAsync(GetTransactionsRequest request, CancellationToken cancellationToken)
+        public async Task<ServiceResult<TransactionsIndexViewModel>> GetAllAsync(GetTransactionsRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-            if (string.IsNullOrEmpty(accessToken))
-                throw new UnauthorizedAccessException("Access token is missing.");
 
             var pageSize = request.PageSize == 0 ? 5 : request.PageSize;
             var query = new List<string>
@@ -53,11 +48,11 @@ namespace InventoryTracker.WebAdmin.Services
                 query.Add($"dateTo={request.DateTo.Value:yyyy-MM-dd}");
             }
             var url = $"/api/admin/transactions?{string.Join("&", query)}";
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            using var response = await _httpClient.SendAsync(requestMessage, cancellationToken);
-            response.EnsureSuccessStatusCode();
-            var pagedResponse = await response.Content.ReadFromJsonAsync<PagedResponse<TransactionsResponseDTO>>(cancellationToken: cancellationToken);
+            var result = await _apiClient.GetAsync<PagedResponse<TransactionsResponseDTO>>(url, "Failed to load transactions.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<TransactionsIndexViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
+
+            var pagedResponse = result.Data!;
             var transactions = pagedResponse?.Items.Select(transaction => new TransactionListItemViewModel
             {
                 TransactionId = transaction.TransactionId,
@@ -92,7 +87,7 @@ namespace InventoryTracker.WebAdmin.Services
             {
                 routeValues["DateTo"] = request.DateTo.Value.ToString("yyyy-MM-dd");
             }
-            return new TransactionsIndexViewModel
+            var viewModel = new TransactionsIndexViewModel
             {
                 Transactions = transactions,
                 TotalCount = pagedResponse?.TotalCount ?? 0,
@@ -123,20 +118,24 @@ namespace InventoryTracker.WebAdmin.Services
                     }
                 }
             };
+            return ServiceResult<TransactionsIndexViewModel>.Ok(viewModel);
         }
-        public async Task<IEnumerable<TransactionListDTO>> GetRecentTransactionsAsync(int count, CancellationToken cancellationToken)
+        public async Task<ServiceResult<IEnumerable<TransactionListDTO>>> GetRecentTransactionsAsync(int count, CancellationToken cancellationToken)
         {
-            var accessToken = _httpContextAccessor.HttpContext?.Request.Cookies["accessToken"];
-            if (string.IsNullOrEmpty(accessToken))
-                throw new UnauthorizedAccessException("Access token is missing.");
+            var url = $"api/admin/transactions/recent/{count}";
 
-            using var request = new HttpRequestMessage(HttpMethod.Get, $"api/admin/transactions/recent/{count}");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-            using var response = await _httpClient.SendAsync(request, cancellationToken);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<TransactionListDTO>>(cancellationToken: cancellationToken)
-                   ?? new List<TransactionListDTO>();
+            var result = await _apiClient.GetAsync<IEnumerable<TransactionListDTO>>(url, "Failed to load transactions.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<IEnumerable<TransactionListDTO>>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
+            var response = result.Data!;
+
+            return ServiceResult<IEnumerable<TransactionListDTO>>.Ok(response);
+        }
+        public async Task<ServiceResult<CreateTransactionResponse>> CreateTransactionAsync(CreateTransactionRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            return await _apiClient.PostAsync<CreateTransactionResponse>("/api/admin/transactions", request, "Failed to create transaction.", cancellationToken);
         }
     }
 }

@@ -5,7 +5,7 @@ using InventoryTracker.Application.Features.Warehouses.DTOs;
 using InventoryTracker.Domain.Entities;
 using MediatR;
 
-namespace InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses
+namespace InventoryTracker.Application.Features.Warehouses.Queries.GetById
 {
     public class GetWarehouseByIdQueryHandler : IRequestHandler<GetWarehouseByIdQuery, WarehouseDTO?>
     {

@@ -1,7 +1,7 @@
 ﻿using InventoryTracker.Application.Features.Clients.DTOs;
 using MediatR;
 
-namespace InventoryTracker.Application.Features.Clients.Queries.GetClients
+namespace InventoryTracker.Application.Features.Clients.Queries.GetById
 {
     public class GetClientByIdQuery : IRequest<ClientDTO?>
     {

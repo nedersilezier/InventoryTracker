@@ -4,7 +4,7 @@ using InventoryTracker.Application.Features.Clients.DTOs;
 using InventoryTracker.Domain.Entities;
 using MediatR;
 
-namespace InventoryTracker.Application.Features.Clients.Queries.GetClients
+namespace InventoryTracker.Application.Features.Clients.Queries.GetDetails
 {
     public class GetClientDetailsByIdQueryHandler: IRequestHandler<GetClientDetailsByIdQuery, ClientDetailsDTO?>
     {

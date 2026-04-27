@@ -2,7 +2,9 @@
 using InventoryTracker.Application.Features.Clients.Commands.CreateClient;
 using InventoryTracker.Application.Features.Clients.Commands.DeactivateClient;
 using InventoryTracker.Application.Features.Clients.Commands.UpdateClient;
+using InventoryTracker.Application.Features.Clients.Queries.GetById;
 using InventoryTracker.Application.Features.Clients.Queries.GetClients;
+using InventoryTracker.Application.Features.Clients.Queries.GetDetails;
 using InventoryTracker.Contracts.Requests.Clients;
 using InventoryTracker.Contracts.Responses.Clients;
 using InventoryTracker.Contracts.Responses.Common;

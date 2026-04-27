@@ -11,5 +11,6 @@ namespace InventoryTracker.Application.Common.Interfaces
         Task<PagedResult<ItemDTO>> GetAllItemsAsync(GetItemsParameters parameters, CancellationToken cancellationToken);
         Task<ItemDTO?> GetItemByIdAsync(Guid id, CancellationToken cancellationToken);
         Task<ItemDetailsDTO?> GetItemDetailsByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<IReadOnlyList<InternalItemSelectDTO>> GetAllItemsLookupAsync(CancellationToken cancellationToken);
     }
 }

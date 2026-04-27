@@ -3,6 +3,7 @@ using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Clients.Commands.CreateClient;
 using InventoryTracker.Application.Features.Clients.DTOs;
+using InventoryTracker.Application.Features.Warehouses.DTOs;
 using InventoryTracker.Domain.Entities;
 using InventoryTracker.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -136,6 +137,15 @@ namespace InventoryTracker.Infrastructure.Services
                 })
                 .FirstOrDefaultAsync(cancellationToken);
             return item;
+        }
+        public async Task<IReadOnlyList<InternalClientSelectDTO>> GetAllClientsLookupAsync(CancellationToken cancellationToken)
+        {
+            var clients = await _context.Clients.AsNoTracking().Where(c => c.IsActive == true).OrderBy(c => c.Name).Select(c => new InternalClientSelectDTO
+            {
+                ClientId = c.ClientId,
+                Name = c.Name
+            }).ToListAsync(cancellationToken);
+            return clients;
         }
     }
 }

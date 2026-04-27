@@ -1,6 +1,8 @@
 ﻿using InventoryTracker.APIClient;
 using InventoryTracker.Contracts.Helpers;
+using InventoryTracker.Contracts.Responses.Clients;
 using InventoryTracker.Contracts.Responses.Countries;
+using InventoryTracker.Contracts.Responses.Items;
 using InventoryTracker.Contracts.Responses.Users;
 using InventoryTracker.Contracts.Responses.Warehouses;
 using InventoryTracker.WebAdmin.Interfaces;
@@ -30,6 +32,22 @@ namespace InventoryTracker.WebAdmin.Services
                 return ServiceResult<List<WarehouseResponseSelectDTO>>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
 
             return ServiceResult<List<WarehouseResponseSelectDTO>>.Ok(result.Data!);
+        }
+        public async Task<ServiceResult<List<ClientResponseSelectDTO>>> GetClientsAsync(CancellationToken cancellationToken)
+        {
+            var result = await _apiClient.GetAsync<List<ClientResponseSelectDTO>>("/api/lookups/clients", "Failed to load clients.", cancellationToken);
+            if(!result.Success)
+                return ServiceResult<List<ClientResponseSelectDTO>>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
+
+            return ServiceResult<List<ClientResponseSelectDTO>>.Ok(result.Data!);
+        }
+        public async Task<ServiceResult<List<ItemResponseSelectDTO>>> GetItemsAsync(CancellationToken cancellationToken)
+        {
+            var result = await _apiClient.GetAsync<List<ItemResponseSelectDTO>>("/api/lookups/items", "Failed to load items.", cancellationToken);
+            if(!result.Success)
+                return ServiceResult<List<ItemResponseSelectDTO>>.Fail(result.ErrorMessage, statusCode: result.StatusCode);
+
+            return ServiceResult<List<ItemResponseSelectDTO>>.Ok(result.Data!);
         }
 
         public async Task<ServiceResult<List<RoleResponseDTO>>> GetRolesAsync(CancellationToken cancellationToken)

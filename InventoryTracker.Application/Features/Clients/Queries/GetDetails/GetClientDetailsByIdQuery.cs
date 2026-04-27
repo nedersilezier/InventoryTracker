@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace InventoryTracker.Application.Features.Clients.Queries.GetClients
+namespace InventoryTracker.Application.Features.Clients.Queries.GetDetails
 {
     public class GetClientDetailsByIdQuery: IRequest<ClientDetailsDTO?>
     {

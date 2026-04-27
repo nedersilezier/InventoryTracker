@@ -20,43 +20,13 @@
                     Manage transactions.
                 </p>
             </div>
-
             <div class="flex gap-3">
-                <div class="relative">
-                    <details class="group relative">
-                        <summary class="list-none cursor-pointer px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-semibold shadow hover:bg-blue-700 transition flex items-center gap-2 select-none">
-                            <span class="text-base leading-none">+ New Transaction</span>
-                        </summary>
-
-                        <div class="absolute right-0 mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden z-50">
-                            <a asp-controller="Transactions"
-                                   asp-action="CreateAdjustment"
-                                   class="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-100">
-                                Adjustment
-                            </a>
-
-                            <a asp-controller="Transactions"
-                                   asp-action="CreateReturn"
-                                   class="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-100">
-                                Inbound
-                            </a>
-
-                            <a asp-controller="Transactions"
-                                   asp-action="CreateIssue"
-                                   class="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-100">
-                                Outbound
-                            </a>
-
-                            <a asp-controller="Transactions"
-                                   asp-action="CreateTransfer"
-                                   class="block px-4 py-3 text-sm text-slate-700 hover:bg-slate-100">
-                                Transfer
-                            </a>
-                        </div>
-                    </details>
-                </div>
+                <a asp-controller="Transactions"
+                       asp-action="Create"
+                       class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-semibold shadow hover:bg-blue-700 transition">
+                    + New Transaction
+                </a>
             </div>
-
         </div>
         @await Html.PartialAsync("_TransactionsTable.cshtml", Model)
     </section>

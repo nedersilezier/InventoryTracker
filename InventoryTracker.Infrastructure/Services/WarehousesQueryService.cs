@@ -1,9 +1,6 @@
 ﻿using InventoryTracker.Application.Common.DTOs;
-using InventoryTracker.Application.Common.Exceptions;
 using InventoryTracker.Application.Common.Interfaces;
-using InventoryTracker.Application.Features.Clients.DTOs;
 using InventoryTracker.Application.Features.Warehouses.DTOs;
-using InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses;
 using InventoryTracker.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 

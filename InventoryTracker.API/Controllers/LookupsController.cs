@@ -1,6 +1,10 @@
-﻿using InventoryTracker.Application.Features.Countries.Queries.GetCountries;
-using InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses;
+﻿using InventoryTracker.Application.Features.Clients.Queries.GetLookups;
+using InventoryTracker.Application.Features.Countries.Queries.GetCountries;
+using InventoryTracker.Application.Features.Items.Queries.GetLookups;
+using InventoryTracker.Application.Features.Warehouses.Queries.GetLookups;
+using InventoryTracker.Contracts.Responses.Clients;
 using InventoryTracker.Contracts.Responses.Countries;
+using InventoryTracker.Contracts.Responses.Items;
 using InventoryTracker.Contracts.Responses.Warehouses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -37,6 +41,31 @@ namespace InventoryTracker.API.Controllers
             {
                 CountryId = c.CountryId,
                 CountryName = c.CountryName
+            }).ToList();
+            return Ok(response);
+        }
+
+        [HttpGet("clients")]
+        public async Task<IActionResult> GetActiveClients(CancellationToken cancellationToken)
+        {
+            var clients = await _mediator.Send(new GetClientsSelectQuery(), cancellationToken);
+            var response = clients.Select(c => new ClientResponseSelectDTO
+            {
+                ClientId = c.ClientId,
+                Name = c.Name
+            }).ToList();
+            return Ok(response);
+        }
+
+        [HttpGet("items")]
+        public async Task<IActionResult> GetActiveItems(CancellationToken cancellationToken)
+        {
+            var items = await _mediator.Send(new GetItemsSelectQuery(), cancellationToken);
+            var response = items.Select(i => new ItemResponseSelectDTO
+            {
+                ItemId = i.ItemId,
+                Name = i.Name,
+                UnitOfMeasure = i.UnitOfMeasure,
             }).ToList();
             return Ok(response);
         }

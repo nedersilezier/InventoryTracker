@@ -2,7 +2,7 @@
 using InventoryTracker.Application.Features.Warehouses.DTOs;
 using MediatR;
 
-namespace InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses
+namespace InventoryTracker.Application.Features.Warehouses.Queries.GetAll
 {
     public class GetWarehousesQuery: IRequest<PagedResult<WarehouseDTO>>
     {

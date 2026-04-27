@@ -1,7 +1,7 @@
 ﻿using InventoryTracker.Application.Features.Items.DTOs;
 using MediatR;
 
-namespace InventoryTracker.Application.Features.Items.Queries.GetItems
+namespace InventoryTracker.Application.Features.Items.Queries.GetById
 {
     public class GetItemByIdQuery: IRequest<ItemDTO?>
     {

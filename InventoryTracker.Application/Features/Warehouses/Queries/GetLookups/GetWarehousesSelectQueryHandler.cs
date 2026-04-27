@@ -1,11 +1,8 @@
 ﻿using InventoryTracker.Application.Common.Interfaces;
 using InventoryTracker.Application.Features.Warehouses.DTOs;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace InventoryTracker.Application.Features.Warehouses.Queries.GetWarehouses
+namespace InventoryTracker.Application.Features.Warehouses.Queries.GetLookups
 {
     public class GetWarehousesSelectQueryHandler : IRequestHandler<GetWarehousesSelectQuery, IReadOnlyList<InternalWarehouseSelectDTO>>
     {

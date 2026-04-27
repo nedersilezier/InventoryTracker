@@ -1,13 +1,8 @@
 ﻿using InventoryTracker.Application.Common.DTOs;
 using InventoryTracker.Application.Common.Interfaces;
-using InventoryTracker.Application.Features.Clients.DTOs;
 using InventoryTracker.Application.Features.Items.DTOs;
-using InventoryTracker.Application.Features.Items.Queries.GetItems;
 using InventoryTracker.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace InventoryTracker.Infrastructure.Services
 {
@@ -105,6 +100,16 @@ namespace InventoryTracker.Infrastructure.Services
                 })
                 .FirstOrDefaultAsync(cancellationToken);
             return item;
+        }
+        public async Task<IReadOnlyList<InternalItemSelectDTO>> GetAllItemsLookupAsync(CancellationToken cancellationToken)
+        {
+            var items = await _context.Items.AsNoTracking().Where(i => i.IsActive == true).OrderBy(i => i.Name).Select(i => new InternalItemSelectDTO
+            {
+                ItemId = i.ItemId,
+                Name = i.Name,
+                UnitOfMeasure = i.UnitOfMeasure
+            }).ToListAsync(cancellationToken);
+            return items;
         }
     }
 }

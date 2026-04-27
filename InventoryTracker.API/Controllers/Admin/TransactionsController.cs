@@ -67,7 +67,7 @@ namespace InventoryTracker.API.Controllers.Admin
         }
 
         [HttpGet]
-        [Route("{count}")]
+        [Route("{id}")]
         public async Task<IActionResult> GetTransactionById(Guid id, CancellationToken cancellationToken)
         {
             var transaction = await _mediator.Send(new GetTransactionByIdQuery(id), cancellationToken);
@@ -89,7 +89,8 @@ namespace InventoryTracker.API.Controllers.Admin
         public async Task<IActionResult> CreateTransaction(CreateTransactionCommand command, CancellationToken cancellationToken)
         {
             var transactionId = await _mediator.Send(command, cancellationToken);
-            return CreatedAtAction(nameof(GetTransactionById), new { id = transactionId }, null);
+            var response = new CreateTransactionResponse { TransactionId = transactionId };
+            return CreatedAtAction(nameof(GetTransactionById), new { id = transactionId }, response);
         }
 
         [HttpPut]

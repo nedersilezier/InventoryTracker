@@ -32,11 +32,6 @@ builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 });
 
-// Register HttpClient for Transactions
-builder.Services.AddHttpClient<ITransactionsService, TransactionsService>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
 
 //register ItemsService
 builder.Services.AddScoped<IItemsService, ItemsService>();
@@ -58,6 +53,9 @@ builder.Services.AddScoped<ICountriesService, CountriesService>();
 
 //register UsersService
 builder.Services.AddScoped<IUsersService, UsersService>();
+
+//register TransactionsService
+builder.Services.AddScoped<ITransactionsService, TransactionsService>();
 
 var app = builder.Build();
 
