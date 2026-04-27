@@ -1,4 +1,9 @@
-﻿using InventoryTracker.Application.Features.Users.Commands.CreateUser;
+﻿using InventoryTracker.Application.Features.Items.Queries.GetItems;
+using InventoryTracker.Application.Features.Users.Commands.ActivateUser;
+using InventoryTracker.Application.Features.Users.Commands.CreateUser;
+using InventoryTracker.Application.Features.Users.Commands.DeactivateUser;
+using InventoryTracker.Application.Features.Users.Commands.UpdateUser;
+using InventoryTracker.Application.Features.Users.Queries.GetById;
 using InventoryTracker.Application.Features.Users.Queries.GetRoles;
 using InventoryTracker.Application.Features.Users.Queries.GetUsers;
 using InventoryTracker.Contracts.Requests.Users;
@@ -27,7 +32,6 @@ namespace InventoryTracker.API.Controllers.Admin
             var query = new GetUsersQuery
             {
                 PageNumber = request.PageNumber,
-                //test
                 PageSize = request.PageSize ?? 1,
                 SearchTerm = request.SearchTerm
             };
@@ -42,8 +46,7 @@ namespace InventoryTracker.API.Controllers.Admin
                     LastName = u.LastName,
                     PhoneNumber = u.PhoneNumber,
                     IsActive = u.IsActive,
-                    UserName = u.UserName,
-                    Role = u.Role
+                    Roles = u.Roles
                 }).ToList(),
 
                 TotalPages = usersPaged.TotalPages,
@@ -52,6 +55,16 @@ namespace InventoryTracker.API.Controllers.Admin
                 TotalCount = usersPaged.TotalCount
             };
             return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetUserById(string id, CancellationToken cancellationToken)
+        {
+            var user = await _mediator.Send(new GetUserByIdQuery(id), cancellationToken);
+            if (user == null)
+                return NotFound();
+            return Ok(user);
         }
 
         [HttpGet]
@@ -67,6 +80,61 @@ namespace InventoryTracker.API.Controllers.Admin
         public async Task<IActionResult> CreateUser(CreateUserCommand command, CancellationToken cancellationToken)
         {
             var result = await _mediator.Send(command, cancellationToken);
+            var response = new UserCreatedResponse { UserId = result.UserId!, Email = result.Email };
+            //To be changed to:
+            //return CreatedAtAction(nameof(GetUserById), new { id = result.UserId }, result);
+
+            return Ok(response);
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> UpdateUser(string id, UpdateUserRequest request, CancellationToken cancellationToken)
+        {
+            var command = new UpdateUserCommand
+            {
+                UserId = id,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                PhoneNumber = request.PhoneNumber,
+                Role = request.Role
+            };
+            var result = await _mediator.Send(command, cancellationToken);
+            if (result == null)
+                return NotFound();
+
+            var response = new UserCreatedResponse { UserId = result.UserId!, Email = result.Email };
+            //To be changed to:
+            //return CreatedAtAction(nameof(GetUserById), new { id = result.UserId }, result);
+
+            return Ok(response);
+        }
+
+        [HttpPatch]
+        [Route("{id}/activate")]
+        public async Task<IActionResult> ActivateUser(string id, CancellationToken cancellationToken)
+        {
+            var command = new ActivateUserCommand(id);
+            var result = await _mediator.Send(command, cancellationToken);
+            if (result == null)
+                return NotFound();
+
+            var response = new UserCreatedResponse { UserId = result.UserId!, Email = result.Email };
+            //To be changed to:
+            //return CreatedAtAction(nameof(GetUserById), new { id = result.UserId }, result);
+
+            return Ok(response);
+        }
+
+        [HttpPatch]
+        [Route("{id}/deactivate")]
+        public async Task<IActionResult> DeactivateUser(string id, CancellationToken cancellationToken)
+        {
+            var command = new DeactivateUserCommand(id);
+            var result = await _mediator.Send(command, cancellationToken);
+            if (result == null)
+                return NotFound();
+
             var response = new UserCreatedResponse { UserId = result.UserId!, Email = result.Email };
             //To be changed to:
             //return CreatedAtAction(nameof(GetUserById), new { id = result.UserId }, result);

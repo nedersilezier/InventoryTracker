@@ -15,7 +15,6 @@ namespace InventoryTracker.Application.Features.Items.Commands.ActivateItem
         }
         public async Task<ItemDTO?> Handle(ActivateItemCommand request, CancellationToken cancellationToken)
         {
-            //var item = await _context.Items.FirstOrDefaultAsync(i => i.ItemId == request.ItemId, cancellationToken);
             var item = await _itemsRepository.GetItemByIdAsync(request.ItemId, cancellationToken);
             if (item == null)
                 return null;

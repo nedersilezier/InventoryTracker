@@ -12,7 +12,6 @@ namespace InventoryTracker.Contracts.Responses.Users
         public string Email { get; set; } = default!;
         public string PhoneNumber { get; set; } = default!;
         public bool IsActive { get; set; }
-        public string UserName { get; set; } = default!;
-        public string Role { get; set; } = default!;
+        public IList<string> Roles { get; set; } = new List<string>();
     }
 }

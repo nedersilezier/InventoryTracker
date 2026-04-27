@@ -112,6 +112,79 @@ namespace InventoryTracker.Infrastructure.Identity
                 Email = user.Email
             };
         }
+        public async Task<CreateUserResult> UpdateUserAsync(string userId, string? firstName, string? lastName, string? phoneNumber, string role)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user is null)
+            {
+                return new CreateUserResult
+                {
+                    Succeeded = false,
+                    Errors = [$"User with id '{userId}' does not exist."]
+                };
+            }
+
+            var roleExists = await _roleManager.RoleExistsAsync(role);
+
+            if (!roleExists)
+            {
+                return new CreateUserResult
+                {
+                    Succeeded = false,
+                    Errors = [$"Role '{role}' does not exist."]
+                };
+            }
+
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.PhoneNumber = phoneNumber;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+
+            if (!updateResult.Succeeded)
+            {
+                return new CreateUserResult
+                {
+                    Succeeded = false,
+                    Errors = updateResult.Errors.Select(e => e.Description).ToList()
+                };
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+
+            if (!currentRoles.Contains(role))
+            {
+                var removeRolesResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+
+                if (!removeRolesResult.Succeeded)
+                {
+                    return new CreateUserResult
+                    {
+                        Succeeded = false,
+                        Errors = removeRolesResult.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+
+                var addToRoleResult = await _userManager.AddToRoleAsync(user, role);
+
+                if (!addToRoleResult.Succeeded)
+                {
+                    return new CreateUserResult
+                    {
+                        Succeeded = false,
+                        Errors = addToRoleResult.Errors.Select(e => e.Description).ToList()
+                    };
+                }
+            }
+
+            return new CreateUserResult
+            {
+                Succeeded = true,
+                UserId = user.Id,
+                Email = user.Email
+            };
+        }
         public async Task<AuthResponseDTO> LoginAsync(string email, string password, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByEmailAsync(email);

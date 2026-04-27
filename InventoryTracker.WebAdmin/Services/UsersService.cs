@@ -1,13 +1,14 @@
 ﻿using InventoryTracker.APIClient;
 using InventoryTracker.Contracts.Helpers;
 using InventoryTracker.Contracts.Requests.Users;
-using InventoryTracker.Contracts.Requests.Warehouses;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Users;
 using InventoryTracker.Contracts.Responses.Warehouses;
 using InventoryTracker.WebAdmin.Interfaces;
+using InventoryTracker.WebAdmin.ViewModels.Common;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using InventoryTracker.WebAdmin.ViewModels.Users;
+using InventoryTracker.WebAdmin.ViewModels.Warehouses;
 
 namespace InventoryTracker.WebAdmin.Services
 {
@@ -42,8 +43,7 @@ namespace InventoryTracker.WebAdmin.Services
                 LastName = u.LastName,
                 PhoneNumber = u.PhoneNumber,
                 IsActive = u.IsActive,
-                UserName = u.UserName,
-                Role = u.Role
+                Role = u.Roles?.FirstOrDefault() ?? string.Empty
             }).ToList() ?? new List<UserListItemViewModel>();
             var routeValues = new Dictionary<string, string?>
             {
@@ -76,10 +76,42 @@ namespace InventoryTracker.WebAdmin.Services
             };
             return ServiceResult<UsersIndexViewModel>.Ok(viewModel);
         }
+        public async Task<ServiceResult<EditUserViewModel>> GetByIdAsync(string id, CancellationToken cancellationToken)
+        {
+            var result = await _apiClient.GetAsync<UserResponseDTO>($"/api/admin/users/{id}", "Failed to load user.", cancellationToken);
+            if (!result.Success)
+                return ServiceResult<EditUserViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
+
+            var user = result.Data!;
+            var vm = new EditUserViewModel
+            {
+                UserId = user.UserId,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                PhoneNumber = user.PhoneNumber,
+                SelectedRole = user.Roles?.FirstOrDefault() ?? string.Empty
+            };
+
+            return ServiceResult<EditUserViewModel>.Ok(vm);
+        }
         public async Task<ServiceResult<UserCreatedResponse>> CreateUserAsync(CreateUserRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             return await _apiClient.PostAsync<UserCreatedResponse>("/api/admin/users", request, "Failed to create user.", cancellationToken);
+        }
+        public async Task<ServiceResult<UserCreatedResponse>> UpdateUserAsync(string id, UpdateUserRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            return await _apiClient.PutAsync<UserCreatedResponse>($"/api/admin/users/{id}", request, "Failed to update user.", cancellationToken);
+        }
+        public async Task<ServiceResult<UserCreatedResponse>> DeactivateUserAsync(string id, CancellationToken cancellationToken)
+        {
+            return await _apiClient.PatchAsync<UserCreatedResponse>($"/api/admin/users/{id}/deactivate", null, "Failed to deactivate user.", cancellationToken);
+        }
+
+        public async Task<ServiceResult<UserCreatedResponse>> ActivateUserAsync(string id, CancellationToken cancellationToken)
+        {
+            return await _apiClient.PatchAsync<UserCreatedResponse>($"/api/admin/users/{id}/activate", null, "Failed to activate user.", cancellationToken);
         }
     }
 }

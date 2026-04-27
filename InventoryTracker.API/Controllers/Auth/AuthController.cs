@@ -48,7 +48,7 @@ namespace InventoryTracker.API.Controllers.Auth
         }
         [Authorize]
         [HttpGet("me")]
-        public async Task<ActionResult<CurrentUserDTO>> Me()
+        public async Task<ActionResult<UserDTO>> Me()
         {
             var result = await _mediator.Send(new GetCurrentUserQuery());
             return Ok(result);

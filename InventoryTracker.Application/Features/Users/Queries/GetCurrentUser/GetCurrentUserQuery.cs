@@ -6,7 +6,7 @@ using System.Text;
 
 namespace InventoryTracker.Application.Features.Users.Queries.GetCurrentUser
 {
-    public class GetCurrentUserQuery: IRequest<CurrentUserDTO>
+    public class GetCurrentUserQuery: IRequest<UserDTO>
     {
     }
 }

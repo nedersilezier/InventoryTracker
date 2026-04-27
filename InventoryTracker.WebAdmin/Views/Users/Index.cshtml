@@ -129,12 +129,45 @@
                                                    class="p-2 hover:bg-slate-100 rounded-lg">
                                                 <span class="material-symbols-outlined text-slate-400 hover:text-blue-400">edit</span>
                                             </a>
-                                            <a asp-controller="Users"
-                                                   asp-action="Delete"
-                                                   asp-route-id="@user.UserId"
-                                                   class="p-2 hover:bg-slate-100 rounded-lg">
-                                                <span class="material-symbols-outlined text-slate-400 hover:text-red-400">delete</span>
-                                            </a>
+                                            @if (user.IsActive)
+                                            {
+                                                <form asp-controller="Users"
+                                                      asp-action="Deactivate"
+                                                      method="post"
+                                                      class="inline">
+    
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden" name="id" value="@user.UserId" />
+                                                    <button type="submit"
+                                                            class="p-2 hover:bg-slate-100 rounded-lg group"
+                                                            onclick="return confirm('Are you sure you want to deactivate this user?')">
+                                                        <span class="material-symbols-outlined text-slate-400 hover:text-red-400">
+                                                            Delete
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <form asp-controller="Users"
+                                                      asp-action="Activate"
+                                                      method="post"
+                                                      class="inline">
+    
+                                                    @Html.AntiForgeryToken()
+
+                                                    <input type="hidden" name="id" value="@user.UserId" />
+
+                                                    <button type="submit"
+                                                            class="p-2 hover:bg-slate-100 rounded-lg group"
+                                                            onclick="return confirm('Are you sure you want to activate this user?')">
+                                                        <span class="material-symbols-outlined text-slate-400 hover:text-green-400">
+                                                            restore_from_trash
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                            }
 
                                         </div>
                                     </td>

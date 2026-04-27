@@ -21,13 +21,13 @@ namespace InventoryTracker.Infrastructure.Services
         {
             _userManager = userManager;
         }
-        public async Task<CurrentUserDTO> GetCurrentUserAsync(string userId, CancellationToken cancellationToken)
+        public async Task<UserDTO> GetUserByIdAsync(string userId, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
                 throw new RecordNotFoundException(nameof(ApplicationUser), userId);
             var roles = await _userManager.GetRolesAsync(user);
-            return new CurrentUserDTO
+            return new UserDTO
             {
                 UserId = user.Id,
                 Email = user.Email ?? string.Empty,
@@ -69,8 +69,7 @@ namespace InventoryTracker.Infrastructure.Services
                     LastName = user.LastName ?? string.Empty,
                     PhoneNumber = user.PhoneNumber ?? string.Empty,
                     IsActive = user.IsActive,
-                    UserName = user.UserName ?? string.Empty,
-                    Role = roles.FirstOrDefault() ?? string.Empty
+                    Roles = roles
                 });
             }
             return new PagedResult<UserDTO>
@@ -80,6 +79,42 @@ namespace InventoryTracker.Infrastructure.Services
                 PageNumber = pageNumber,
                 PageSize = parameters.PageSize,
                 TotalCount = totalCount
+            };
+        }
+        public async Task<UserDTO> ActivateUserAsync(string userId, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new RecordNotFoundException(nameof(ApplicationUser), userId);
+            user.IsActive = true;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                throw new BusinessException("Failed to update the user.");
+            return new UserDTO
+            {
+                UserId = user.Id,
+                Email = user.Email ?? string.Empty,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
+                PhoneNumber = user.PhoneNumber ?? string.Empty
+            };
+        }
+        public async Task<UserDTO> DeactivateUserAsync(string userId, CancellationToken cancellationToken)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                throw new RecordNotFoundException(nameof(ApplicationUser), userId);
+            user.IsActive = false;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                throw new BusinessException("Failed to update the user.");
+            return new UserDTO
+            {
+                UserId = user.Id,
+                Email = user.Email ?? string.Empty,
+                FirstName = user.FirstName ?? string.Empty,
+                LastName = user.LastName ?? string.Empty,
+                PhoneNumber = user.PhoneNumber ?? string.Empty
             };
         }
     }

@@ -14,5 +14,6 @@ namespace InventoryTracker.Application.Common.Interfaces
         Task LogoutAsync(string refreshToken, CancellationToken cancellationToken);
         Task<AuthResponseDTO> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
         Task<IReadOnlyList<RoleDTO>> GetRolesAsync(CancellationToken cancellationToken);
+        Task<CreateUserResult> UpdateUserAsync(string userId, string? firstName, string? lastName, string? phoneNumber, string role);
     }
 }

@@ -9,7 +9,9 @@ namespace InventoryTracker.Application.Common.Interfaces
 {
     public interface IUsersService
     {
-        Task<CurrentUserDTO> GetCurrentUserAsync(string userId, CancellationToken cancellationToken);
+        Task<UserDTO> GetUserByIdAsync(string userId, CancellationToken cancellationToken);
         Task<PagedResult<UserDTO>> GetAllUsersAsync(GetUsersParameters parameters, CancellationToken cancellationToken);
+        Task<UserDTO> ActivateUserAsync(string userId, CancellationToken cancellationToken);
+        Task<UserDTO> DeactivateUserAsync(string userId, CancellationToken cancellationToken);
     }
 }

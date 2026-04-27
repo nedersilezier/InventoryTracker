@@ -1,0 +1,136 @@
+﻿@model InventoryTracker.WebAdmin.ViewModels.Users.EditUserViewModel
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="max-w-7xl mx-auto px-4 py-0">
+    <div class="mb-6">
+        <div class="flex items-center gap-2 text-slate-500 mb-2">
+            <a asp-controller="Users"
+                   asp-action="Index"
+                   class="text-xs font-semibold uppercase tracking-widest hover:text-blue-600 transition-colors">
+                Users
+            </a>
+            <span class="text-sm">›</span>
+            <span class="text-xs font-semibold text-black uppercase tracking-widest">
+                Edit User
+            </span>
+        </div>
+    </div>
+
+    <form asp-controller="Users" asp-action="Edit" method="post" class="space-y-8">
+        @Html.AntiForgeryToken()
+        <input asp-for="UserId" type="hidden" />
+
+        <div class="bg-white rounded-xl p-8 shadow-sm relative overflow-hidden border border-slate-100">
+            <div class="absolute top-0 left-0 w-full h-1 bg-blue-600"></div>
+            <div class="space-y-10">
+                <section class="space-y-6">
+                    <div class="flex items-center gap-4">
+                        <span class="bg-blue-100 text-blue-700 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold">
+                            01
+                        </span>
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500">
+                            Identity
+                        </h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="flex flex-col gap-2">
+                            <label asp-for="FirstName" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                First Name
+                            </label>
+                            <input asp-for="FirstName"
+                                   class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                                   placeholder="e.g. Alexander" />
+                            <span asp-validation-for="FirstName" class="text-sm text-red-600"></span>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label asp-for="LastName" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                Last Name
+                            </label>
+                            <input asp-for="LastName"
+                                   class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                                   placeholder="e.g. Hamilton" />
+                            <span asp-validation-for="LastName" class="text-sm text-red-600"></span>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="space-y-6">
+                    <div class="flex items-center gap-4">
+                        <span class="bg-blue-100 text-blue-700 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold">
+                            02
+                        </span>
+                        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-500">
+                            Contact &amp; Access
+                        </h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <div class="flex flex-col gap-2">
+                            <label asp-for="PhoneNumber" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                Phone Number
+                            </label>
+                            <input asp-for="PhoneNumber"
+                                   type="tel"
+                                   class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all placeholder:text-slate-400"
+                                   placeholder="+31 00 00 00 00" />
+                            <span asp-validation-for="PhoneNumber" class="text-sm text-red-600"></span>
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label asp-for="SelectedRole" class="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                Role
+                            </label>
+                            <div class="relative">
+                                <select asp-for="SelectedRole"
+                                        asp-items="Model.AvailableRoles"
+                                        class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 appearance-none focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all cursor-pointer">
+                                    <option value="">Select Access Role</option>
+                                </select>
+
+                                <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                    ⌄
+                                </span>
+                            </div>
+                            <span asp-validation-for="SelectedRole" class="text-sm text-red-600"></span>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-8">
+                <div asp-validation-summary="ModelOnly"
+                     class="min-h-[56px] rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+                </div>
+            </div>
+
+            <div class="lg:col-span-4 grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <div class="lg:col-span-2 space-y-3">
+                    <a asp-controller="Users"
+                           asp-action="Index"
+                           class="w-full bg-slate-200 text-slate-600 font-bold py-4 rounded-full hover:bg-slate-300 transition-all text-center block">
+                        Cancel
+                    </a>
+                </div>
+
+                <div class="lg:col-span-2 space-y-3">
+                    <button type="submit"
+                            class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold py-4 rounded-full shadow hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-lg">save</span>
+                        <span>Save Changes</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
