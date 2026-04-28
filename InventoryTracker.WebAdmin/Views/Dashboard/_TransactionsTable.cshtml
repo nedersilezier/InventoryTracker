@@ -47,10 +47,10 @@
                             <!-- Date -->
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-slate-900">
-                                    @t.TransactionDate.ToString("dd-MM-yyyy")
+                                    @t.TransactionDate.ToLocalTime().ToString("dd-MM-yyyy")
                                 </div>
                                 <div class="text-[11px] text-slate-400">
-                                    @t.TransactionDate.ToString("HH:mm")
+                                    @t.TransactionDate.ToLocalTime().ToString("HH:mm")
                                 </div>
                             </td>
 

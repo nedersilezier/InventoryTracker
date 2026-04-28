@@ -1,18 +1,11 @@
 ﻿using InventoryTracker.Contracts.Helpers;
-using InventoryTracker.Contracts.Requests.Common;
 using InventoryTracker.Contracts.Requests.Transactions;
-using InventoryTracker.Contracts.Requests.Warehouses;
-using InventoryTracker.Contracts.Responses.Common;
-using InventoryTracker.Shared.Enums;
 using InventoryTracker.WebAdmin.Interfaces;
-using InventoryTracker.WebAdmin.Services;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using InventoryTracker.WebAdmin.ViewModels.Items;
 using InventoryTracker.WebAdmin.ViewModels.Transactions;
-using InventoryTracker.WebAdmin.ViewModels.Warehouses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Transactions;
 
 namespace InventoryTracker.WebAdmin.Controllers
 {
@@ -166,13 +159,16 @@ namespace InventoryTracker.WebAdmin.Controllers
                 vm.AvailableItems = itemsResult.Data!;
                 vm.AvailableClients = clientsResult.Data!;
                 vm.AvailableWarehouses = warehousesResult.Data!;
+
                 return View("Create", vm);
             }
+            var localDate = vm.TransactionDate.Date.Add(DateTime.Now.TimeOfDay);
+            var utcDate = DateTime.SpecifyKind(localDate, DateTimeKind.Local).ToUniversalTime();
 
             var request = new CreateTransactionRequest
             {
                 Type = vm.Type,
-                TransactionDate = vm.TransactionDate,
+                TransactionDate = utcDate,
                 ClientId = vm.ClientId,
                 SourceWarehouseId = vm.SourceWarehouseId,
                 DestinationWarehouseId = vm.DestinationWarehouseId,

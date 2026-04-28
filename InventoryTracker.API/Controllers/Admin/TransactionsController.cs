@@ -4,7 +4,6 @@ using InventoryTracker.Application.Features.Transactions.Commands.CreateTransact
 using InventoryTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions;
 using InventoryTracker.Contracts.Requests.Transactions;
-using InventoryTracker.Contracts.Responses.Clients;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Transactions;
 using MediatR;

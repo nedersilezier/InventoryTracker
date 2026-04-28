@@ -7,7 +7,7 @@ namespace InventoryTracker.WebAdmin.ViewModels.Transactions
     {
         [Required]
         public Guid ItemId { get; set; }
-        //public string? Name { get; set; }
+        public string? Name { get; set; }
         public decimal Quantity { get; set; }
     }
 }

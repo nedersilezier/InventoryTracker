@@ -3,7 +3,6 @@ using InventoryTracker.Contracts.Requests.Common;
 using InventoryTracker.Contracts.Requests.Warehouses;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
-using InventoryTracker.WebAdmin.ViewModels.Items;
 using InventoryTracker.WebAdmin.ViewModels.Warehouses;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;

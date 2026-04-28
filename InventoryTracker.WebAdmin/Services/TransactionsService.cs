@@ -1,10 +1,8 @@
 ﻿using InventoryTracker.APIClient;
 using InventoryTracker.Contracts.Helpers;
 using InventoryTracker.Contracts.Requests.Transactions;
-using InventoryTracker.Contracts.Requests.Warehouses;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Transactions;
-using InventoryTracker.Contracts.Responses.Warehouses;
 using InventoryTracker.WebAdmin.Interfaces;
 using InventoryTracker.WebAdmin.ViewModels.HelperVMs;
 using InventoryTracker.WebAdmin.ViewModels.Transactions;
