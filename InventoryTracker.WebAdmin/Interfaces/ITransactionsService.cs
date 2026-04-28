@@ -11,5 +11,7 @@ namespace InventoryTracker.WebAdmin.Interfaces
         Task<ServiceResult<TransactionsIndexViewModel>> GetAllAsync(GetTransactionsRequest request, CancellationToken cancellationToken);
         Task<ServiceResult<CreateTransactionResponse>> CreateTransactionAsync(CreateTransactionRequest request, CancellationToken cancellationToken);
         Task<ServiceResult<IEnumerable<TransactionListDTO>>> GetRecentTransactionsAsync(int count, CancellationToken cancellationToken);
+        Task<ServiceResult<Guid>> ApproveTransactionAsync(Guid id, CancellationToken cancellationToken);
+        Task<ServiceResult<Guid>> CancelTransactionAsync(Guid id, CancellationToken cancellationToken);
     }
 }

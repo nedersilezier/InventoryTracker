@@ -21,7 +21,6 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
         public async Task<Guid> Handle(ApproveTransactionCommand request, CancellationToken cancellationToken)
         {
             var transaction = await _transactionsRepository.GetTransactionWithItemsByIdAsync(request.TransactionId, cancellationToken);
-            //var transaction = await _context.Transactions.Include(t => t.TransactionItems).FirstOrDefaultAsync(t => t.TransactionId == request.TransactionId, cancellationToken);
             if (transaction == null)
                 throw new RecordNotFoundException(nameof(Transaction), request.TransactionId);
 
@@ -35,8 +34,6 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
             var stocks = await _stocksRepository.GetStocksByItemIdsAsync(itemIds, cancellationToken);
             IQueryable<Stock> stocksQuery = stocks.AsQueryable();
 
-            //IQueryable<Stock> stocksQuery = _context.Stocks.Where(s => itemIds.Contains(s.ItemId));
-
             switch (transaction.Type)
             {
                 case TransactionType.Adjustment:
@@ -44,7 +41,6 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                         throw new BusinessException("No source warehouse bound to the transaction.");
 
                     var stocksToAdjust = stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToList();
-                    //var stocksToAdjust = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
                     foreach (var item in transaction.TransactionItems)
                     {
                         var stock = stocksToAdjust.FirstOrDefault(s => s.ItemId == item.ItemId);
@@ -59,11 +55,10 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                             };
                             stocksToAdjust.Add(stock);
                            await _stocksRepository.AddStock(stock);
-                            //_context.Stocks.Add(stock);
                         }
                         var quantityChange = stock.Quantity + item.Quantity;
                         if (quantityChange < 0)
-                            throw new BusinessException($"Insufficient stock for item {item.ItemId} to adjust.");
+                            throw new BusinessException($"Insufficient stock for item '{item.NameSnapshot}' to adjust.");
 
                         stock.Quantity = quantityChange;
                     }
@@ -74,15 +69,14 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                         throw new BusinessException("No source warehouse bound to the transaction.");
 
                     var stocksToSend = stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToList();
-                    //var stocksToSend = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
                     foreach (var item in transaction.TransactionItems)
                     {
                         var stock = stocksToSend.FirstOrDefault(s => s.ItemId == item.ItemId);
                         if (stock == null)
-                            throw new BusinessException($"No stock record found for item {item.ItemId} in the source warehouse.");
+                            throw new BusinessException($"No stock record found for item '{item.NameSnapshot}' in the source warehouse.");
                         var quantityChange = stock.Quantity - item.Quantity;
                         if (quantityChange < 0)
-                            throw new BusinessException($"Insufficient stock for item {item.ItemId} to issue to client.");
+                            throw new BusinessException($"Insufficient stock for item '{item.NameSnapshot}' to issue to client.");
                         stock.Quantity = quantityChange;
                     }
                     break;
@@ -92,15 +86,13 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                         throw new BusinessException("Source or destination warehouse not bound to the transaction.");
 
                     var sourceWarehouseStocks = stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToList();
-                    //var sourceWarehouseStocks = await stocksQuery.Where(s => s.WarehouseId == transaction.SourceWarehouseId).ToListAsync(cancellationToken);
                     var destinationWarehouseStocks = stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToList();
-                    //var destinationWarehouseStocks = await stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToListAsync(cancellationToken);
 
                     foreach (var item in transaction.TransactionItems)
                     {
                         var sourceStock = sourceWarehouseStocks.FirstOrDefault(s => s.ItemId == item.ItemId);
                         if (sourceStock == null)
-                            throw new BusinessException($"No stock record found for item {item.ItemId} in the source warehouse.");
+                            throw new BusinessException($"No stock record found for item '{item.NameSnapshot}' in the source warehouse.");
                         var destinationStock = destinationWarehouseStocks.FirstOrDefault(s => s.ItemId == item.ItemId);
                         if (destinationStock == null)
                         {
@@ -113,11 +105,10 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                             };
                             destinationWarehouseStocks.Add(destinationStock);
                             await _stocksRepository.AddStock(destinationStock);
-                            //_context.Stocks.Add(destinationStock);
                         }
                         var quantityChangeSource = sourceStock.Quantity - item.Quantity;
                         if (quantityChangeSource < 0)
-                            throw new BusinessException($"Insufficient stock for item {item.ItemId} to transfer to destination warehouse.");
+                            throw new BusinessException($"Insufficient stock for item '{item.NameSnapshot}' to transfer to destination warehouse.");
 
                         sourceStock.Quantity -= item.Quantity;
                         destinationStock.Quantity += item.Quantity;
@@ -128,7 +119,6 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                     if (transaction.DestinationWarehouseId == null || transaction.ClientId == null)
                         throw new BusinessException("Return transaction requires destination warehouse and client.");
                     var stocksReturned = stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToList();
-                    //var stocksReturned = await stocksQuery.Where(s => s.WarehouseId == transaction.DestinationWarehouseId).ToListAsync(cancellationToken);
                     foreach(var item in transaction.TransactionItems)
                     {
                         var stock = stocksReturned.FirstOrDefault(s => s.ItemId == item.ItemId);
@@ -143,7 +133,6 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.ApproveTra
                             };
                             stocksReturned.Add(stock);
                             await _stocksRepository.AddStock(stock);
-                            //_context.Stocks.Add(stock);
                         }
                         stock.Quantity += item.Quantity;
                     }

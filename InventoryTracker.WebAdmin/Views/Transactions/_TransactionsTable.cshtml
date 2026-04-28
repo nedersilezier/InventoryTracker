@@ -76,33 +76,95 @@
                                         </summary>
 
                                         <div class="absolute right-0 mt-2 w-40 bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden z-50">
-                                            <a asp-controller="Transactions"
-                                                   asp-action="Edit"
-                                                   asp-route-id="@t.TransactionId"
-                                                   class="block px-4 py-1 text-sm text-slate-700 hover:bg-slate-100">
-                                                Edit
-                                            </a>
+                                            <form asp-controller="Transactions"
+                                                  asp-action="Edit"
+                                                  method="get"
+                                                  class="block w-full">
+    
+                                                @Html.AntiForgeryToken()
 
-                                            <a asp-controller="Transactions"
-                                                   asp-action="Approve"
-                                                   asp-route-id="@t.TransactionId"
-                                                   class="block px-4 py-1 text-sm text-slate-700 hover:bg-slate-100">
-                                                Approve
-                                            </a>
+                                                <input type="hidden" name="id" value="@t.TransactionId" />
+                                                <button type="submit"
+                                                        class="w-full p-2 hover:bg-slate-100 rounded-lg group">
+                                                    <div class="flex items-center justify-end gap-1">
+                                                        <div class="material-symbols-outlined text-[18px] text-blue-600">
+                                                            edit
+                                                        </div>
+                                                        <div>
+                                                            Edit
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </button>
+                                            </form>
 
-                                            <a asp-controller="Transactions"
-                                                   asp-action="Cancel"
-                                                   asp-route-id="@t.TransactionId"
-                                                   class="block px-4 py-1 text-sm text-slate-700 hover:bg-slate-100">
-                                                Cancel
-                                            </a>
+                                            <form asp-controller="Transactions"
+                                                  asp-action="Approve"
+                                                  method="post"
+                                                  class="block w-full">
+    
+                                                @Html.AntiForgeryToken()
 
-                                            <a asp-controller="Transactions"
-                                                   asp-action="ExportToPFD"
-                                                   asp-route-id="@t.TransactionId"
-                                                   class="block px-4 py-1 text-sm text-slate-700 hover:bg-slate-100">
-                                                Document preview
-                                            </a>
+                                                <input type="hidden" name="id" value="@t.TransactionId" />
+                                                <button type="submit"
+                                                        class="w-full p-2 hover:bg-slate-100 rounded-lg group"
+                                                        onclick="return confirm('Are you sure you want to approve this transaction?')">
+                                                    <div class="flex items-center justify-end gap-1">
+                                                        <div class="material-symbols-outlined text-[18px] text-green-600">
+                                                            Check
+                                                        </div>
+                                                        <div>
+                                                            Approve
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </button>
+                                            </form>
+
+                                            <form asp-controller="Transactions"
+                                                  asp-action="Cancel"
+                                                  method="post"
+                                                  class="block w-full">
+    
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden" name="id" value="@t.TransactionId" />
+                                                <button type="submit"
+                                                        class="w-full p-2 hover:bg-slate-100 rounded-lg group"
+                                                        onclick="return confirm('Are you sure you want to approve this transaction?')">
+                                                    <div class="flex items-center justify-end gap-1">
+                                                        <div class="material-symbols-outlined text-[18px] text-red-600">
+                                                            cancel
+                                                        </div>
+                                                        <div>
+                                                            Cancel
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </button>
+                                            </form>
+
+                                            <form asp-controller="Transactions"
+                                                  asp-action="ShowDocument"
+                                                  method="get"
+                                                  class="block w-full">
+    
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden" name="id" value="@t.TransactionId" />
+                                                <button type="submit"
+                                                        class="w-full p-2 hover:bg-slate-100 rounded-lg group">
+                                                    <div class="flex items-center justify-end gap-1">
+                                                        <div class="material-symbols-outlined text-[18px] text-slate-600">
+                                                            article
+                                                        </div>
+                                                        <div>
+                                                            Document
+                                                        </div>
+                                                    </div>
+                                                    
+                                                </button>
+                                            </form>
                                         </div>
                                     </details>
                                 </div>

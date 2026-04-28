@@ -135,5 +135,13 @@ namespace InventoryTracker.WebAdmin.Services
             ArgumentNullException.ThrowIfNull(request);
             return await _apiClient.PostAsync<CreateTransactionResponse>("/api/admin/transactions", request, "Failed to create transaction.", cancellationToken);
         }
+        public async Task<ServiceResult<Guid>> ApproveTransactionAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await _apiClient.PatchAsync<Guid>($"/api/admin/transactions/{id}/approve", null, "Failed to approve transaction.", cancellationToken);
+        }
+        public async Task<ServiceResult<Guid>> CancelTransactionAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await _apiClient.PatchAsync<Guid>($"/api/admin/transactions/{id}/cancel", null, "Failed to cancel transaction.", cancellationToken);
+        }
     }
 }

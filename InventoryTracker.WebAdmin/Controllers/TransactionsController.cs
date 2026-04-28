@@ -228,6 +228,48 @@ namespace InventoryTracker.WebAdmin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Approve(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _transactionsService.ApproveTransactionAsync(id, cancellationToken);
+
+            if (!result.Success)
+            {
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
+
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to approve transaction.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = $"Transaction '{result.Data!}' approved successfully.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _transactionsService.CancelTransactionAsync(id, cancellationToken);
+
+            if (!result.Success)
+            {
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
+
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to cancel transaction.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = $"Transaction '{result.Data!}' cancelled successfully.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
         #region Helpers
         private async Task<ServiceResult<List<ItemSelectOption>>> GetItemSelectListAsync(CancellationToken cancellationToken)
         {
