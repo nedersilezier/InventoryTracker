@@ -19,6 +19,7 @@ namespace InventoryTracker.Infrastructure.Services
         public async Task<PagedResult<TransactionListDTO>> GetAllTransactionsAsync(GetTransactionsParameters parameters, CancellationToken cancellationToken)
         {
             var query = _context.Transactions
+                .AsNoTracking()
                 .Include(t => t.Client)
                 .AsQueryable();
             var selectedTypes = new List<TransactionType>();
