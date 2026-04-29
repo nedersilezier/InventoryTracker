@@ -1,8 +1,8 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Button, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getCurrentUser, login } from '../lib/api';
+import { login } from '../lib/api';
 
 export default function Index() {
   const [email, setEmail] = useState('');
@@ -13,19 +13,8 @@ export default function Index() {
     try {
       setLoading(true);
 
-      const result = await login(email, password);
-
-      console.log('LOGIN RESULT:', {
-        email: result.email,
-        userId: result.userId,
-        roles: result.roles
-      });
-
-      const me = await getCurrentUser();
-      console.log('CURRENT USER:', me);
-      Alert.alert(
-              'Login success',
-              `Loged in as ${me.email} \nName: ${me.firstName} \nLast name: ${me.lastName}`);
+      await login(email, password);
+      router.replace("/transactions");
     } catch (error) {
       console.log('LOGIN ERROR:', error);
       const message =

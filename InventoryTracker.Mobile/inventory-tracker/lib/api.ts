@@ -1,11 +1,13 @@
 import * as SecureStore from 'expo-secure-store';
+import { handleUnauthorized } from './auth';
+import { PagedResponse, TransactionListDTO, GetTransactionsParams } from './transactions.types';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
 if (!API_URL) {
   throw new Error('No EXPO_PUBLIC_API_URL');
 }
-
+//types
 export type LoginRequest = {
   email: string;
   password: string;
@@ -21,21 +23,14 @@ export type AuthResponse = {
   roles: string[];
 };
 
-export type MeResponse = {
-  userId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  roles: string[];
-};
-
 export type ApiErrorResponse = {
   type?: string;
   title?: string;
   status?: number;
   detail?: string;
 };
+
+//login function
 export async function login(email: string, password: string): Promise<AuthResponse> {
   const body: LoginRequest = {
     email,
@@ -43,9 +38,6 @@ export async function login(email: string, password: string): Promise<AuthRespon
   };
 
   const url = `${API_URL}/api/auth/login`;
-
-  console.log('LOGIN URL:', url);
-  console.log('LOGIN BODY:', body);
 
   try {
     const response = await fetch(url, {
@@ -55,9 +47,6 @@ export async function login(email: string, password: string): Promise<AuthRespon
       },
       body: JSON.stringify(body),
     });
-
-    console.log('LOGIN STATUS:', response.status);
-    console.log('LOGIN OK?:', response.ok);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -97,21 +86,38 @@ export async function getRefreshToken(): Promise<string | null> {
   return await SecureStore.getItemAsync('refreshToken');
 }
 
-// protected endpoint test
-export async function getCurrentUser(): Promise<MeResponse> {
+//get all transactions function
+export async function getTransactions(params: GetTransactionsParams): Promise<PagedResponse<TransactionListDTO>> {
+  //get access token
   const token = await getAccessToken();
 
-  const response = await fetch(`${API_URL}/api/auth/me`, {
+//build query
+const query = new URLSearchParams({
+  pageNumber: String(params.pageNumber),
+  pageSize: String(params.pageSize),
+  includeReturns: String(params.includeReturns ?? true),
+  includeIssues: String(params.includeIssues ?? true),
+  includeTransfers: String(params.includeTransfers ?? true),
+  includeAdjustments: String(params.includeAdjustments ?? true),
+  ...(params.dateFrom && { dateFrom: params.dateFrom }),
+  ...(params.dateTo && { dateTo: params.dateTo }),
+});
+//execute request
+  const response = await fetch(`${API_URL}/api/user/transactions?${query}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
   });
-
+//handle failures
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      await handleUnauthorized();
+      throw new Error('Unauthorized');
+    }
     const errorText = await response.text();
-    throw new Error(errorText || 'Failed to load the user');
+    throw new Error(errorText || 'Failed to load transactions');
   }
 
   return await response.json();
