@@ -2,13 +2,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { TransactionListDTO } from '../../lib/transactions.types';
 import { TYPE_UI } from '../../lib/transactions.ui';
-import { shortId } from '../../lib/transactions.utils';
 
 type Props = {
   transaction: TransactionListDTO;
 };
 
 export function TransactionCard({ transaction }: Props) {
+    //map transaction type to ui
   const type = TYPE_UI[transaction.typeName] ?? {
     label: transaction.typeName || 'Unknown',
     color: '#5c5f60',

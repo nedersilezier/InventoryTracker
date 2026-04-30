@@ -83,6 +83,10 @@ builder.Services
             ValidIssuer = jwtSettings.Issuer,
             ValidAudience = jwtSettings.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key))
+
+            //TEST
+            // Disable default 5 minute tolerance after token expiration.
+            //ClockSkew = TimeSpan.Zero
         };
     });
 // Register the refresh token generator

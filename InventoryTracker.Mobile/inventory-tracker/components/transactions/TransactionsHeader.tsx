@@ -1,5 +1,6 @@
 import { View, Pressable, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 type Props = {
   onOpenFilters: () => void;
@@ -7,6 +8,7 @@ type Props = {
 
 export function TransactionsHeader({onOpenFilters} : Props)
 {
+  const router = useRouter();
     return(
     <View style={styles.header}>
         <Pressable style={styles.iconButton}>
@@ -17,11 +19,12 @@ export function TransactionsHeader({onOpenFilters} : Props)
 
         <View style={styles.headerActions}>
           <Pressable style={styles.iconButton} 
-                    onPress={() => { onOpenFilters }}>
+                    onPress={ onOpenFilters }>
             <Ionicons name="filter" size={24} color="#041b3c" />
           </Pressable>
 
-          <Pressable style={styles.iconButton}>
+          <Pressable style={styles.iconButton}
+                      onPress={() => router.push('/create-transaction')}>
             <Ionicons name="add" size={30} color="#0052cc" />
           </Pressable>
         </View>

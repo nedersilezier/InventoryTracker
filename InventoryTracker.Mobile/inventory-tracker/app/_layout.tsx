@@ -6,6 +6,7 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
+    //register global handler for 401, 403 responses, when triggered redirects to login
     setUnauthorizedHandler(() => {
       router.replace('/');
     });

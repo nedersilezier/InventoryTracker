@@ -22,3 +22,8 @@ export async function handleUnauthorized() {
   //trigger redirect
   onUnauthorized?.();
 }
+
+//reset isHandling after successful re-login
+export function resetUnauthorizedHandlerState() {
+  isHandling = false;
+}
