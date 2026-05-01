@@ -3,15 +3,18 @@ import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, V
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BottomNavItem } from '../components/transactions/BottomNavItem';
 import { FilterModal } from '../components/transactions/FilterModal';
+import { SearchModal } from '../components/transactions/SearchModal';
 import { TransactionCard } from '../components/transactions/TransactionCard';
 import { TransactionsHeader } from '../components/transactions/TransactionsHeader';
 import { getTransactions } from '../lib/api';
 import { DEFAULT_FILTERS, TransactionFilters, TransactionListDTO, } from '../lib/transactions.types';
 import { formatDateLabel } from '../lib/transactions.utils';
+import { useRouter } from 'expo-router';
 
 const PAGE_SIZE = 10;
 
 export default function TransactionsScreen() {
+  const router = useRouter();
     //list of transactions in UI
   const [items, setItems] = useState<TransactionListDTO[]>([]);
   //current page number(for pagination)
@@ -22,12 +25,14 @@ export default function TransactionsScreen() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [filterVisible, setFilterVisible] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);
   //active filters used for api requests
   const [filters, setFilters] = useState<TransactionFilters>(DEFAULT_FILTERS);
   //draft filters used inside filters modal
   const [draftFilters, setDraftFilters] = useState<TransactionFilters>(DEFAULT_FILTERS);
 
   const [applyingFilters, setApplyingFilters] = useState(false);
+  const [applyingSearch, setApplyingSearch] = useState(false);
 
   //core responsible for fetching data
   const loadPage = useCallback(
@@ -36,12 +41,12 @@ export default function TransactionsScreen() {
       mode: 'replace' | 'append',
       activeFilters: TransactionFilters
     ) => {
+      console.log(activeFilters);
       const result = await getTransactions({
         pageNumber: page,
         pageSize: PAGE_SIZE,
         ...activeFilters,
       });
-
       setItems((prev) => {
         //override list(when new filters)
         if (mode === 'replace') {
@@ -101,6 +106,7 @@ export default function TransactionsScreen() {
       loadingMore ||
       refreshing ||
       applyingFilters ||
+      applyingSearch ||
       pageNumber >= totalPages
     ) {
       return;
@@ -121,6 +127,11 @@ export default function TransactionsScreen() {
     setDraftFilters(filters);
     setFilterVisible(true);
   };
+//open search modal
+  const handleOpenSearch = () => {
+    setDraftFilters(filters);
+    setSearchVisible(true);
+  };
 //apply filters + reset list and fetch new data
   const handleApplyFilters = async () => {
     const nextFilters = draftFilters;
@@ -140,6 +151,26 @@ export default function TransactionsScreen() {
       setApplyingFilters(false);
     }
   };
+//apply search
+  const handleApplySearch = async () => {
+    const nextFilters = draftFilters;
+    console.log(nextFilters);
+    try {
+      setApplyingSearch(true);
+      setSearchVisible(false);
+      setFilters(nextFilters);
+      setItems([]);
+      setPageNumber(1);
+
+      await loadPage(1, 'replace', nextFilters);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      Alert.alert('Search error', message);
+    } finally {
+      setApplyingSearch(false);
+    }
+  };
+
 //view
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
@@ -203,11 +234,19 @@ export default function TransactionsScreen() {
         onApply={handleApplyFilters}
         onClose={() => setFilterVisible(false)}
       />
+      {/* search modal view */}
+      <SearchModal
+        visible={searchVisible}
+        filters={draftFilters}
+        onChange={setDraftFilters}
+        onApply={handleApplySearch}
+        onClose={() => setSearchVisible(false)}
+      />
     {/* bottom navigation view */}
       <View style={styles.bottomNav}>
-        <BottomNavItem icon="search-outline" label="Search" active={false} />
-        <BottomNavItem icon="receipt-outline" label="Transactions" active />
-        <BottomNavItem icon="person-outline" label="Account" active={false} />
+        <BottomNavItem icon="search-outline" label="Search" active={searchVisible} onOpen={handleOpenSearch}/>
+        <BottomNavItem icon="receipt-outline" label="Transactions" active onOpen={() => router.replace('/transactions')}/>
+        <BottomNavItem icon="person-outline" label="Account" active={false} onOpen={() => {}}/>
       </View>
     </SafeAreaView>
   );

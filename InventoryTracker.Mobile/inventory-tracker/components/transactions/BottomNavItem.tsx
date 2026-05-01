@@ -5,11 +5,12 @@ type Props = {
   icon: keyof typeof Ionicons.glyphMap;
   label: string;
   active: boolean;
+  onOpen: () => void;
 };
 
-export function BottomNavItem({ icon, label, active }: Props) {
+export function BottomNavItem({ icon, label, active, onOpen }: Props) {
   return (
-    <Pressable style={[styles.navItem, active && styles.navItemActive]}>
+    <Pressable style={[styles.navItem, active && styles.navItemActive]} onPress={ onOpen }>
       <Ionicons name={icon} size={26} color={active ? '#0052cc' : '#64748b'} />
       <Text style={[styles.navText, active && styles.navTextActive]}>
         {label}

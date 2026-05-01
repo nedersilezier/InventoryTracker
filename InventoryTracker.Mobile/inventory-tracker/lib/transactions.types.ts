@@ -34,6 +34,7 @@ export type TransactionFilters = {
   includeAdjustments: boolean;
   dateFrom?: string;
   dateTo?: string;
+  searchTerm?: string;
 };
 //default transaction filters
 export const DEFAULT_FILTERS: TransactionFilters = {
@@ -41,6 +42,7 @@ export const DEFAULT_FILTERS: TransactionFilters = {
   includeIssues: true,
   includeTransfers: true,
   includeAdjustments: true,
+  searchTerm: undefined,
 };
 //request body
 export type GetTransactionsParams = {
@@ -50,6 +52,7 @@ export type GetTransactionsParams = {
   includeIssues?: boolean;
   includeTransfers?: boolean;
   includeAdjustments?: boolean;
+  searchTerm?: string;
   dateFrom?: string;
   dateTo?: string;
 };

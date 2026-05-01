@@ -103,10 +103,10 @@ export async function getTransactions(
     includeIssues: String(params.includeIssues ?? true),
     includeTransfers: String(params.includeTransfers ?? true),
     includeAdjustments: String(params.includeAdjustments ?? true),
+    searchTerm: String(params.searchTerm ?? ''),
     ...(params.dateFrom ? { dateFrom: params.dateFrom } : {}),
     ...(params.dateTo ? { dateTo: params.dateTo } : {}),
   });
-
   const response = await authorizedFetch(`/api/user/transactions?${query}`, {
     method: 'GET',
   });
