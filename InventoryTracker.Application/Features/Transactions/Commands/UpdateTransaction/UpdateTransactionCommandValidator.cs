@@ -34,8 +34,8 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.UpdateTran
                 items.RuleFor(i => i.ItemId)
                     .NotEmpty().WithMessage("ItemId is required.");
 
-                items.RuleFor(i => i.Quantity)
-                    .GreaterThan(0).WithMessage("Quantity must be greater than zero.");
+                //items.RuleFor(i => i.Quantity)
+                //    .GreaterThan(0).WithMessage("Quantity must be greater than zero.");
             });
 
             RuleFor(x => x.Items)
@@ -43,6 +43,23 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.UpdateTran
 
             RuleFor(x => x).Custom((request, context) =>
             {
+                foreach (var item in request.Items)
+                {
+                    if (request.Type == TransactionType.Adjustment)
+                    {
+                        if (item.Quantity == 0)
+                        {
+                            context.AddFailure("Adjustment quantity cannot be zero.");
+                        }
+                    }
+                    else
+                    {
+                        if (item.Quantity <= 0)
+                        {
+                            context.AddFailure("Quantity must be greater than zero.");
+                        }
+                    }
+                }
                 switch (request.Type)
                 {
                     case TransactionType.IssueToClient:
