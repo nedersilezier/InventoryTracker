@@ -5,8 +5,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace InventoryTracker.WebAdmin.ViewModels.Transactions
 {
-    public class CreateTransactionViewModel
+    public class CreateEditTransactionViewModel
     {
+        public Guid? TransactionId { get; set; }
         [Required(ErrorMessage = "Transaction type is required.")]
         public TransactionType Type { get; set; } = TransactionType.Adjustment;
         public Guid? ClientId { get; set; }
@@ -27,6 +28,6 @@ namespace InventoryTracker.WebAdmin.ViewModels.Transactions
         public List<ItemSelectOption> AvailableItems { get; set; } = new();
         public List<SelectListItem> AvailableClients { get; set; } = new();
         public List<SelectListItem> AvailableWarehouses { get; set; } = new();
-        public List<CreateTransactionItemViewModel> SelectedItems { get; set; } = new();
+        public List<CreateEditTransactionItemViewModel> SelectedItems { get; set; } = new();
     }
 }

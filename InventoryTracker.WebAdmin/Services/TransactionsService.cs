@@ -130,10 +130,44 @@ namespace InventoryTracker.WebAdmin.Services
 
             return ServiceResult<IEnumerable<TransactionListDTO>>.Ok(response);
         }
+        public async Task<ServiceResult<CreateEditTransactionViewModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _apiClient.GetAsync<TransactionForEditDTO>($"/api/admin/transactions/{id}", "Failed to load transaction.", cancellationToken);
+
+            if (!result.Success)
+                return ServiceResult<CreateEditTransactionViewModel>.Fail(result.ErrorMessage, result.ValidationErrors, result.StatusCode);
+
+            var transaction = result.Data!;
+
+            var vm = new CreateEditTransactionViewModel
+            {
+                TransactionId = transaction.TransactionId,
+                Type = transaction.Type,
+                ClientId = transaction.ClientId,
+                SourceWarehouseId = transaction.SourceWarehouseId,
+                DestinationWarehouseId = transaction.DestinationWarehouseId,
+                TransactionDate = transaction.TransactionDate,
+                ReferenceNumber = transaction.ReferenceNumber,
+                Notes = transaction.Notes,
+                SelectedItems = transaction.Items.Select(ti => new CreateEditTransactionItemViewModel
+                {
+                    ItemId = ti.ItemId,
+                    Name = ti.NameSnapshot,
+                    Quantity = ti.Quantity
+                }).ToList()
+            };
+
+            return ServiceResult<CreateEditTransactionViewModel>.Ok(vm);
+        }
         public async Task<ServiceResult<CreateTransactionResponse>> CreateTransactionAsync(CreateTransactionRequest request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             return await _apiClient.PostAsync<CreateTransactionResponse>("/api/admin/transactions", request, "Failed to create transaction.", cancellationToken);
+        }
+        public async Task<ServiceResult<CreateTransactionResponse>> UpdateTransactionAsync(Guid id, UpdateTransactionRequest request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            return await _apiClient.PutAsync<CreateTransactionResponse>($"/api/admin/transactions/{id}", request, "Failed to update transaction.", cancellationToken);
         }
         public async Task<ServiceResult<Guid>> ApproveTransactionAsync(Guid id, CancellationToken cancellationToken)
         {

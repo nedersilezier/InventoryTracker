@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransactions
+namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransactions.GetAll
 {
     public class GetTransactionsQueryValidator: AbstractValidator<GetTransactionsQuery>
     {

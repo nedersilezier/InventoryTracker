@@ -1,8 +1,7 @@
-﻿using InventoryTracker.Application.Features.Transactions.Commands.ApproveTransaction;
-using InventoryTracker.Application.Features.Transactions.Commands.CancelTransaction;
-using InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction;
+﻿using InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using InventoryTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions;
+using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions.GetAll;
 using InventoryTracker.Contracts.Requests.Transactions;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Transactions;

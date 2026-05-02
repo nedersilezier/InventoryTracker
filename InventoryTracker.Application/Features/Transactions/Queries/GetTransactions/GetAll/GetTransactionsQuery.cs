@@ -3,7 +3,7 @@ using InventoryTracker.Application.Features.Transactions.DTOs;
 using MediatR;
 
 
-namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransactions
+namespace InventoryTracker.Application.Features.Transactions.Queries.GetTransactions.GetAll
 {
     public class GetTransactionsQuery: IRequest<PagedResult<TransactionListDTO>>
     {

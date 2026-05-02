@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace InventoryTracker.WebAdmin.ViewModels.Transactions
 {
-    public class CreateTransactionItemViewModel
+    public class CreateEditTransactionItemViewModel
     {
         [Required]
         public Guid ItemId { get; set; }

@@ -3,6 +3,7 @@ using InventoryTracker.Application.Features.Transactions.Commands.CancelTransact
 using InventoryTracker.Application.Features.Transactions.Commands.CreateTransaction;
 using InventoryTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions;
+using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions.GetAll;
 using InventoryTracker.Contracts.Requests.Transactions;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Transactions;
@@ -112,10 +113,11 @@ namespace InventoryTracker.API.Controllers.Admin
                     Quantity = i.Quantity
                 }).ToList()
             };
-            var transaction = await _mediator.Send(command, cancellationToken);
-            if (transaction == Guid.Empty)
+            var transactionId = await _mediator.Send(command, cancellationToken);
+            if (transactionId == Guid.Empty)
                 return NotFound();
-            return Ok(transaction);
+            var response = new CreateTransactionResponse { TransactionId = transactionId };
+            return Ok(response);
         }
         [HttpPatch]
         [Route("{id}/cancel")]

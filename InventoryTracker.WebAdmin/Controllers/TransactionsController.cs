@@ -6,6 +6,7 @@ using InventoryTracker.WebAdmin.ViewModels.Items;
 using InventoryTracker.WebAdmin.ViewModels.Transactions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using static InventoryTracker.Contracts.Requests.Transactions.UpdateTransactionRequest;
 
 namespace InventoryTracker.WebAdmin.Controllers
 {
@@ -108,18 +109,18 @@ namespace InventoryTracker.WebAdmin.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var viewModel = new CreateTransactionViewModel
+            var viewModel = new CreateEditTransactionViewModel
             {
                 AvailableItems = itemsResult.Data!,
                 AvailableWarehouses = warehousesResult.Data!,
                 AvailableClients = clientsResult.Data!
             };
-            return View("Create", viewModel);
+            return View("CreateEdit", viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateTransactionViewModel vm, CancellationToken cancellationToken)
+        public async Task<IActionResult> Create(CreateEditTransactionViewModel vm, CancellationToken cancellationToken)
         {
             if (!ModelState.IsValid)
             {
@@ -160,7 +161,7 @@ namespace InventoryTracker.WebAdmin.Controllers
                 vm.AvailableClients = clientsResult.Data!;
                 vm.AvailableWarehouses = warehousesResult.Data!;
 
-                return View("Create", vm);
+                return View("CreateEdit", vm);
             }
             var localDate = vm.TransactionDate.Date.Add(DateTime.Now.TimeOfDay);
             var utcDate = DateTime.SpecifyKind(localDate, DateTimeKind.Local).ToUniversalTime();
@@ -225,7 +226,180 @@ namespace InventoryTracker.WebAdmin.Controllers
                 return View("Create", vm);
             }
             TempData["SuccessMessage"] = $"Transaction '{result.Data!.TransactionId}' created successfully.";
-            return RedirectToAction(nameof(Index));
+            return View("CreateEditSuccess");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken)
+        {
+            var result = await _transactionsService.GetByIdAsync(id, cancellationToken);
+            if (!result.Success)
+            {
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
+
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load transaction.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var itemsResult = await GetItemSelectListAsync(cancellationToken);
+
+            if (!itemsResult.Success)
+            {
+                var authFailure = HandleAuthFailure(itemsResult);
+                if (authFailure is not null)
+                    return authFailure;
+
+                TempData["ErrorMessage"] = itemsResult.ErrorMessage;
+                return RedirectToAction(nameof(Index));
+            }
+
+            var clientsResult = await GetClientSelectListAsync(null, cancellationToken);
+
+            if (!clientsResult.Success)
+            {
+                var authFailure = HandleAuthFailure(clientsResult);
+                if (authFailure is not null)
+                    return authFailure;
+
+                TempData["ErrorMessage"] = clientsResult.ErrorMessage;
+                return RedirectToAction(nameof(Index));
+            }
+
+            var warehousesResult = await GetWarehouseSelectListAsync(null, cancellationToken);
+
+            if (!warehousesResult.Success)
+            {
+                var authFailure = HandleAuthFailure(warehousesResult);
+                if (authFailure is not null)
+                    return authFailure;
+
+                TempData["ErrorMessage"] = warehousesResult.ErrorMessage;
+                return RedirectToAction(nameof(Index));
+            }
+            var viewModel = result.Data!;
+            viewModel.AvailableClients = clientsResult.Data!;
+            viewModel.AvailableItems = itemsResult.Data!;
+            viewModel.AvailableWarehouses = warehousesResult.Data!;
+
+            return View("CreateEdit", viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(CreateEditTransactionViewModel vm, CancellationToken cancellationToken)
+        {
+            if (!ModelState.IsValid)
+            {
+                var itemsResult = await GetItemSelectListAsync(cancellationToken);
+
+                if (!itemsResult.Success)
+                {
+                    var authFailure = HandleAuthFailure(itemsResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = itemsResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var clientsResult = await GetClientSelectListAsync(null, cancellationToken);
+
+                if (!clientsResult.Success)
+                {
+                    var authFailure = HandleAuthFailure(clientsResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = clientsResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var warehousesResult = await GetWarehouseSelectListAsync(null, cancellationToken);
+
+                if (!warehousesResult.Success)
+                {
+                    var authFailure = HandleAuthFailure(warehousesResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = warehousesResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                vm.AvailableClients = clientsResult.Data!;
+                vm.AvailableItems = itemsResult.Data!;
+                vm.AvailableWarehouses = warehousesResult.Data!;
+                return View("CreateEdit", vm);
+            }
+            var request = new UpdateTransactionRequest
+            {
+                Type = vm.Type,
+                ClientId = vm.ClientId,
+                SourceWarehouseId = vm.SourceWarehouseId,
+                DestinationWarehouseId = vm.DestinationWarehouseId,
+                TransactionDate = vm.TransactionDate,
+                ReferenceNumber = vm.ReferenceNumber,
+                Notes = vm.Notes,
+                Items = vm.SelectedItems.Select(si => new UpdateTransactionItemRequest
+                {
+                    ItemId = si.ItemId,
+                    Quantity = si.Quantity
+                }).ToList()
+            };
+            var id = vm.TransactionId.GetValueOrDefault();
+            var result = await _transactionsService.UpdateTransactionAsync(id, request, cancellationToken);
+
+            if (!result.Success)
+            {
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
+
+                AddServiceErrorsToModelState(result, "Unable to update the transaction");
+                var itemsResult = await GetItemSelectListAsync(cancellationToken);
+                if (!itemsResult.Success)
+                {
+                    authFailure = HandleAuthFailure(itemsResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = itemsResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var clientsResult = await GetClientSelectListAsync(null, cancellationToken);
+
+                if (!clientsResult.Success)
+                {
+                    authFailure = HandleAuthFailure(clientsResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = clientsResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                var warehousesResult = await GetWarehouseSelectListAsync(null, cancellationToken);
+
+                if (!warehousesResult.Success)
+                {
+                    authFailure = HandleAuthFailure(warehousesResult);
+                    if (authFailure is not null)
+                        return authFailure;
+
+                    TempData["ErrorMessage"] = warehousesResult.ErrorMessage;
+                    return RedirectToAction(nameof(Index));
+                }
+
+                vm.AvailableClients = clientsResult.Data!;
+                vm.AvailableItems = itemsResult.Data!;
+                vm.AvailableWarehouses = warehousesResult.Data!;
+                return View("CreateEdit", vm);
+            }
+            TempData["SuccessMessage"] = $"Transaction '{result?.Data?.TransactionId}' updated successfully.";
+            return View("CreateEditSuccess");
         }
 
         [HttpPost]

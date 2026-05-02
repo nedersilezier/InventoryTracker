@@ -1,0 +1,24 @@
+﻿@{
+    Layout = null;
+    var message = TempData["SuccessMessage"]?.ToString() ?? "Transaction updated successfully.";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Transaction updated</title>
+    <script>
+            setTimeout(function () {
+                window.close();
+
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("Index", "Transactions")';
+                }, 200);
+            }, 1200);
+    </script>
+</head>
+<body>
+        <p style="mx-auto">@message</p>
+</body>
+</html>
