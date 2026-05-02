@@ -3,15 +3,18 @@ using InventoryTracker.Contracts.Responses;
 using InventoryTracker.AuthClient;
 
 using Microsoft.AspNetCore.Mvc;
+using InventoryTracker.APIClient;
 
 namespace InventoryTracker.WebAdmin.Controllers
 {
     public class AuthController : BaseController
     {
         private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly ITokenStore _tokenStore;
+        public AuthController(IAuthService authService, ITokenStore tokenStore)
         {
             _authService = authService;
+            _tokenStore = tokenStore;
         }
         [HttpGet]
         public async Task<IActionResult> Login(CancellationToken cancellationToken)
@@ -22,11 +25,10 @@ namespace InventoryTracker.WebAdmin.Controllers
                 var result = await _authService.RefreshTokenAsync(new TokenRefreshRequest { RefreshToken = refreshToken }, cancellationToken);
                 if (result.Success)
                 {
-                    AppendAuthCookies(result.Data!);
+                    _tokenStore.StoreTokens(result.Data!);
                     return RedirectToAction("Index", "Dashboard");
                 }
-                Response.Cookies.Delete("accessToken");
-                Response.Cookies.Delete("refreshToken");
+                _tokenStore.ClearTokens();
             }
             return View(new LoginViewModel());
         }
@@ -46,7 +48,7 @@ namespace InventoryTracker.WebAdmin.Controllers
                 AddServiceErrorsToModelState(result);
                 return View(request);
             }
-            AppendAuthCookies(result.Data!);
+            _tokenStore.StoreTokens(result.Data!);
             return RedirectToAction("Index", "Dashboard");
         }
         [HttpPost]
@@ -62,33 +64,12 @@ namespace InventoryTracker.WebAdmin.Controllers
                     cancellationToken);
             }
 
-            Response.Cookies.Delete("accessToken");
-            Response.Cookies.Delete("refreshToken");
-
+            _tokenStore.ClearTokens();
             return RedirectToAction("Login", "Auth");
         }
         public IActionResult AccessDenied()
         {
             return View();
-        }
-
-        private void AppendAuthCookies(AuthResponseDTO result)
-        {
-            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = result.AccessTokenExpiresAtUtc
-            });
-
-            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
-                Expires = result.RefreshTokenExpiresAtUtc
-            });
         }
     }
 }

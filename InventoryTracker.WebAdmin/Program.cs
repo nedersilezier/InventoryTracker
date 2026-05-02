@@ -24,6 +24,9 @@ builder.Services.AddHttpClient<ApiHttpClient>(client =>
 
 // Register AccessTokenProvider and HttpMessageHandler for attaching access tokens to outgoing requests
 builder.Services.AddScoped<IAccessTokenProvider, HttpContextAccessTokenProvider>();
+builder.Services.AddScoped<IRefreshTokenProvider, HttpContextRefreshTokenProvider>();
+builder.Services.AddScoped<ITokenStore, HttpContextTokenStore>();
+builder.Services.AddScoped<ITokenRefreshClient, TokenRefreshClient>();
 builder.Services.AddTransient<AccessTokenHandler>();
 
 // Register HttpClient for Auth
