@@ -1,8 +1,8 @@
 import { useRouter } from "expo-router";
 import { TransactionForm } from "../components/create-transaction/TransactionForm";
 import { createTransaction } from "../lib/api";
-import { CreateTransactionForm } from "../lib/create-transaction.types";
-import { mapFormToCreateRequest } from "../lib/create-transaction.utils";
+import { CreateTransactionForm } from "../lib/create-edit-transaction.types";
+import { mapFormToCreateRequest } from "../lib/create-edit-transaction.utils";
 
 const EMPTY_TRANSACTION_FORM: CreateTransactionForm = {
   type: "adjustment",

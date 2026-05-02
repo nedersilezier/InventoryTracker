@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { TransactionTypeKey } from '../../lib/create-transaction.types';
+import { TransactionTypeKey } from '../../lib/create-edit-transaction.types';
 import { SectionTitle } from './SectionTitle';
 
 

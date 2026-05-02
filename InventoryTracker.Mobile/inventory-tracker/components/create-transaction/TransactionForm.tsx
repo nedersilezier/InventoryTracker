@@ -33,8 +33,8 @@ import {
   SelectedTransactionItem,
   TransactionTypeKey,
   WarehouseLookup,
-} from "../../lib/create-transaction.types";
-import { isIntegerUnit } from "../../lib/create-transaction.utils";
+} from "../../lib/create-edit-transaction.types";
+import { isIntegerUnit } from "../../lib/create-edit-transaction.utils";
 
 // Local wizard step type
 //flow is handled inside one screen using step type instead of routing between separate screens

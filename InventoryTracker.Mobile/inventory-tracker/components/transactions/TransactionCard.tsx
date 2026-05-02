@@ -1,27 +1,40 @@
-import { Ionicons } from '@expo/vector-icons';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { TransactionListDTO } from '../../lib/transactions.types';
-import { TYPE_UI } from '../../lib/transactions.ui';
+import { Ionicons } from "@expo/vector-icons";
+import { Pressable, StyleSheet, Text, View, Alert } from "react-native";
+import { TransactionListDTO } from "../../lib/transactions.types";
+import { TYPE_UI } from "../../lib/transactions.ui";
+import { useRouter } from "expo-router";
 
 type Props = {
   transaction: TransactionListDTO;
 };
 
 export function TransactionCard({ transaction }: Props) {
-    //map transaction type to ui
+  const router = useRouter();
+  //map transaction type to ui
   const type = TYPE_UI[transaction.typeName] ?? {
-    label: transaction.typeName || 'Unknown',
-    color: '#5c5f60',
-    bg: '#dee0e2',
-    icon: 'document-text-outline' as keyof typeof Ionicons.glyphMap,
+    label: transaction.typeName || "Unknown",
+    color: "#5c5f60",
+    bg: "#dee0e2",
+    icon: "document-text-outline" as keyof typeof Ionicons.glyphMap,
   };
 
-  const title = `${type.label} • ${
-    transaction.referenceNumber ?? '-'
-  }`;
+  const title = `${type.label} • ${transaction.referenceNumber ?? "-"}`;
 
   return (
-    <Pressable style={styles.card}>
+    <Pressable
+      style={styles.card}
+      onPress={
+        transaction.statusName === "Draft"
+          ? () =>
+              router.push({
+                pathname: "/edit-transaction/[id]",
+                params: {
+                  id: transaction.transactionId,
+                },
+              })
+          : () => Alert.alert("Cannot edit transaction due to its status.")
+      }
+    >
       <View style={[styles.typeBar, { backgroundColor: type.color }]} />
 
       <View style={styles.cardBody}>
@@ -44,7 +57,9 @@ export function TransactionCard({ transaction }: Props) {
           {transaction.fromDisplay ? (
             <View style={styles.detailRow}>
               <Ionicons name="arrow-up-outline" size={16} color="#434654" />
-              <Text style={styles.detailText}>From: {transaction.fromDisplay}</Text>
+              <Text style={styles.detailText}>
+                From: {transaction.fromDisplay}
+              </Text>
             </View>
           ) : null}
 
@@ -62,14 +77,14 @@ export function TransactionCard({ transaction }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    backgroundColor: '#f4f5f7',
+    flexDirection: "row",
+    backgroundColor: "#f4f5f7",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#dfe1e6',
+    borderColor: "#dfe1e6",
     marginBottom: 14,
-    overflow: 'hidden',
-    shadowColor: '#091e42',
+    overflow: "hidden",
+    shadowColor: "#091e42",
     shadowOpacity: 0.08,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
@@ -84,17 +99,17 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   cardTop: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    alignItems: "flex-start",
+    justifyContent: "space-between",
   },
   cardTitle: {
     flex: 1,
     fontSize: 17,
     lineHeight: 23,
-    fontWeight: '700',
-    color: '#041b3c',
+    fontWeight: "700",
+    color: "#041b3c",
   },
   badge: {
     borderRadius: 999,
@@ -103,31 +118,31 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 11,
-    fontWeight: '800',
-    textTransform: 'uppercase',
+    fontWeight: "800",
+    textTransform: "uppercase",
   },
   statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   statusText: {
     fontSize: 14,
-    color: '#5c5f60',
-    fontWeight: '600',
+    color: "#5c5f60",
+    fontWeight: "600",
   },
   routeBox: {
     gap: 4,
     marginTop: 2,
   },
   detailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
   },
   detailText: {
     flex: 1,
     fontSize: 14,
-    color: '#434654',
+    color: "#434654",
   },
 });

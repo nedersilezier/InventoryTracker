@@ -1,4 +1,5 @@
-import { CreateTransactionForm, CreateTransactionRequest, TransactionTypeKey, TransactionTypeValue } from './create-transaction.types';
+import { CreateTransactionForm, CreateTransactionRequest, TransactionTypeKey, TransactionTypeValue } from './create-edit-transaction.types';
+import { TransactionForEditDTO } from './create-edit-transaction.types';
 
 // Maps UI-friendly transaction type keys to numeric enum values expected by the API.
 export function toTransactionTypeValue(type: TransactionTypeKey) {
@@ -111,4 +112,71 @@ export function mapFormToCreateRequest(form: CreateTransactionForm): CreateTrans
   }
 
   return request;
+}
+
+
+/////
+//edit related
+////
+
+//maps api response to transaction form for ui
+export function mapTransactionForEditToForm(
+  transaction: TransactionForEditDTO
+): CreateTransactionForm {
+  const type = mapTransactionTypeValueToKey(transaction.type);
+
+  return {
+    type,
+    referenceNumber: transaction.referenceNumber ?? '',
+    notes: transaction.notes ?? '',
+    fromId: getEditFromId(transaction, type),
+    toId: getEditToId(transaction, type),
+    items: transaction.items.map((item) => ({
+      itemId: item.itemId,
+      name: item.nameSnapshot,
+      unitOfMeasure: item.unitOfMeasureSnapshot,
+      quantity: item.quantity,
+    })),
+  };
+}
+
+//maps transaction type
+function mapTransactionTypeValueToKey(
+  type: TransactionTypeValue
+): TransactionTypeKey {
+  switch (type) {
+    case TransactionTypeValue.IssueToClient:
+      return 'issue';
+    case TransactionTypeValue.ReturnFromClient:
+      return 'return';
+    case TransactionTypeValue.TransferBetweenWarehouses:
+      return 'transfer';
+    case TransactionTypeValue.Adjustment:
+      return 'adjustment';
+  }
+}
+
+//sets FromId depending on transaction type
+function getEditFromId(
+  transaction: TransactionForEditDTO,
+  type: TransactionTypeKey
+) {
+  if (type === 'issue') return transaction.sourceWarehouseId ?? undefined;
+  if (type === 'return') return transaction.clientId ?? undefined;
+  if (type === 'transfer') return transaction.sourceWarehouseId ?? undefined;
+
+  return undefined;
+}
+
+//sets ToId depending on transaction type
+function getEditToId(
+  transaction: TransactionForEditDTO,
+  type: TransactionTypeKey
+) {
+  if (type === 'issue') return transaction.clientId ?? undefined;
+  if (type === 'return') return transaction.destinationWarehouseId ?? undefined;
+  if (type === 'transfer') return transaction.destinationWarehouseId ?? undefined;
+  if (type === 'adjustment') return transaction.sourceWarehouseId ?? undefined;
+
+  return undefined;
 }

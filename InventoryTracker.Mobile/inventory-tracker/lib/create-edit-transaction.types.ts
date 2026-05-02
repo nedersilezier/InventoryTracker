@@ -80,3 +80,42 @@ export type OpenPicker = (config: {
   selectedId?: string;
   onSelect: (option: PickerOption) => void;
 }) => void;
+
+//////
+///edit related
+/////
+
+export type TransactionForEditDTO = {
+  transactionId: string;
+  type: TransactionTypeValue;
+  status: number;
+  clientId: string | null;
+  sourceWarehouseId: string | null;
+  destinationWarehouseId: string | null;
+  transactionDate: string;
+  referenceNumber: string | null;
+  notes: string | null;
+  items: TransactionForEditItemDTO[];
+};
+
+export type TransactionForEditItemDTO = {
+  itemId: string;
+  nameSnapshot: string;
+  unitOfMeasureSnapshot: string;
+  quantity: number;
+};
+
+export type EditTransactionRequest = {
+  transactionId: string;
+  type: TransactionTypeValue;
+  clientId?: string | null;
+  sourceWarehouseId?: string | null;
+  destinationWarehouseId?: string | null;
+  transactionDate: string;
+  referenceNumber?: string | null;
+  notes?: string | null;
+  items: {
+    itemId: string;
+    quantity: number;
+  }[];
+};

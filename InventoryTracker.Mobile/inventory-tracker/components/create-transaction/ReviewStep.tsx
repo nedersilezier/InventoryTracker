@@ -4,8 +4,8 @@ import {
   CreateTransactionForm,
   TransactionTypeKey,
   WarehouseLookup,
-} from '../../lib/create-transaction.types';
-import { formatDisplayDate, getTypeLabel } from '../../lib/create-transaction.utils';
+} from '../../lib/create-edit-transaction.types';
+import { formatDisplayDate, getTypeLabel } from '../../lib/create-edit-transaction.utils';
 import { SectionTitle } from './SectionTitle';
 
 // Props for the final review step.

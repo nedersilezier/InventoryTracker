@@ -5,8 +5,8 @@ import {
   ItemLookup,
   OpenPicker,
   PickerOption,
-} from "../../lib/create-transaction.types";
-import { isIntegerUnit } from "../../lib/create-transaction.utils";
+} from "../../lib/create-edit-transaction.types";
+import { isIntegerUnit } from "../../lib/create-edit-transaction.utils";
 import { SearchPickerField } from "./SearchPickerField";
 import { SectionTitle } from "./SectionTitle";
 import { TextField } from "./TextField";

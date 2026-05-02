@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { PickerOption } from "../../lib/create-transaction.types";
+import { PickerOption } from "../../lib/create-edit-transaction.types";
 
 // Props for the reusable fullscreen search picker
 // same modal is used for warehouses, clients and items

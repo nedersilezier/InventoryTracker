@@ -10,7 +10,8 @@ import {
   ItemLookup,
   WarehouseLookup,
   ClientLookup,
-} from "./create-transaction.types";
+} from "./create-edit-transaction.types";
+import { TransactionForEditDTO } from "./create-edit-transaction.types";
 
 //api url loaded from expo env
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -103,22 +104,40 @@ export async function getTransactions(
     includeIssues: String(params.includeIssues ?? true),
     includeTransfers: String(params.includeTransfers ?? true),
     includeAdjustments: String(params.includeAdjustments ?? true),
-    searchTerm: String(params.searchTerm ?? ''),
+    searchTerm: String(params.searchTerm ?? ""),
     ...(params.dateFrom ? { dateFrom: params.dateFrom } : {}),
     ...(params.dateTo ? { dateTo: params.dateTo } : {}),
   });
   const response = await authorizedFetch(`/api/user/transactions?${query}`, {
-    method: 'GET',
+    method: "GET",
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || 'Failed to load transactions');
+    throw new Error(errorText || "Failed to load transactions");
   }
 
   return await response.json();
 }
 
+//gets transaction by ID
+export async function getTransactionById(
+  transactionId: string,
+): Promise<TransactionForEditDTO> {
+  const response = await authorizedFetch(
+    `/api/user/transactions/${transactionId}`,
+    {
+      method: "GET",
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Failed to load transaction");
+  }
+
+  return await response.json();
+}
 
 //creates new transaction
 export async function createTransaction(
@@ -138,7 +157,24 @@ export async function createTransaction(
   return await response.json();
 }
 
+//updates transaction
+export async function updateTransaction(
+  id: string,
+  payload: CreateTransactionRequest,
+): Promise<string> {
+  const response = await authorizedFetch(`/api/user/transactions/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Failed to update transaction");
+  }
+
+  // API returns GUID of created transaction
+  return await response.json();
+}
 
 /////Helpers
 
@@ -217,12 +253,11 @@ async function authorizedFetch(url: string, options: RequestInit = {}) {
 
   if (response.status === 401 || response.status === 403) {
     await handleUnauthorized();
-    throw new Error('Unauthorized');
+    throw new Error("Unauthorized");
   }
 
   return response;
 }
-
 
 //// Get lookups for select menus
 export async function getWarehousesLookup(): Promise<WarehouseLookup[]> {
