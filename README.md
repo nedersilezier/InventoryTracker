@@ -1,208 +1,136 @@
 # InventoryTracker
 
-Inventory management platform built with ASP.NET Core, Clean Architecture and CQRS.
+InventoryTracker is a multi-client inventory management system built with ASP.NET Core, Entity Framework Core, ASP.NET Core Identity, JWT authentication, CQRS, and a Clean Architecture-inspired structure.
 
-## Overview
+The project focuses on backend architecture, secure API design, reusable client/API integration, and practical inventory workflows such as stock adjustments, issues, returns, and warehouse transfers.
 
-InventoryTracker is a work-in-progress inventory management system for tracking item flow between clients and warehouses
+## Highlights
 
-The project is designed as a multi-client solution with:
-- ASP.NET Core Web API
-- ASP.NET MVC WebAdmin
-- ASP.NET MVC WebOperator
-- React Native / Expo mobile client for warehouse operator
-- shared contracts between API and clients
+- ASP.NET Core Web API with secured admin and user endpoints
+- ASP.NET Core Identity authentication with JWT access tokens and refresh tokens
+- Role-based authorization for Admin and User flows
+- Clean Architecture-inspired solution structure with Domain, Application, Infrastructure, API, Contracts, and client projects
+- CQRS with MediatR commands, queries, handlers, and validation pipeline
+- FluentValidation with global API exception handling
+- Entity Framework Core with SQL Server, migrations, auditing, and soft delete support
+- Transaction-based stock control instead of direct stock editing
+- Reusable API client layer for MVC clients
+- WebAdmin MVC client with CRUD, pagination, filtering, search, and transaction approval/cancellation
+- React Native / Expo mobile client for operator transaction workflows
 
-The main goal of this project is to build a practical inventory system while learning and applying modern backend architecture patterns in .NET.
+## Current Status
 
-## Status
+The backend API, WebAdmin MVP, and selected mobile transaction flows are functional.
 
-This project is currently **work in progress**.
+Implemented:
 
-Already implemented:
-- MVP backend API for authentication, user management, master data and inventory transactions
-- ASP.NET Core Identity authentication and authorization
-- JWT access tokens and refresh token flow
-- FluentValidation with global exception handling in API
-- Role-based access control
-- Basic inventory-related modules
-- Shared contracts between API and clients
-- Secured admin API endpoints
-- Reusable ApiClient layer for web clients
-- `AccessTokenHandler` for web clients
-- automatic refresh token handling for web and mobile
-- `ServiceResult` pattern for handling API responses and parsing validation/errors in web clients
-- WebAdmin integration with API through services
-- WebAdmin MVP with paginated browsing, filters and search, full CRUD
-- WebAdmin transaction creation, editing, approval and cancellation 
-- Mobile paginated transaction browsing with search and filtering
-- Mobile transaction creation and editing in mobile
+- Authentication, refresh token flow, and logout
+- User management with role assignment and active/inactive users
+- Master data management for items, clients, countries, and warehouses
+- Inventory transaction creation, editing, approval, and cancellation
+- Stock updates when transactions are approved
+- Paginated browsing, filtering, and search
+- Shared request/response contracts between API and clients
+- Automatic token refresh handling in web and mobile clients
 
+In progress:
 
-Still in progress:
 - WebOperator client
-- Mobile client features
-- Client's balance support in the domain model and transaction logic
-- Transaction document generator
-- deployment setup
-
-## Main Features
-
-### Authentication and authorization
-- ASP.NET Core Identity
-- JWT authentication
-- refresh tokens
-- login / refresh / logout flow
-- role-based authorization
-- Admin/User role support
-
-### Admin user management
-- list users
-- search users
-- pagination
-- create users
-- edit users
-- assign roles
-- activate / deactivate users
-
-### Inventory master data
-- items
-- clients with address data
-- countries
-- warehouses with address data
-
-### Stock and transaction control
-Stock levels are controlled through the transaction workflow instead of being managed as simple standalone CRUD data.
-
-The system supports:
-- inventory transactions(adjustment, issue, return, transfer)
-- transaction items
-- stock changes based on transaction approval
-- transaction status handling
-- warehouse-based stock tracking
-
-### Multi-client architecture
-The solution contains multiple clients consuming the same API:
-- WebAdmin – administration panel
-- WebOperator – operator-facing web client
-- Mobile – operator-facing React Native / Expo mobile client
+- Additional mobile features
+- Client balance support
+- Transaction document generation
+- Deployment setup
+- Automated test coverage
 
 ## Architecture
 
-The solution follows a Clean Architecture-inspired structure:
-````text
+```text
 InventoryTracker.API             - ASP.NET Core Web API
 InventoryTracker.Application     - CQRS commands, queries, handlers, validation
-InventoryTracker.Domain          - domain entities and core business model
+InventoryTracker.Domain          - Domain entities and business model
 InventoryTracker.Infrastructure  - EF Core, Identity, persistence, services
-InventoryTracker.Contracts       - shared request/response DTOs
-InventoryTracker.Shared          - shared enums and common types
+InventoryTracker.Contracts       - Shared request/response DTOs
+InventoryTracker.Shared          - Shared enums and common types
+InventoryTracker.APIClient       - Reusable HTTP/API client layer
+InventoryTracker.AuthClient      - Authentication client layer
 InventoryTracker.WebAdmin        - ASP.NET MVC admin client
 InventoryTracker.WebOperator     - ASP.NET MVC operator client
 InventoryTracker.Mobile          - React Native / Expo mobile client
-InventoryTracker.APIClient       - API communication helper layer
-InventoryTracker.AuthClient      - authentication client layer
-````
-## Backend Architecture
+```
 
-### CQRS with MediatR
+## Core Features
 
-The application layer separates write operations and read operations using commands and queries.
+### Authentication and Authorization
 
-Examples:
-- `CreateUserCommand`
-- `UpdateUserCommand`
-- `GetUsersQuery`
-- `CreateTransactionCommand`
-- `ApproveTransactionCommand`
-- `CancelTransactionCommand`
-- `GetTransactionsQuery`
+- ASP.NET Core Identity
+- JWT bearer authentication
+- Refresh token rotation
+- Login, refresh, and logout flow
+- Role-based access control
+- Admin and User roles
+- Inactive users blocked from login
 
-### Validation pipeline
+### Admin Management
 
-FluentValidation is integrated through a MediatR pipeline behavior, so requests are validated before reaching command/query handlers.
+- User listing, search, and pagination
+- User creation and editing
+- Role assignment
+- User activation/deactivation
+- CRUD for items, clients, countries, and warehouses
 
-API validation errors are handled by a global exception handler and returned in a consistent format to clients.
+### Inventory Transactions
 
-### Persistence and infrastructure
+Stock is controlled through transaction workflows rather than direct manual stock edits.
 
-The infrastructure layer contains the concrete persistence and service implementations used by the application.
+Supported transaction types:
 
-It includes:
-- Entity Framework Core database context
-- ASP.NET Core Identity configuration
-- repositories for selected domain areas
-- authentication and token services
-- application service implementations used by the API layer
+- Adjustment
+- Issue to client
+- Return from client
+- Transfer between warehouses
 
-The project currently uses a local development database.
+Supported transaction behavior:
 
-### Auditing and soft delete
-
-The database context automatically handles audit fields such as:
-- `CreatedAt`
-- `CreatedBy`
-- `UpdatedAt`
-- `UpdatedBy`
-
-Soft-deletable entities are deactivated instead of being physically removed.
+- Draft transaction creation and editing
+- Approval workflow
+- Cancellation workflow
+- Stock changes on approval
+- Warehouse-based stock tracking
+- Item snapshot data stored on transaction items
 
 ## API
 
-The API exposes secured endpoints for managing system data and inventory workflows.
-
 Example endpoint groups:
+
+- `/api/auth`
 - `/api/admin/users`
 - `/api/admin/items`
+- `/api/admin/clients`
 - `/api/admin/warehouses`
+- `/api/admin/stocks`
 - `/api/admin/transactions`
 - `/api/user/transactions`
+- `/api/lookups`
 
-Swagger/OpenAPI is configured for development and supports Bearer token authentication.
+Swagger/OpenAPI is available in development.
 
-## Client API Integration
+## Client Integration
 
-Web clients communicate with the backend API through a reusable API client layer.
+Web clients communicate with the API through reusable client services.
 
-The web client infrastructure includes:
-- typed API client services
-- shared request/response contracts
-- `AccessTokenHandler` for attaching access tokens to outgoing API requests
-- automatic refresh token handling when access tokens expire
-- `ServiceResult` pattern for checking API responses and parsing validation/errors
-- centralized API communication instead of duplicating HTTP logic in controllers
+The client layer includes:
 
-## WebAdmin
-
-The WebAdmin client is an ASP.NET MVC application that communicates with the backend API through reusable client services.
-
-Current WebAdmin MVP includes:
-- paginated browsing, filtering and search
-- full CRUD for users
-- full CRUD for master data
-- full CRUD for inventory transactions
-- transaction creation and editing
-- transaction approval and cancellation
-- API validation error handling
-- token-based API communication
-- automatic access token refresh through the web client infrastructure
-
-## Mobile Client
-
-The mobile client is built with React Native / Expo and communicates with the same backend API.
-
-Current mobile MVP includes:
-- paginated transaction browsing
-- transaction search and filtering
-- transaction creation
-- transaction editing
-- automatic refresh token handling
-
-Additional mobile features are still in progress.
+- Typed API service classes
+- Shared contracts
+- `AccessTokenHandler` for attaching bearer tokens
+- Automatic refresh token handling
+- Centralized API error parsing
+- `ServiceResult` pattern for success, validation, and error responses
 
 ## Tech Stack
 
 ### Backend
+
 - C#
 - ASP.NET Core
 - ASP.NET Core Identity
@@ -213,80 +141,53 @@ Additional mobile features are still in progress.
 - JWT Bearer Authentication
 - Swagger / OpenAPI
 
-### Frontend / Clients
+### Clients
+
 - ASP.NET MVC
 - Razor Views
 - React Native
 - Expo
 - TypeScript
 
-### Architecture / Patterns
-- Clean Architecture
-- CQRS
-- Repository implementations for selected domain areas
-- DTO contracts
-- Dependency Injection
-- Role-based authorization
-- Auditing
-- Soft delete
-- reusable API client layer
-- centralized API response handling
-
-## Notable Implementation Details
-
-- JWT authentication with refresh token rotation
-- inactive users cannot log in
-- refresh tokens can be revoked during logout
-- secured admin API endpoints with role-based authorization
-- MediatR validation pipeline
-- FluentValidation with global API exception handling
-- shared contracts between API and clients
-- reusable API client layer for web clients
-- `AccessTokenHandler` for secured API communication
-- automatic refresh token handling for web and mobile clients
-- `ServiceResult` pattern for API response and error handling
-- WebAdmin full CRUD integrated with secured backend endpoints
-- stock controlled through transaction workflows instead of direct manual edits
-- transaction approval and cancellation flow
-- transaction domain model prepared for stock movements and warehouse operations
-
-## Running the project
+## Running the Project
 
 ### Requirements
-- Visual Studio 2022 or compatible version
-- .NET 10
-- SQL Server
-- Node.js / npm for the mobile client
 
-### Backend setup
-1. Clone the repository.
-2. Configure the API connection string in `appsettings.json` or user secrets.
-3. Configure JWT settings.
-4. Apply EF Core migrations or create the database.
+- Visual Studio 2022 or compatible IDE
+- .NET 10 SDK
+- SQL Server or SQL Server LocalDB
+- Node.js and npm for the mobile client
+
+### API Setup
+
+1. Configure the API connection string.
+2. Configure JWT settings through local development configuration in `appsettings.json` or user secrets.
+3. Configure an optional seeded admin user.
+4. Apply EF Core migrations.
 5. Run `InventoryTracker.API`.
 
-### WebAdmin setup
+Example:
+
+```bash
+dotnet ef database update --project InventoryTracker.Infrastructure --startup-project InventoryTracker.API
+dotnet run --project InventoryTracker.API
+```
+
+### WebAdmin Setup
+
 1. Make sure the API is running.
-2. Configure `ApiSettings:BaseUrl` in WebAdmin settings.
+2. Configure `ApiSettings:BaseUrl` in the WebAdmin settings.
 3. Run `InventoryTracker.WebAdmin`.
 
-### Mobile setup
+```bash
+dotnet run --project InventoryTracker.WebAdmin
+```
 
-1. Go to the mobile project directory:
+### Mobile Setup
 
 ```bash
 cd InventoryTracker.Mobile/inventory-tracker
-```
-
-2. Install dependencies:
-
-```bash
 npm install
-```
-
-3. Start Expo:
-
-```bash
 npx expo start
 ```
 
@@ -322,24 +223,17 @@ npx expo start
 
 ![Mobile New Transaction - Review](Screenshots/mobile_new_transaction4.png)
 
-## What I am learning / practicing
+## Roadmap
 
-While building this project, I am working on:
-- designing a multi-project .NET solution
-- applying Clean Architecture principles
-- implementing CQRS with MediatR
-- securing APIs with JWT and refresh tokens
-- building role-based admin functionality
-- connecting MVC and mobile clients to a shared API
-- implementing reusable API client infrastructure
-- handling API responses and validation errors
-- modelling inventory and warehouse workflows
-- structuring a larger application beyond simple CRUD
+- Add automated unit and integration tests
+- Add GitHub Actions build/test workflow
+- Complete WebOperator client
+- Expand mobile operator workflows
+- Add client balance support
+- Add transaction document generation
+- Improve deployment configuration
+- Move production-like secrets fully out of committed configuration
 
-## Repository Notes
+## Notes
 
-This repository is a learning project and is actively being developed.
-
-The focus is on backend architecture, authentication, authorization, API design, client/API integration and practical inventory management workflows.
-
-The backend API, WebAdmin MVP and selected mobile transaction flows are already functional, while additional operator and mobile features are still being implemented.
+This is an active learning and portfolio project. The current focus is backend architecture, secure API design, client/API integration, and realistic inventory workflows.

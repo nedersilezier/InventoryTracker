@@ -151,7 +151,7 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "https://localhost:7244", // WebAdmin
-                "https://localhost:7141/" // WebOperator
+                "https://localhost:7141" // WebOperator
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
@@ -172,6 +172,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseExceptionHandler();
 //app.UseHttpsRedirection();
+app.UseCors("FrontendPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
