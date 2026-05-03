@@ -4,13 +4,13 @@ Inventory management platform built with ASP.NET Core, Clean Architecture and CQ
 
 ## Overview
 
-InventoryTracker is a work-in-progress inventory management system for tracking items flow between clients and warehouses
+InventoryTracker is a work-in-progress inventory management system for tracking item flow between clients and warehouses
 
 The project is designed as a multi-client solution with:
 - ASP.NET Core Web API
 - ASP.NET MVC WebAdmin
 - ASP.NET MVC WebOperator
-- React Native / Expo mobile client fow warehouse operator
+- React Native / Expo mobile client for warehouse operator
 - shared contracts between API and clients
 
 The main goal of this project is to build a practical inventory system while learning and applying modern backend architecture patterns in .NET.
@@ -294,33 +294,33 @@ npx expo start
 
 ### WebAdmin
 
-![WebAdmin Login](screenshots/web_login.png)
+![WebAdmin Login](Screenshots/web_login.png)
 
-![WebAdmin Transactions](screenshots/web_transactions.png)
+![WebAdmin Transactions](Screenshots/web_transactions.png)
 
-![WebAdmin New Transaction](screenshots/web_return.png)
+![WebAdmin New Transaction](Screenshots/web_return.png)
 
-![WebAdmin Clients](screenshots/web_clients.png)
+![WebAdmin Clients](Screenshots/web_clients.png)
 
-![WebAdmin Client Details](screenshots/web_client_details.png)
+![WebAdmin Client Details](Screenshots/web_client_details.png)
 
 ### Mobile
 
-![Mobile Login](screenshots/mobile_login.png)
+![Mobile Login](Screenshots/mobile_login.png)
 
-![Mobile Transactions](screenshots/mobile_transactions.png)
+![Mobile Transactions](Screenshots/mobile_transactions.png)
 
-![Mobile Search](screenshots/mobile_search_modal.png)
+![Mobile Search](Screenshots/mobile_search_modal.png)
 
-![Mobile Filter](screenshots/mobile_filters_modal.png)
+![Mobile Filter](Screenshots/mobile_filters_modal.png)
 
-![Mobile New Transaction - General](screenshots/mobile_new_transaction1.png)
+![Mobile New Transaction - General](Screenshots/mobile_new_transaction1.png)
 
-![Mobile New Transaction - General](screenshots/mobile_new_transaction2.png)
+![Mobile New Transaction - General](Screenshots/mobile_new_transaction2.png)
 
-![Mobile New Transaction - Items](screenshots/mobile_new_transaction3.png)
+![Mobile New Transaction - Items](Screenshots/mobile_new_transaction3.png)
 
-![Mobile New Transaction - Review](screenshots/mobile_new_transaction4.png)
+![Mobile New Transaction - Review](Screenshots/mobile_new_transaction4.png)
 
 ## What I am learning / practicing
 
