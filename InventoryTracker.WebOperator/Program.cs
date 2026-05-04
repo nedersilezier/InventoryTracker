@@ -1,6 +1,8 @@
 using InventoryTracker.APIClient;
 using InventoryTracker.AuthClient;
+using InventoryTracker.WebOperator.Interfaces;
 using InventoryTracker.WebOperator.Providers;
+using InventoryTracker.WebOperator.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +29,9 @@ builder.Services.AddHttpClient<ApiHttpClient>(client =>
     client.BaseAddress = new Uri(apiBaseUrl);
 })
 .AddHttpMessageHandler<AccessTokenHandler>();
- 
+
+builder.Services.AddScoped<ITransactionsService, TransactionsService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

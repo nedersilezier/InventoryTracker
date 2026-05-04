@@ -24,7 +24,7 @@ namespace InventoryTracker.WebOperator.Controllers
                 if (result.Success)
                 {
                     _tokenStore.StoreTokens(result.Data!);
-                    return RedirectToAction("Index", "Dashboard");
+                    return RedirectToAction("Index", "Transactions");
                 }
                 _tokenStore.ClearTokens();
             }
@@ -47,7 +47,7 @@ namespace InventoryTracker.WebOperator.Controllers
                 return View(request);
             }
             _tokenStore.StoreTokens(result.Data!);
-            return RedirectToAction("Index", "Dashboard");
+            return RedirectToAction("Index", "Transactions");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -7,56 +7,22 @@
     </div>
 
     <nav class="flex flex-col gap-1 px-2">
-
-        <a asp-controller="Dashboard"
-               asp-action="Index"
-               method="get"
-               class="px-4 py-3 rounded-xl bg-blue-50 text-blue-700 font-semibold">
-            Dashboard
-        </a>
-
         <a asp-controller="Transactions"
                asp-action="Index"
-               asp-route-type="@TransactionType.ReturnFromClient"
                class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            Returns
+            Transactions
         </a>
-
-        <a asp-controller="Transactions"
-               asp-action="Index"
-               asp-route-type="@TransactionType.IssueToClient"
-               class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            Issues
-        </a>
-
-        <a asp-controller="Transactions"
-               asp-action="Index"
-               asp-route-type="@TransactionType.TransferBetweenWarehouses"
-               class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            Transfers
-        </a>
-
-        <a asp-controller="Transactions"
-               asp-action="Index"
-               asp-route-type="@TransactionType.Adjustment"
-               class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            Adjustments
-        </a>
-
         <a asp-controller="Transactions"
                asp-action="Index"
                asp-route-status="@TransactionStatus.Draft"
                class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            All Drafts
+            My Drafts
         </a>
-
         <a asp-controller="Transactions"
-               asp-action="Index"
-               class="px-4 py-3 rounded-xl hover:bg-slate-100">
-            All Transactions
+               asp-action="Create"
+               target="_blank"
+               class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-semibold shadow hover:bg-blue-700 transition sticky-bottom">
+            Create New
         </a>
-
-
     </nav>
-
 </aside>

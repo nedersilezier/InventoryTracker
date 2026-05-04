@@ -1,6 +1,7 @@
 ﻿namespace InventoryTracker.WebOperator.ViewModels.Transactions
 {
     using InventoryTracker.Shared.Enums;
+    using InventoryTracker.Shared.Extensions;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
 
     public class TransactionCardViewModel
@@ -9,7 +10,13 @@
 
         public TransactionType Type { get; set; }
         public TransactionStatus Status { get; set; }
-        public string TypeDisplay { get; set; } = default!;
+        public string TypeDisplay
+        {
+            get
+            {
+                return TransactionTypeExtensions.ToDisplayName(Type);
+            }
+        }
         public string StatusDisplay
         {
             get
