@@ -11,6 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\InventoryTracker.APIClient\InventoryTracker.APIClient.csproj" />
+    <ProjectReference Include="..\InventoryTracker.AuthClient\InventoryTracker.AuthClient.csproj" />
     <ProjectReference Include="..\InventoryTracker.Contracts\InventoryTracker.Contracts.csproj" />
     <ProjectReference Include="..\InventoryTracker.Shared\InventoryTracker.Shared.csproj" />
   </ItemGroup>

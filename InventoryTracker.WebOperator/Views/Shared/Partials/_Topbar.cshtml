@@ -5,12 +5,35 @@
     </h2>
 
     <div class="flex gap-3">
-        <button class="p-2 hover:bg-slate-100 rounded-lg">
-            🔔
-        </button>
-        <button class="p-2 hover:bg-slate-100 rounded-lg">
-            ⚙
-        </button>
-    </div>
+        <div class="relative inline-block text-left">
+            <button type="button"
+                    class="p-2 text-[20px] hover:bg-slate-100 rounded-lg"
+                    onclick="document.getElementById('settingsDropdown').classList.toggle('hidden')">
+                ⚙
+            </button>
 
+            <div id="settingsDropdown"
+                 class="hidden absolute right-0 mt-2 w-48 rounded-lg bg-white shadow-lg ring-1 ring-black/5 z-50">
+                <div class="py-1">
+                    <a href="/profile"
+                           class="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                        My account
+                    </a>
+
+                    <form asp-area=""
+                          asp-controller="Auth"
+                          asp-action="Logout"
+                          method="post"
+                          class="m-0">
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="block w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </header>
