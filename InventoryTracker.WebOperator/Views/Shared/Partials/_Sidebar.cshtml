@@ -8,6 +8,12 @@
 
     <nav class="flex flex-col gap-1 px-2">
         <a asp-controller="Transactions"
+               asp-action="Create"
+               target="_blank"
+               class="px-5 py-2.5 mt-2 mb-6 rounded-full bg-blue-600 text-white text-sm font-semibold text-center shadow hover:bg-blue-700 transition">
+            Create New
+        </a>
+        <a asp-controller="Transactions"
                asp-action="Index"
                class="px-4 py-3 rounded-xl hover:bg-slate-100">
             Transactions
@@ -18,11 +24,19 @@
                class="px-4 py-3 rounded-xl hover:bg-slate-100">
             My Drafts
         </a>
-        <a asp-controller="Transactions"
-               asp-action="Create"
-               target="_blank"
-               class="px-5 py-2.5 rounded-full bg-blue-600 text-white text-sm font-semibold shadow hover:bg-blue-700 transition sticky-bottom">
-            Create New
-        </a>
     </nav>
+    <div class="mt-auto pb-8 mx-1">
+        @if (TempData["SuccessMessage"] is string successMessage)
+        {
+            <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 shadow-sm">
+                @successMessage
+            </div>
+        }
+        @if (TempData["ErrorMessage"] is string errorMessage)
+        {
+            <div class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 shadow-sm">
+                @errorMessage
+            </div>
+        }
+    </div>
 </aside>

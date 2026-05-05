@@ -7,5 +7,6 @@ namespace InventoryTracker.WebOperator.Interfaces
     public interface ITransactionsService
     {
         Task<ServiceResult<OperatorTransactionsIndexViewModel>> GetAllAsync(GetTransactionsRequest request, CancellationToken cancellationToken);
+        Task<ServiceResult<Guid>> CancelTransactionAsync(Guid id, CancellationToken cancellationToken);
     }
 }

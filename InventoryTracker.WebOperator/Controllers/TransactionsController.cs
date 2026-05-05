@@ -59,5 +59,28 @@ namespace InventoryTracker.WebOperator.Controllers
             }
             return View(result.Data);
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(Guid id, CancellationToken cancellationToken, string? returnUrl)
+        {
+            var result = await _transactionsService.CancelTransactionAsync(id, cancellationToken);
+
+            if (!result.Success)
+            {
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
+
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to cancel transaction.";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = $"Transaction '{result.Data!}' cancelled successfully.";
+            }
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
