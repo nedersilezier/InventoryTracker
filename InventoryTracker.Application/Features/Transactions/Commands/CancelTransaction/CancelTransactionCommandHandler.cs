@@ -20,7 +20,7 @@ namespace InventoryTracker.Application.Features.Transactions.Commands.CancelTran
         }
         public async Task<Guid> Handle(CancelTransactionCommand request, CancellationToken cancellationToken)
         {
-            var transaction = await _transactionsRepository.GetTransactionWithItemsByIdAsync(request.TransactionId, cancellationToken);
+            var transaction = await _transactionsRepository.GetTransactionByIdAsync(request.TransactionId, cancellationToken);
             if (transaction == null)
                 throw new RecordNotFoundException(nameof(Transaction), request.TransactionId);
 

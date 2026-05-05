@@ -24,6 +24,10 @@ namespace InventoryTracker.Infrastructure.Repositories
         {
             return await _context.Transactions.Include(t => t.TransactionItems).FirstOrDefaultAsync(t => t.TransactionId == id, cancellationToken);
         }
+        public async Task<Transaction?> GetTransactionByIdAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await _context.Transactions.FirstOrDefaultAsync(t => t.TransactionId == id, cancellationToken);
+        }
         public Task AddTransactionItem(TransactionItem transactionItem)
         {
             _context.TransactionItems.Add(transactionItem);

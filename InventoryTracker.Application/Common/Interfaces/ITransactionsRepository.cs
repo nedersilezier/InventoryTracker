@@ -11,5 +11,6 @@ namespace InventoryTracker.Application.Common.Interfaces
 
         Task AddTransactionItem(TransactionItem transactionItem);
         Task<Transaction?> GetTransactionWithItemsByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<Transaction?> GetTransactionByIdAsync(Guid id, CancellationToken cancellationToken);
     }
 }
