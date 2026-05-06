@@ -15,7 +15,7 @@ namespace InventoryTracker.WebAdmin.ViewModels.Transactions
         public Guid? DestinationWarehouseId { get; set; }
 
         [Required(ErrorMessage = "Transaction date is required.")]
-        public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
+        public DateTime TransactionDate { get; set; } = DateTime.Now;
         public string? ReferenceNumber { get; set; }
         public string? Notes { get; set; }
         public List<SelectListItem> AvailableTypes = new List<SelectListItem>

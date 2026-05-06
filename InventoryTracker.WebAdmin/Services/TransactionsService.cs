@@ -23,12 +23,12 @@ namespace InventoryTracker.WebAdmin.Services
 
             var pageSize = request.PageSize == 0 ? 5 : request.PageSize;
             var query = new List<string>
-            { 
-                $"pageNumber={request.PageNumber}", 
-                $"pageSize={pageSize}", 
-                $"includeAdjustments={request.IncludeAdjustments}", 
-                $"includeTransfers={request.IncludeTransfers}", 
-                $"includeIssues={request.IncludeIssues}", 
+            {
+                $"pageNumber={request.PageNumber}",
+                $"pageSize={pageSize}",
+                $"includeAdjustments={request.IncludeAdjustments}",
+                $"includeTransfers={request.IncludeTransfers}",
+                $"includeIssues={request.IncludeIssues}",
                 $"includeReturns={request.IncludeReturns}"
             };
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
@@ -38,12 +38,14 @@ namespace InventoryTracker.WebAdmin.Services
 
             if (request.DateFrom.HasValue)
             {
-                query.Add($"dateFrom={request.DateFrom.Value:yyyy-MM-dd}");
+                var utcFrom = DateTime.SpecifyKind(request.DateFrom.Value.Date, DateTimeKind.Local).ToUniversalTime();
+                query.Add($"dateFrom={Uri.EscapeDataString(utcFrom.ToString("O"))}");
             }
 
             if (request.DateTo.HasValue)
             {
-                query.Add($"dateTo={request.DateTo.Value:yyyy-MM-dd}");
+                var utcTo = DateTime.SpecifyKind(request.DateTo.Value.Date, DateTimeKind.Local).ToUniversalTime();
+                query.Add($"dateTo={Uri.EscapeDataString(utcTo.ToString("O"))}");
             }
             var url = $"/api/admin/transactions?{string.Join("&", query)}";
             var result = await _apiClient.GetAsync<PagedResponse<TransactionsResponseDTO>>(url, "Failed to load transactions.", cancellationToken);
@@ -63,7 +65,7 @@ namespace InventoryTracker.WebAdmin.Services
                 StatusDisplay = transaction.StatusName,
                 TypeDisplay = transaction.TypeName,
             }).ToList() ?? new List<TransactionListItemViewModel>();
-            
+
             var routeValues = new Dictionary<string, string?>
             {
                 ["PageSize"] = pageSize.ToString(),

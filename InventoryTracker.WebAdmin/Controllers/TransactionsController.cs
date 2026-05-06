@@ -223,7 +223,7 @@ namespace InventoryTracker.WebAdmin.Controllers
                 vm.AvailableItems = itemsResult.Data!;
                 vm.AvailableClients = clientsResult.Data!;
                 vm.AvailableWarehouses = warehousesResult.Data!;
-                return View("Create", vm);
+                return View("CreateEdit", vm);
             }
             TempData["SuccessMessage"] = $"Transaction '{result.Data!.TransactionId}' created successfully.";
             return View("CreateEditSuccess");
