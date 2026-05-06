@@ -31,6 +31,7 @@ builder.Services.AddHttpClient<ApiHttpClient>(client =>
 .AddHttpMessageHandler<AccessTokenHandler>();
 
 builder.Services.AddScoped<ITransactionsService, TransactionsService>();
+builder.Services.AddScoped<ILookupsService, LookupsService>();
 
 var app = builder.Build();
 

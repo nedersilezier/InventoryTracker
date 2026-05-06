@@ -1,0 +1,23 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Transaction updated</title>
+    <script>
+            setTimeout(function () {
+                window.close();
+
+                setTimeout(function () {
+                    window.location.href = '@Url.Action("Index", "Transactions")';
+                }, 200);
+            }, 1000);
+    </script>
+</head>
+<body>
+    <p>Success</p>
+</body>
+</html>

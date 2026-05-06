@@ -1,0 +1,458 @@
+﻿@using InventoryTracker.Shared.Enums
+@using System.Text.Json
+@model InventoryTracker.WebOperator.ViewModels.Transactions.CreateEditTransactionViewModel
+
+@{
+    ViewData["Title"] = Model.TransactionId == null ? "Create Transaction" : "Edit Transaction";
+    var selectedItems = Model.SelectedItems ?? [];
+    var formAction = Model.TransactionId == null ? "Create" : "Edit";
+}
+
+<div class="min-h-screen bg-[#f8f9ff] text-[#0d1c2e] pb-36">
+    <form asp-controller="Transactions" asp-action="@formAction" method="post" id="transactionForm" class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        @Html.AntiForgeryToken()
+
+        @if (Model.TransactionId != null)
+        {
+            <input type="hidden" asp-for="TransactionId" />
+        }
+
+        <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div asp-validation-summary="ModelOnly" class="mt-6 rounded-2xl bg-[#ffdad6] px-4 py-3 text-sm font-semibold text-[#93000a]"></div>
+        </div>
+        <div class="space-y-8">
+            <section class="relative rounded-[2rem] overflow-hidden bg-[#eff4ff] p-6 sm:p-8">
+                <div class="absolute inset-y-0 left-0 w-1 bg-[#004ac6]"></div>
+                <div class="mb-7 flex items-center gap-3 text-[#004ac6]">
+                    <span class="material-symbols-outlined">info</span>
+                    <h2 class="font-['Plus_Jakarta_Sans'] text-lg font-extrabold">General</h2>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div class="space-y-2">
+                        <label asp-for="Type" class="px-1 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">
+                            Transaction Type <span class="text-[#ba1a1a]">*</span>
+                        </label>
+                        <div class="relative">
+                            <select asp-for="Type" asp-items="Model.AvailableTypes" id="transactionType"
+                                    class="h-14 w-full cursor-pointer appearance-none rounded-2xl border-0 bg-[#d5e3fc] px-5 pr-12 font-bold text-[#0d1c2e]  focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15">
+                            </select>
+                            <span class="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#434655]">expand_more</span>
+                        </div>
+                        <span asp-validation-for="Type" class="text-sm font-semibold text-[#ba1a1a]"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="TransactionDate" class="px-1 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">
+                            Transaction Date <span class="text-[#ba1a1a]">*</span>
+                        </label>
+                        <input asp-for="TransactionDate" type="date" id="transactionDate" value="@Model.TransactionDate.ToString("yyyy-MM-dd")"
+                               class="h-14 w-full rounded-2xl border-0 bg-[#d5e3fc] px-5 font-bold text-[#0d1c2e]  focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15" />
+                        <span asp-validation-for="TransactionDate" class="text-sm font-semibold text-[#ba1a1a]"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="ReferenceNumber" class="px-1 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">Reference Number</label>
+                        <input asp-for="ReferenceNumber" placeholder="REF-00000"
+                               class="h-14 w-full rounded-2xl border-0 bg-[#d5e3fc] px-5 font-bold text-[#0d1c2e] placeholder:text-[#434655]/40  focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15" />
+                        <span asp-validation-for="ReferenceNumber" class="text-sm font-semibold text-[#ba1a1a]"></span>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label asp-for="Notes" class="px-1 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">Notes</label>
+                        <textarea asp-for="Notes" rows="1" placeholder="Add administrative notes..."
+                                  class="min-h-14 w-full resize-none rounded-2xl border-0 bg-[#d5e3fc] px-5 py-4 font-bold text-[#0d1c2e] placeholder:text-[#434655]/40  focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15"></textarea>
+                        <span asp-validation-for="Notes" class="text-sm font-semibold text-[#ba1a1a]"></span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="relative rounded-[2rem] bg-[#e6eeff] p-6 sm:p-8">
+                <div class="absolute inset-y-0 left-0 w-1 bg-[#006e2d]"></div>
+                <div class="mb-7 flex items-center gap-3 text-[#006e2d]">
+                    <span class="material-symbols-outlined">local_shipping</span>
+                    <h2 class="font-['Plus_Jakarta_Sans'] text-lg font-extrabold">Parties</h2>
+                </div>
+
+                <div id="partiesFields" class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                    <div class="space-y-2 field-client" data-field="client">
+                        <label asp-for="ClientId" class="px-1 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">Client</label>
+                        <div class="relative">
+                            <select asp-for="ClientId" asp-items="Model.AvailableClients" id="clientId"
+                                    class="h-14 w-full cursor-pointer appearance-none rounded-2xl border-0 bg-[#d5e3fc] px-5 pr-12 font-bold text-[#0d1c2e] focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15">
+                                <option value="">Select Client</option>
+                            </select>
+                            <span class="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#434655]">expand_more</span>
+                        </div>
+                        <span asp-validation-for="ClientId" class="text-sm font-semibold text-[#ba1a1a]"></span>
+                    </div>
+
+                    <div class="space-y-2 field-sourceWarehouse" data-field="sourceWarehouse">
+                        <label asp-for="SourceWarehouseId" class="px-1 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">Source Warehouse</label>
+                        <div class="relative">
+                            <select asp-for="SourceWarehouseId" asp-items="Model.AvailableWarehouses" id="sourceWarehouseId"
+                                    class="h-14 w-full cursor-pointer appearance-none rounded-2xl border-0 bg-[#d5e3fc] px-5 pr-12 font-bold text-[#0d1c2e] focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15">
+                                <option value="">Select Warehouse</option>
+                            </select>
+                            <span class="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#434655]">expand_more</span>
+                        </div>
+                        <span asp-validation-for="SourceWarehouseId" class="text-sm font-semibold text-[#ba1a1a]"></span>
+                    </div>
+
+                    <div class="space-y-2 field-destinationWarehouse" data-field="destinationWarehouse">
+                        <label asp-for="DestinationWarehouseId" class="px-1 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">Destination Warehouse</label>
+                        <div class="relative">
+                            <select asp-for="DestinationWarehouseId" asp-items="Model.AvailableWarehouses" id="destinationWarehouseId"
+                                    class="h-14 w-full cursor-pointer appearance-none rounded-2xl border-0 bg-[#d5e3fc] px-5 pr-12 font-bold text-[#0d1c2e] focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15">
+                                <option value="">Select Warehouse</option>
+                            </select>
+                            <span class="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#434655]">expand_more</span>
+                        </div>
+                        <span asp-validation-for="DestinationWarehouseId" class="text-sm font-semibold text-[#ba1a1a]"></span>
+                    </div>
+                    <div id="adjustmentHelp" class="hidden md:col-span-1 space-y-2">
+                        <label class="invisible px-1 text-xs font-black uppercase tracking-[0.16em]">spacer</label>
+                        <div class="flex h-14 items-center gap-3 rounded-2xl bg-[#ffdbce] px-4 text-sm font-semibold text-[#7f2b00]">
+                            <span class="material-symbols-outlined text-[20px]">lightbulb</span>
+                            <span>Positive = increase stock, negative = decrease stock.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="rounded-[2rem] bg-white p-6 shadow-[0_12px_32px_rgba(13,28,46,0.06)] ring-1 ring-[#c3c6d7]/15 sm:p-8">
+                <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-[#0d1c2e]">inventory_2</span>
+                        <h2 class="font-['Plus_Jakarta_Sans'] text-lg font-extrabold">Items</h2>
+                    </div>
+                </div>
+
+                <div class="mb-6 grid grid-cols-1 gap-3 rounded-[1.5rem] bg-[#eff4ff] p-4 md:grid-cols-[1fr_10rem_auto] md:items-center">
+                    <div class="relative">
+                        <select id="itemToAdd"
+                                class="h-14 w-full cursor-pointer appearance-none rounded-2xl border-0 bg-white px-5 pr-12 font-bold text-[#0d1c2e] focus:ring-4 focus:ring-[#004ac6]/15">
+                            <option value="">Select item to add...</option>
+                            @foreach (var item in Model.AvailableItems)
+                            {
+                                <option value="@item.Value" data-uom="@item.UnitOfMeasure">@item.Text</option>
+                            }
+                        </select>
+                        <span class="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#434655]">expand_more</span>
+                    </div>
+
+                    <input id="quantityToAdd" type="number" step="0.01" placeholder="0"
+                           class="h-14 w-full rounded-2xl border-0 bg-white px-5 text-center font-black text-[#0d1c2e] focus:ring-4 focus:ring-[#004ac6]/15" />
+
+                    <button type="button" id="addItemButton"
+                            class="inline-flex h-14 items-center justify-center gap-2 rounded-2xl bg-[#dbe1ff] px-6 font-black text-[#00174b] transition hover:bg-[#b4c5ff] active:scale-95">
+                        <span class="material-symbols-outlined text-lg">add_circle</span>
+                        <span>Add Item</span>
+                    </button>
+                </div>
+
+                <p id="itemsClientError" class="mb-4 hidden rounded-2xl bg-[#ffdad6] px-4 py-3 text-sm font-bold text-[#93000a]"></p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full border-separate border-spacing-y-3">
+                        <thead>
+                            <tr class="text-left">
+                                <th class="px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">Item Description</th>
+                                <th class="w-36 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">Quantity</th>
+                                <th class="w-24 px-4 py-2 text-right text-xs font-black uppercase tracking-[0.16em] text-[#434655]">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selectedItemsTableBody"></tbody>
+                    </table>
+                </div>
+
+                <div id="selectedItemsInputs" class="hidden"></div>
+            </section>
+        </div>
+        <div class="fixed bottom-0 left-0 lg:left-64 right-0 z-20 bg-gradient-to-t from-[#f8f9ff] via-[#f8f9ff]/90 to-transparent p-4 sm:p-6">
+            <div class="mx-auto max-w-7xl">
+                <div class="flex justify-center rounded-[2rem] bg-white/80 p-4 shadow-[0_18px_60px_rgba(13,28,46,0.14)] ring-1 ring-white/60 backdrop-blur-xl">
+
+                    <div class="flex flex-col gap-3 sm:flex-row">
+                        <button type="button"
+                                onclick="window.close(); setTimeout(() => window.location.href='@Url.Action("Index", "Transactions")', 150);"
+                                class="h-14 rounded-2xl px-8 font-black text-[#434655] transition hover:bg-[#e6eeff] active:scale-95">
+                            Cancel
+                        </button>
+
+                        <button type="submit"
+                                class="inline-flex h-14 items-center justify-center gap-3 rounded-2xl bg-gradient-to-br from-[#004ac6] to-[#2563eb] px-10 font-black text-white shadow-lg shadow-blue-900/20 transition hover:shadow-xl active:scale-95">
+                            <span>Confirm Transaction</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const transactionForm = document.getElementById('transactionForm');
+            const transactionType = document.getElementById('transactionType');
+            const quantityToAdd = document.getElementById('quantityToAdd');
+            const itemToAdd = document.getElementById('itemToAdd');
+            const addItemButton = document.getElementById('addItemButton');
+            const adjustmentHelp = document.getElementById('adjustmentHelp');
+            const tableBody = document.getElementById('selectedItemsTableBody');
+            const hiddenInputs = document.getElementById('selectedItemsInputs');
+            const itemsClientError = document.getElementById('itemsClientError');
+            const sourceWarehouse = document.getElementById('sourceWarehouseId');
+            const destinationWarehouse = document.getElementById('destinationWarehouseId');
+
+            const selectedItems = @Html.Raw(JsonSerializer.Serialize(selectedItems));
+
+            const fieldContainers = {
+                client: document.querySelector('[data-field="client"]'),
+                sourceWarehouse: document.querySelector('[data-field="sourceWarehouse"]'),
+                destinationWarehouse: document.querySelector('[data-field="destinationWarehouse"]')
+            };
+
+            function normalizeItem(item) {
+                return {
+                    itemId: String(item.itemId ?? item.ItemId ?? ''),
+                    name: String(item.name ?? item.Name ?? ''),
+                    quantity: Number(item.quantity ?? item.Quantity ?? 0)
+                };
+            }
+
+            function createHiddenInput(name, value) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                return input;
+            }
+
+            function showItemsError(message) {
+                itemsClientError.textContent = message;
+                itemsClientError.classList.remove('hidden');
+            }
+
+            function clearItemsError() {
+                itemsClientError.textContent = '';
+                itemsClientError.classList.add('hidden');
+            }
+
+            function syncSelectedItemsInputs() {
+                hiddenInputs.innerHTML = '';
+                selectedItems.forEach((item, index) => {
+                    hiddenInputs.appendChild(createHiddenInput(`SelectedItems[${index}].ItemId`, item.itemId));
+                    hiddenInputs.appendChild(createHiddenInput(`SelectedItems[${index}].Name`, item.name));
+                    hiddenInputs.appendChild(createHiddenInput(`SelectedItems[${index}].Quantity`, item.quantity));
+                });
+            }
+
+            function renderItems() {
+                tableBody.innerHTML = '';
+                syncSelectedItemsInputs();
+
+                if (selectedItems.length === 0) {
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 3;
+                    cell.className = 'rounded-3xl bg-[#eff4ff] px-6 py-10 text-center text-sm font-bold text-[#434655]/70';
+                    cell.textContent = 'No items added yet.';
+                    row.appendChild(cell);
+                    tableBody.appendChild(row);
+                    return;
+                }
+
+                selectedItems.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    row.className = 'group';
+
+                    const itemCell = document.createElement('td');
+                    itemCell.className = 'rounded-l-3xl bg-[#eff4ff] p-4';
+                    itemCell.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-[#004ac6]">
+                                <span class="material-symbols-outlined">barcode</span>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="truncate font-black text-[#0d1c2e]">${escapeHtml(item.name)}</p>
+                            </div>
+                        </div>`;
+
+                    const quantityCell = document.createElement('td');
+                    quantityCell.className = 'bg-[#eff4ff] p-4';
+                    quantityCell.innerHTML = `<span class="inline-flex min-w-20 justify-center rounded-xl bg-white px-4 py-3 font-black text-[#0d1c2e]">${item.quantity}</span>`;
+
+                    const actionCell = document.createElement('td');
+                    actionCell.className = 'rounded-r-3xl bg-[#eff4ff] p-4 text-right';
+
+                    const removeButton = document.createElement('button');
+                    removeButton.type = 'button';
+                    removeButton.className = 'inline-flex h-11 w-11 items-center justify-center rounded-xl text-[#ba1a1a] transition hover:bg-[#ffdad6] active:scale-95';
+                    removeButton.innerHTML = '<span class="material-symbols-outlined">delete</span>';
+                    removeButton.addEventListener('click', () => {
+                        selectedItems.splice(index, 1);
+                        clearItemsError();
+                        renderItems();
+                    });
+
+                    actionCell.appendChild(removeButton);
+                    row.appendChild(itemCell);
+                    row.appendChild(quantityCell);
+                    row.appendChild(actionCell);
+                    tableBody.appendChild(row);
+                });
+            }
+
+            function escapeHtml(value) {
+                return String(value)
+                    .replaceAll('&', '&amp;')
+                    .replaceAll('<', '&lt;')
+                    .replaceAll('>', '&gt;')
+                    .replaceAll('"', '&quot;')
+                    .replaceAll("'", '&#039;');
+            }
+
+            function showField(name, visible) {
+                const container = fieldContainers[name];
+                if (!container) return;
+
+                container.classList.toggle('hidden', !visible);
+                const input = container.querySelector('select, input, textarea');
+                if (!input) return;
+
+                input.disabled = !visible;
+                if (!visible) input.value = '';
+            }
+
+            function setFieldOrder(type) {
+                Object.values(fieldContainers).forEach(container => {
+                    if (!container) return;
+                    container.classList.remove('md:order-1', 'md:order-2', 'md:order-3');
+                });
+
+                if (type === 'IssueToClient') {
+                    fieldContainers.sourceWarehouse?.classList.add('md:order-1');
+                    fieldContainers.client?.classList.add('md:order-2');
+                } else if (type === 'ReturnFromClient') {
+                    fieldContainers.client?.classList.add('md:order-1');
+                    fieldContainers.destinationWarehouse?.classList.add('md:order-2');
+                } else if (type === 'TransferBetweenWarehouses') {
+                    fieldContainers.sourceWarehouse?.classList.add('md:order-1');
+                    fieldContainers.destinationWarehouse?.classList.add('md:order-2');
+                }
+            }
+
+            function applyTypeView() {
+                const type = transactionType.value;
+
+                showField('client', type === 'IssueToClient' || type === 'ReturnFromClient');
+                showField('sourceWarehouse', type === 'IssueToClient' || type === 'TransferBetweenWarehouses' || type === 'Adjustment');
+                showField('destinationWarehouse', type === 'ReturnFromClient' || type === 'TransferBetweenWarehouses');
+                setFieldOrder(type);
+
+                adjustmentHelp?.classList.toggle('hidden', type !== 'Adjustment');
+
+                if (quantityToAdd) quantityToAdd.placeholder = type === 'Adjustment' ? 'e.g. -5' : '0';
+                syncWarehouses();
+            }
+
+            function syncWarehouses() {
+                if (!sourceWarehouse || !destinationWarehouse) return;
+
+                [...destinationWarehouse.options].forEach(opt => opt.disabled = false);
+                [...sourceWarehouse.options].forEach(opt => opt.disabled = false);
+
+                const type = transactionType.value;
+                const sourceValue = sourceWarehouse.value;
+                const destinationValue = destinationWarehouse.value;
+
+                if (type !== 'TransferBetweenWarehouses') return;
+
+                [...destinationWarehouse.options].forEach(opt => {
+                    if (opt.value && opt.value === sourceValue) opt.disabled = true;
+                });
+
+                [...sourceWarehouse.options].forEach(opt => {
+                    if (opt.value && opt.value === destinationValue) opt.disabled = true;
+                });
+
+                if (sourceValue && sourceValue === destinationValue) destinationWarehouse.value = '';
+            }
+
+            function addItem() {
+                const itemId = itemToAdd.value;
+                const itemName = itemToAdd.options[itemToAdd.selectedIndex]?.text ?? '';
+                const quantity = Number(quantityToAdd.value);
+
+                if (!itemId) {
+                    showItemsError('Select an item before adding it.');
+                    return;
+                }
+
+                if (!quantity || quantity === 0) {
+                    showItemsError('Quantity cannot be 0.');
+                    return;
+                }
+
+                if (transactionType.value !== 'Adjustment' && quantity < 0) {
+                    showItemsError('Quantity cannot be negative for this transaction type.');
+                    return;
+                }
+
+                const existingItem = selectedItems.find(x => x.itemId === itemId);
+
+                if (existingItem) {
+                    const nextQuantity = Number(existingItem.quantity) + quantity;
+                    if (transactionType.value !== 'Adjustment' && nextQuantity < 0) {
+                        showItemsError('Quantity cannot be negative.');
+                        return;
+                    }
+                    existingItem.quantity = nextQuantity;
+                } else {
+                    selectedItems.push({ itemId, name: itemName, quantity });
+                }
+
+                itemToAdd.value = '';
+                quantityToAdd.value = '';
+                clearItemsError();
+                renderItems();
+            }
+
+            itemToAdd?.addEventListener('change', () => {
+                const selected = itemToAdd.options[itemToAdd.selectedIndex];
+                const uom = selected?.dataset?.uom;
+
+                if (uom === 'kg' || uom === 'l') {
+                    quantityToAdd.step = '0.01';
+                    quantityToAdd.dataset.integerOnly = 'false';
+                } else {
+                    quantityToAdd.step = '1';
+                    quantityToAdd.dataset.integerOnly = 'true';
+                }
+            });
+
+            quantityToAdd?.addEventListener('keydown', (event) => {
+                if (quantityToAdd.dataset.integerOnly === 'true' && (event.key === '.' || event.key === ',')) {
+                    event.preventDefault();
+                }
+            });
+
+            sourceWarehouse?.addEventListener('change', syncWarehouses);
+            destinationWarehouse?.addEventListener('change', syncWarehouses);
+            transactionType?.addEventListener('change', applyTypeView);
+            addItemButton?.addEventListener('click', addItem);
+            transactionForm?.addEventListener('submit', () => syncSelectedItemsInputs());
+
+            for (let i = 0; i < selectedItems.length; i++) {
+                selectedItems[i] = normalizeItem(selectedItems[i]);
+            }
+
+            itemToAdd?.dispatchEvent(new Event('change'));
+            applyTypeView();
+            renderItems();
+        })();
+    </script>
+}

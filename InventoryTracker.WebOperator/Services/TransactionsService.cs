@@ -38,12 +38,14 @@ namespace InventoryTracker.WebOperator.Services
 
             if (request.DateFrom.HasValue)
             {
-                query.Add($"dateFrom={request.DateFrom.Value:yyyy-MM-dd}");
+                var utcFrom = DateTime.SpecifyKind(request.DateFrom.Value.Date, DateTimeKind.Local).ToUniversalTime();
+                query.Add($"dateFrom={Uri.EscapeDataString(utcFrom.ToString("O"))}");
             }
 
             if (request.DateTo.HasValue)
             {
-                query.Add($"dateTo={request.DateTo.Value:yyyy-MM-dd}");
+                var utcTo = DateTime.SpecifyKind(request.DateTo.Value.Date, DateTimeKind.Local).ToUniversalTime();
+                query.Add($"dateTo={Uri.EscapeDataString(utcTo.ToString("O"))}");
             }
             var url = $"/api/user/transactions?{string.Join("&", query)}";
             var result = await _apiClient.GetAsync<PagedResponse<TransactionsResponseDTO>>(url, "Failed to load transactions.", cancellationToken);

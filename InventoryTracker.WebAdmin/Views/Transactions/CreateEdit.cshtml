@@ -6,23 +6,6 @@
     ViewData["Title"] = Model.TransactionId == null ? "Add New Transaction" : "Edit Transaction";
     var selectedItems = Model.SelectedItems ?? [];
 }
-<style>
-    .type-IssueToClient .field-sourceWarehouse {
-        order: 1;
-    }
-
-    .type-IssueToClient .field-client {
-        order: 2;
-    }
-
-    .type-ReturnFromClient .field-client {
-        order: 1;
-    }
-
-    .type-ReturnFromClient .field-destinationWarehouse {
-        order: 2;
-    }
-</style>
 <div class="max-w-7xl mx-auto px-4 py-0">
     <div class="mb-6">
         <div class="flex items-center gap-2 text-slate-500 mb-2">
@@ -117,7 +100,7 @@
                             Source &amp; Destination
                         </h2>
                     </div>
-                    <div id="partiesFields" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                         <div class="flex flex-col gap-2 field-client" data-field="client">
                             <label asp-for="ClientId" class="text-xs font-bold uppercase tracking-wider text-slate-500">
                                 Client
@@ -355,6 +338,25 @@
                     }
                 }
             });
+
+            function setFieldOrder(type) {
+                Object.values(fieldContainers).forEach(container => {
+                    if (!container) return;
+                    container.classList.remove('md:order-1', 'md:order-2', 'md:order-3');
+                });
+
+                if (type === 'IssueToClient') {
+                    fieldContainers.sourceWarehouse?.classList.add('md:order-1');
+                    fieldContainers.client?.classList.add('md:order-2');
+                } else if (type === 'ReturnFromClient') {
+                    fieldContainers.client?.classList.add('md:order-1');
+                    fieldContainers.destinationWarehouse?.classList.add('md:order-2');
+                } else if (type === 'TransferBetweenWarehouses') {
+                    fieldContainers.sourceWarehouse?.classList.add('md:order-1');
+                    fieldContainers.destinationWarehouse?.classList.add('md:order-2');
+                }
+            }
+
             // Show or hide a form field by logical name.
             function showField(name, visible) {
                 // Get the container from fieldContainers map.
@@ -386,21 +388,6 @@
                 // Read currently selected transaction type.
                 const type = transactionType.value;
 
-                // Get wrapper for source/client/destination fields.
-                const wrapper = document.getElementById('partiesFields');
-
-                // Remove previous type-specific CSS classes.
-                wrapper.classList.remove(
-                    'type-IssueToClient',
-                    'type-ReturnFromClient',
-                    'type-TransferBetweenWarehouses',
-                    'type-Adjustment'
-                );
-
-                // Add current type-specific CSS class.
-                // This is used by CSS to change field order.
-                wrapper.classList.add(`type-${type}`);
-
                 // Client is needed for issue to client and return from client.
                 showField('client', type === 'IssueToClient' || type === 'ReturnFromClient');
 
@@ -416,7 +403,8 @@
                     type === 'ReturnFromClient' ||
                     type === 'TransferBetweenWarehouses'
                 );
-
+                // set select fields order depending on type
+                setFieldOrder(type);
                 // Show adjustment help text only for adjustment transaction.
                 adjustmentHelp?.classList.toggle('hidden', type !== 'Adjustment');
 

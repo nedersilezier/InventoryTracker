@@ -16,8 +16,8 @@
         </span>
 
         <span class="text-[11px] text-bolder text-black whitespace-nowrap">
-            @Model.TransactionDate.ToString("dd-MM-yyyy")
-            <span class="text-[10px] text-slate-600 whitespace-nowrap ml-2">@Model.TransactionDate.ToString("HH:mm")</span>
+            @Model.TransactionDate.ToLocalTime().ToString("dd-MM-yyyy")
+            <span class="text-[10px] text-slate-600 whitespace-nowrap ml-2">@Model.TransactionDate.ToLocalTime().ToString("HH:mm")</span>
         </span>
     </div>
 
