@@ -279,6 +279,9 @@ namespace InventoryTracker.WebAdmin.Controllers
                 return RedirectToAction(nameof(Index));
             }
             var viewModel = result.Data!;
+            var utcDate = viewModel.TransactionDate;
+            var localDate = DateTime.SpecifyKind(utcDate, DateTimeKind.Utc).ToLocalTime();
+            viewModel.TransactionDate = localDate;
             viewModel.AvailableClients = clientsResult.Data!;
             viewModel.AvailableItems = itemsResult.Data!;
             viewModel.AvailableWarehouses = warehousesResult.Data!;
@@ -333,13 +336,15 @@ namespace InventoryTracker.WebAdmin.Controllers
                 vm.AvailableWarehouses = warehousesResult.Data!;
                 return View("CreateEdit", vm);
             }
+            var localDate = vm.TransactionDate;
+            var utcDate = DateTime.SpecifyKind(localDate, DateTimeKind.Local).ToUniversalTime();
             var request = new UpdateTransactionRequest
             {
                 Type = vm.Type,
                 ClientId = vm.ClientId,
                 SourceWarehouseId = vm.SourceWarehouseId,
                 DestinationWarehouseId = vm.DestinationWarehouseId,
-                TransactionDate = vm.TransactionDate,
+                TransactionDate = utcDate,
                 ReferenceNumber = vm.ReferenceNumber,
                 Notes = vm.Notes,
                 Items = vm.SelectedItems.Select(si => new UpdateTransactionItemRequest

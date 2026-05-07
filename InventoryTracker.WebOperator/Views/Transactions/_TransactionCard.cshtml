@@ -15,7 +15,7 @@
             </h3>
         </span>
 
-        <span class="text-[11px] text-bolder text-black whitespace-nowrap">
+        <span class="text-[11px] text-bold text-black whitespace-nowrap">
             @Model.TransactionDate.ToLocalTime().ToString("dd-MM-yyyy")
             <span class="text-[10px] text-slate-600 whitespace-nowrap ml-2">@Model.TransactionDate.ToLocalTime().ToString("HH:mm")</span>
         </span>
@@ -27,11 +27,11 @@
         <!-- ROUTE -->
         <div class="flex items-center justify-between text-slate-700 text-xs font-medium">
             <span class="truncate max-w-[40%]">
-                @(string.IsNullOrWhiteSpace(Model.FromDisplay) ? "-" : Model.FromDisplay)
+                @(string.IsNullOrWhiteSpace(Model.FromDisplay) ? "" : Model.FromDisplay)
             </span>
 
             <span class="truncate max-w-[40%] text-right">
-                @(string.IsNullOrWhiteSpace(Model.ToDisplay) ? "-" : Model.ToDisplay)
+                @(string.IsNullOrWhiteSpace(Model.ToDisplay) ? "" : Model.ToDisplay)
             </span>
         </div>
     </div>
@@ -59,11 +59,22 @@
                         </span>
                     </button>
                 </form>
-                <a asp-action="Edit"
-                       asp-route-id="@Model.TransactionId"
-                       class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-500">
-                    ✏
-                </a>
+                <form asp-controller="Transactions"
+                      asp-action="Edit"
+                      method="get"
+                      class="inline">
+    
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="id" value="@Model.TransactionId" />
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+
+                    <button type="submit">
+                        <span class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-500">
+                            ✏
+                        </span>
+                    </button>
+                </form>
             }
             else
             {

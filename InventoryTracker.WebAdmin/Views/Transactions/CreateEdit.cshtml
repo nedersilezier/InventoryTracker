@@ -60,12 +60,23 @@
                             <label asp-for="TransactionDate" class="text-xs font-bold uppercase tracking-wider text-slate-500">
                                 Transaction Date
                             </label>
-                            <input asp-for="TransactionDate"
-                                   type="date"
-                                   id="transactionDate"
-                                   value="@Model.TransactionDate.ToString("yyyy-MM-dd")"
-                                   class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" />
-                            <span asp-validation-for="TransactionDate" class="text-sm text-red-600"></span>
+                                @if (Model.TransactionId == null)
+                                {
+                                    <input asp-for="TransactionDate"
+                                    type="date"
+                                    id="transactionDate"
+                                    value="@Model.TransactionDate.ToString("yyyy-MM-dd")"
+                                    class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" />
+                                }
+                                else
+                                {
+                                <input asp-for="TransactionDate"
+                                       type="datetime-local"
+                                       id="transactionDate"
+                                       value="@Model.TransactionDate.ToString("yyyy-MM-ddTHH:mm")"
+                                       class="w-full bg-slate-100 border border-transparent rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-200 focus:border-blue-300 transition-all" />
+                                }
+                                <span asp-validation-for="TransactionDate" class="text-sm text-red-600"></span>
                         </div>
 
                         <div class="flex flex-col gap-2">

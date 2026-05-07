@@ -103,10 +103,11 @@ namespace InventoryTracker.API.Controllers.User
                     Quantity = i.Quantity
                 }).ToList()
             };
-            var transaction = await _mediator.Send(command, cancellationToken);
-            if (transaction == Guid.Empty)
+            var transactionId = await _mediator.Send(command, cancellationToken);
+            if (transactionId == Guid.Empty)
                 return NotFound();
-            return Ok(transaction);
+            var response = new CreateTransactionResponse{ TransactionId = transactionId };
+            return Ok(response);
         }
         [HttpPatch]
         [Route("{id}/cancel")]

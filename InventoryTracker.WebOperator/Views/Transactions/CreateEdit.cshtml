@@ -46,8 +46,17 @@
                         <label asp-for="TransactionDate" class="px-1 text-xs font-black uppercase tracking-[0.16em] text-[#434655]">
                             Transaction Date <span class="text-[#ba1a1a]">*</span>
                         </label>
-                        <input asp-for="TransactionDate" type="date" id="transactionDate" value="@Model.TransactionDate.ToString("yyyy-MM-dd")"
-                               class="h-14 w-full rounded-2xl border-0 bg-[#d5e3fc] px-5 font-bold text-[#0d1c2e]  focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15" />
+                        @if (Model.TransactionId == null)
+                        {
+                            <input asp-for="TransactionDate" type="date" id="transactionDate" value="@Model.TransactionDate.ToString("yyyy-MM-dd")"
+                                   class="h-14 w-full rounded-2xl border-0 bg-[#d5e3fc] px-5 font-bold text-[#0d1c2e]  focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15" />
+                        }
+                        else
+                        {
+                            <input asp-for="TransactionDate" type="datetime-local" id="transactionDate" value="@Model.TransactionDate.ToString("yyyy-MM-ddTHH:mm")"
+                                   class="h-14 w-full rounded-2xl border-0 bg-[#d5e3fc] px-5 font-bold text-[#0d1c2e]  focus:bg-white focus:ring-4 focus:ring-[#004ac6]/15" />
+                        }
+
                         <span asp-validation-for="TransactionDate" class="text-sm font-semibold text-[#ba1a1a]"></span>
                     </div>
 
