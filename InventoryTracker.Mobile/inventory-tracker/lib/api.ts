@@ -1,17 +1,18 @@
 import * as SecureStore from "expo-secure-store";
 import { handleUnauthorized, resetUnauthorizedHandlerState } from "./auth";
 import {
-  PagedResponse,
-  TransactionListDTO,
-  GetTransactionsParams,
-} from "./transactions.types";
-import {
+  CancelTransactionRequest,
+  ClientLookup,
   CreateTransactionRequest,
   ItemLookup,
+  TransactionForEditDTO,
   WarehouseLookup,
-  ClientLookup,
 } from "./create-edit-transaction.types";
-import { TransactionForEditDTO } from "./create-edit-transaction.types";
+import {
+  GetTransactionsParams,
+  PagedResponse,
+  TransactionListDTO,
+} from "./transactions.types";
 
 //api url loaded from expo env
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -173,6 +174,39 @@ export async function updateTransaction(
   }
 
   // API returns GUID of created transaction
+  return await response.json();
+}
+
+//cancels transaction
+export async function cancelTransaction(
+  id: string,
+  payload: CancelTransactionRequest,
+): Promise<string> {
+  const response = await authorizedFetch(
+    `/api/user/transactions/${id}/cancel`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    let message = "Failed to cancel transaction";
+    try {
+      var parsedError = JSON.parse(errorText);
+      message =
+        parsedError.detail ||
+        parsedError.title ||
+        parsedError.message ||
+        message;
+    } catch {
+      message = errorText || message;
+    }
+    throw new Error(message);
+  }
+
+  // API returns GUID of cancelled transaction
   return await response.json();
 }
 

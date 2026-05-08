@@ -62,13 +62,12 @@
                 <form asp-controller="Transactions"
                       asp-action="Edit"
                       method="get"
+                      target="_blank"
                       class="inline">
     
                     @Html.AntiForgeryToken()
 
                     <input type="hidden" name="id" value="@Model.TransactionId" />
-                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-
                     <button type="submit">
                         <span class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-500">
                             ✏

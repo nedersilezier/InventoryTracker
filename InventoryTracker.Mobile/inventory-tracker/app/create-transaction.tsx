@@ -30,6 +30,7 @@ export default function CreateTransactionScreen() {
 
         router.replace("/transactions");
       }}
+      onCancel={async () => {}}
     />
   );
 }

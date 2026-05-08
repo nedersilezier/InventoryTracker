@@ -13,13 +13,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { CreateTransactionHeader } from "./CreateTransactionHeader";
-import { GeneralStep } from "./GeneralStep";
-import { ItemsStep } from "./ItemsStep";
-import { ReviewStep } from "./ReviewStep";
-import { SearchPickerModal } from "./SearchPickerModal";
 import {
-  createTransaction,
   getClientsLookup,
   getItemsLookup,
   getWarehousesLookup,
@@ -35,6 +29,11 @@ import {
   WarehouseLookup,
 } from "../../lib/create-edit-transaction.types";
 import { isIntegerUnit } from "../../lib/create-edit-transaction.utils";
+import { CreateTransactionHeader } from "./CreateTransactionHeader";
+import { GeneralStep } from "./GeneralStep";
+import { ItemsStep } from "./ItemsStep";
+import { ReviewStep } from "./ReviewStep";
+import { SearchPickerModal } from "./SearchPickerModal";
 
 // Local wizard step type
 //flow is handled inside one screen using step type instead of routing between separate screens
@@ -47,6 +46,7 @@ type Props = {
   submittingLabel: string;
   submitLabel: string;
   onSubmit: (form: CreateTransactionForm) => Promise<void>;
+  onCancel: () => Promise<void>;
 };
 
 export function TransactionForm({
@@ -56,6 +56,7 @@ export function TransactionForm({
   submittingLabel,
   submitLabel,
   onSubmit,
+  onCancel,
 }: Props) {
   const router = useRouter();
 
@@ -66,6 +67,8 @@ export function TransactionForm({
   const [loadingLookups, setLoadingLookups] = useState(true);
   // Prevents duplicate submit requests and disables actions during creation
   const [submitting, setSubmitting] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [editing, setEditing] = useState(mode === "create" ? false : true);
 
   // Lookup data loaded from API
   // these arrays are passed to child components and search picker modal
@@ -278,9 +281,28 @@ export function TransactionForm({
       router.replace("/transactions");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
-      Alert.alert(mode == "create" ? "Create transaction error" : "Update transaction error", message);
+      Alert.alert(
+        mode == "create"
+          ? "Create transaction error"
+          : "Update transaction error",
+        message,
+      );
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const cancel = async () => {
+    try {
+      setCancelling(true);
+
+      await onCancel();
+      router.replace("/transactions");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      Alert.alert("Cancel transactin error", message);
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -399,13 +421,14 @@ export function TransactionForm({
           <>
             <Pressable
               style={[
-                styles.secondaryButton,
+                styles.cancelButton,
                 submitting && styles.disabledButton,
+                { opacity: editing ? 1 : 0 },
               ]}
-              onPress={goBack}
-              disabled={submitting}
+              onPress={cancel}
+              disabled={submitting || !editing || cancelling}
             >
-              <Text style={styles.secondaryButtonText}>Back</Text>
+              <Text style={styles.cancelButtonText}>Cancel Transaction</Text>
             </Pressable>
 
             <Pressable
@@ -414,7 +437,7 @@ export function TransactionForm({
                 submitting && styles.disabledButton,
               ]}
               onPress={submit}
-              disabled={submitting}
+              disabled={submitting || cancelling}
             >
               <Text style={styles.primaryButtonText}>
                 {submitting ? submittingLabel : submitLabel}
@@ -477,18 +500,31 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "800",
   },
-  secondaryButton: {
+  cancelButton: {
     minHeight: 52,
     borderRadius: 14,
+    paddingHorizontal: 20,
+
+    backgroundColor: "#d71427",
     borderWidth: 1,
-    borderColor: "#737685",
+    borderColor: "#40040b",
+
     alignItems: "center",
     justifyContent: "center",
+
+    shadowColor: "#ac0404",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  secondaryButtonText: {
-    color: "#0052cc",
-    fontSize: 16,
-    fontWeight: "700",
+  cancelButtonText: {
+    color: "#ffffff",
+    fontSize: 17,
+    fontWeight: "800",
   },
   disabledButton: {
     opacity: 0.6,

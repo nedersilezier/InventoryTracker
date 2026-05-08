@@ -6,7 +6,7 @@ export enum TransactionTypeValue {
   Adjustment = 4,
 }
 
-export type TransactionTypeKey = 'issue' | 'return' | 'transfer' | 'adjustment';
+export type TransactionTypeKey = "issue" | "return" | "transfer" | "adjustment";
 
 // Warehouse option returned by lookup endpoint.
 export type WarehouseLookup = {
@@ -61,6 +61,10 @@ export type CreateTransactionRequest = {
     itemId: string;
     quantity: number;
   }[];
+};
+
+export type CancelTransactionRequest = {
+  cancellationReason: string;
 };
 
 // Option used by the reusable search picker modal.

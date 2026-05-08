@@ -2,10 +2,20 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
 import { TransactionForm } from "../../components/create-transaction/TransactionForm";
-import { getTransactionById, updateTransaction } from "../../lib/api";
+import {
+  cancelTransaction,
+  getTransactionById,
+  updateTransaction,
+} from "../../lib/api";
 
-import { CreateTransactionForm } from "../../lib/create-edit-transaction.types";
-import { mapFormToCreateRequest, mapTransactionForEditToForm } from "../../lib/create-edit-transaction.utils";
+import {
+  CancelTransactionRequest,
+  CreateTransactionForm,
+} from "../../lib/create-edit-transaction.types";
+import {
+  mapFormToCreateRequest,
+  mapTransactionForEditToForm,
+} from "../../lib/create-edit-transaction.utils";
 
 export default function EditTransactionScreen() {
   const router = useRouter();
@@ -56,6 +66,15 @@ export default function EditTransactionScreen() {
 
         await updateTransaction(id, payload);
 
+        router.replace("/transactions");
+      }}
+      onCancel={async () => {
+        if (!id) return;
+        const payload: CancelTransactionRequest = {
+          cancellationReason:
+            "Cancelled from mobile. Cancellation on mobile to be changed.",
+        };
+        await cancelTransaction(id, payload);
         router.replace("/transactions");
       }}
     />

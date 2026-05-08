@@ -10,7 +10,7 @@
         <form asp-controller="Transactions" asp-action="Index" method="get" class="rounded-2xl border border-slate-200 bg-white/80 shadow-sm backdrop-blur px-4 py-4 mt-4">
             <input type="hidden" name="PageNumber" value="1" />
 
-            @if (Model.Filters.PageSize.HasValue)
+            @if (Model!.Filters.PageSize.HasValue)
             {
                 <input type="hidden" name="PageSize" value="@Model.Filters.PageSize" />
             }
@@ -108,7 +108,7 @@
 </div>
 
 <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-5 auto-rows-fr pb-28">
-    @foreach (var transaction in Model.Transactions ?? Enumerable.Empty<InventoryTracker.WebOperator.ViewModels.Transactions.TransactionCardViewModel>())
+    @foreach (var transaction in Model!.Transactions! ?? Enumerable.Empty<InventoryTracker.WebOperator.ViewModels.Transactions.TransactionCardViewModel>())
     {
         @await Html.PartialAsync("_TransactionCard.cshtml", transaction)
     }
