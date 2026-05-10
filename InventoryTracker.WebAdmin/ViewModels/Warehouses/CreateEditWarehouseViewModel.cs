@@ -6,7 +6,6 @@ namespace InventoryTracker.WebAdmin.ViewModels.Warehouses
 {
     public class CreateEditWarehouseViewModel
     {
-        [Key]
         public Guid? WarehouseId { get; set; }
 
         [Required(ErrorMessage = "Warehouse name is required")]

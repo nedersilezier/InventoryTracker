@@ -21,13 +21,11 @@ namespace InventoryTracker.APIClient
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var retryRequest = await CloneHttpRequestMessageAsync(request, cancellationToken);
-
             AddBearerToken(request, _accessTokenProvider.GetAccessToken());
 
             var response = await base.SendAsync(request, cancellationToken);
             if (response.StatusCode != HttpStatusCode.Unauthorized)
                 return response;
-
             response.Dispose();
 
             var refreshToken = _refreshTokenProvider.GetRefreshToken();

@@ -4,7 +4,6 @@ namespace InventoryTracker.WebAdmin.ViewModels.Countries
 {
     public class CreateEditCountryViewModel
     {
-        [Key]
         public Guid? CountryId { get; set; }
 
         [Required(ErrorMessage = "Country name is required")]

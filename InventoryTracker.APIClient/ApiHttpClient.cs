@@ -32,7 +32,7 @@ namespace InventoryTracker.APIClient
 
             if (content is null)
                 return ServiceResult<T>.Fail("Failed to parse response from server.", statusCode: (int)response.StatusCode);
-                
+
             return ServiceResult<T>.Ok(content);
         }
 

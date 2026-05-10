@@ -5,6 +5,7 @@
     public class OperatorTransactionsIndexViewModel
     {
         public string PageTitle { get; set; } = "Transactions";
+        public string Action { get; set; } = "Index";
         public int TotalCount { get; set; }
         public int DisplayedCount { get; set; }
         public List<TransactionCardViewModel> Transactions { get; set; } = new();

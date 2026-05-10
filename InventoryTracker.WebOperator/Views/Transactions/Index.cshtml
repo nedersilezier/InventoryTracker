@@ -4,109 +4,114 @@
 @{
     ViewData["Title"] = Model?.PageTitle ?? "Transactions";
 }
+@if (Model == null)
+{
+    <p>model is null</p>
+}
+else
+{
+    <div class="max-w-7xl mx-auto mb-6 mt-6">
+        <section class="relative z-0">
+            <form asp-controller="Transactions" asp-action="@Model.Action" method="get" class="rounded-2xl border border-slate-200 bg-white/80 shadow-sm backdrop-blur px-4 py-4 mt-4">
+                <input type="hidden" name="PageNumber" value="1" />
 
-<div class="max-w-7xl mx-auto mb-6 mt-6">
-    <section class="relative z-0">
-        <form asp-controller="Transactions" asp-action="Index" method="get" class="rounded-2xl border border-slate-200 bg-white/80 shadow-sm backdrop-blur px-4 py-4 mt-4">
-            <input type="hidden" name="PageNumber" value="1" />
+                @if (Model!.Filters.PageSize.HasValue)
+                    {
+                        <input type="hidden" name="PageSize" value="@Model.Filters.PageSize" />
+                    }
 
-            @if (Model!.Filters.PageSize.HasValue)
-            {
-                <input type="hidden" name="PageSize" value="@Model.Filters.PageSize" />
-            }
+                    <div class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(150px,170px)_minmax(150px,170px)_minmax(260px,1fr)_auto] lg:items-end">
 
-            <div class="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(150px,170px)_minmax(150px,170px)_minmax(260px,1fr)_auto] lg:items-end">
+                        <div class="space-y-2">
+                            <label class="relative block">
+                                <span class="absolute left-4 top-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Date from</span>
+                                <input name="DateFrom"
+                                value="@Model.Filters.DateFrom?.ToString("yyyy-MM-dd")"
+                                type="date"
+                                class="h-14 w-full rounded-xl border-0 bg-slate-100 px-4 pt-5 text-sm font-semibold text-slate-800 ring-1 ring-inset ring-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500" />
+                            </label>
+                        </div>
 
-                <div class="space-y-2">
-                    <label class="relative block">
-                        <span class="absolute left-4 top-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Date from</span>
-                        <input name="DateFrom"
-                               value="@Model.Filters.DateFrom?.ToString("yyyy-MM-dd")"
-                               type="date"
-                               class="h-14 w-full rounded-xl border-0 bg-slate-100 px-4 pt-5 text-sm font-semibold text-slate-800 ring-1 ring-inset ring-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500" />
-                    </label>
-                </div>
+                        <div class="space-y-2">
+                            <label class="relative block">
+                                <span class="absolute left-4 top-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Date to</span>
+                                <input name="DateTo"
+                                value="@Model.Filters.DateTo?.ToString("yyyy-MM-dd")"
+                                type="date"
+                                class="h-14 w-full rounded-xl border-0 bg-slate-100 px-4 pt-5 text-sm font-semibold text-slate-800 ring-1 ring-inset ring-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500" />
+                            </label>
+                        </div>
 
-                <div class="space-y-2">
-                    <label class="relative block">
-                        <span class="absolute left-4 top-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">Date to</span>
-                        <input name="DateTo"
-                               value="@Model.Filters.DateTo?.ToString("yyyy-MM-dd")"
-                               type="date"
-                               class="h-14 w-full rounded-xl border-0 bg-slate-100 px-4 pt-5 text-sm font-semibold text-slate-800 ring-1 ring-inset ring-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500" />
-                    </label>
-                </div>
+                        <label class="relative block">
+                            <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
+                                    <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                            <input name="SearchTerm"
+                            value="@Model.Filters.SearchTerm"
+                            type="search"
+                            placeholder="Warehouse, Client, Reference..."
+                            class="h-14 w-full rounded-xl border-0 bg-slate-100 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 ring-1 ring-inset ring-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500" />
+                        </label>
 
-                <label class="relative block">
-                    <span class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
-                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
-                        </svg>
-                    </span>
-                    <input name="SearchTerm"
-                           value="@Model.Filters.SearchTerm"
-                           type="search"
-                           placeholder="Warehouse, Client, Reference..."
-                           class="h-14 w-full rounded-xl border-0 bg-slate-100 pl-11 pr-4 text-sm font-semibold text-slate-800 placeholder:text-slate-400 ring-1 ring-inset ring-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-500" />
-                </label>
+                        <div class="flex items-center justify-end gap-2">
+                            <a asp-controller="Transactions"
+                            asp-action="@Model.Action"
+                            class="inline-flex h-11 items-center justify-center rounded-xl px-4 text-sm font-bold text-slate-500 hover:bg-slate-100">
+                                Clear
+                            </a>
+                            <button type="submit" class="inline-flex h-11 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-bold text-white hover:bg-blue-700 active:scale-95 transition">
+                                Filter
+                            </button>
+                        </div>
 
-                <div class="flex items-center justify-end gap-2">
-                    <a asp-controller="Transactions"
-                           asp-action="Index"
-                           class="inline-flex h-11 items-center justify-center rounded-xl px-4 text-sm font-bold text-slate-500 hover:bg-slate-100">
-                        Clear
-                    </a>
-                    <button type="submit" class="inline-flex h-11 items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-bold text-white hover:bg-blue-700 active:scale-95 transition">
-                        Filter
-                    </button>
-                </div>
+                        <div class="lg:col-span-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-100 p-2 ring-1 ring-inset ring-slate-200">
+                            <label class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-bold text-slate-700 hover:bg-white">
+                                <input type="checkbox"
+                                name="IncludeAdjustments"
+                                value="true"
+                                checked="@(Model.Filters.IncludeAdjustments ? "checked" : null)"
+                                class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                                <input type="hidden" name="IncludeAdjustments" value="false" />
+                                adjustment
+                            </label>
 
-                <div class="lg:col-span-3 flex flex-wrap items-center gap-2 rounded-xl bg-slate-100 p-2 ring-1 ring-inset ring-slate-200">
-                    <label class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-bold text-slate-700 hover:bg-white">
-                        <input type="checkbox"
-                               name="IncludeAdjustments"
-                               value="true"
-                               checked="@(Model.Filters.IncludeAdjustments ? "checked" : null)"
-                               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                        <input type="hidden" name="IncludeAdjustments" value="false" />
-                        adjustment
-                    </label>
+                            <label class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-bold text-slate-700 hover:bg-white">
+                                <input type="checkbox"
+                                name="IncludeIssues"
+                                value="true"
+                                checked="@(Model.Filters.IncludeIssues ? "checked" : null)"
+                                class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                                <input type="hidden" name="IncludeIssues" value="false" />
+                                issue
+                            </label>
 
-                    <label class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-bold text-slate-700 hover:bg-white">
-                        <input type="checkbox"
-                               name="IncludeIssues"
-                               value="true"
-                               checked="@(Model.Filters.IncludeIssues ? "checked" : null)"
-                               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                        <input type="hidden" name="IncludeIssues" value="false" />
-                        issue
-                    </label>
+                            <label class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-bold text-slate-700 hover:bg-white">
+                                <input type="checkbox"
+                                name="IncludeReturns"
+                                value="true"
+                                checked="@(Model.Filters.IncludeReturns ? "checked" : null)"
+                                class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                                <input type="hidden" name="IncludeReturns" value="false" />
+                                return
+                            </label>
 
-                    <label class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-bold text-slate-700 hover:bg-white">
-                        <input type="checkbox"
-                               name="IncludeReturns"
-                               value="true"
-                               checked="@(Model.Filters.IncludeReturns ? "checked" : null)"
-                               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                        <input type="hidden" name="IncludeReturns" value="false" />
-                        return
-                    </label>
-
-                    <label class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-bold text-slate-700 hover:bg-white">
-                        <input type="checkbox"
-                               name="IncludeTransfers"
-                               value="true"
-                               checked="@(Model.Filters.IncludeTransfers ? "checked" : null)"
-                               class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
-                        <input type="hidden" name="IncludeTransfers" value="false" />
-                        transfer
-                    </label>
-                </div>
-            </div>
-        </form>
-    </section>
-</div>
-
+                            <label class="inline-flex h-9 cursor-pointer items-center gap-2 rounded-lg px-3 text-sm font-bold text-slate-700 hover:bg-white">
+                                <input type="checkbox"
+                                name="IncludeTransfers"
+                                value="true"
+                                checked="@(Model.Filters.IncludeTransfers ? "checked" : null)"
+                                class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                                <input type="hidden" name="IncludeTransfers" value="false" />
+                                transfer
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+}
 <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-5 auto-rows-fr pb-28">
     @foreach (var transaction in Model!.Transactions! ?? Enumerable.Empty<InventoryTracker.WebOperator.ViewModels.Transactions.TransactionCardViewModel>())
     {

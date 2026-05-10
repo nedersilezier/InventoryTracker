@@ -4,7 +4,6 @@ namespace InventoryTracker.WebAdmin.ViewModels.Items
 {
     public class CreateEditItemViewModel
     {
-        [Key]
         public Guid? ItemId { get; set; }
 
         [Required(ErrorMessage = "Item name is required")]

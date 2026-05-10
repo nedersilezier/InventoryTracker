@@ -65,6 +65,53 @@ namespace InventoryTracker.WebOperator.Controllers
             }
             return View(result.Data);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Drafts(GetTransactionsRequest request, CancellationToken cancellationToken)
+        {
+            if (!request.DateFrom.HasValue && !request.DateTo.HasValue)
+            {
+                var today = DateTime.Today;
+                request.DateFrom = today;
+                request.DateTo = today;
+            }
+            var result = await _transactionsService.GetUsersDraftsAsync(request, cancellationToken);
+
+            if (!result.Success)
+            {
+                var authFailure = HandleAuthFailure(result);
+                if (authFailure is not null)
+                    return authFailure;
+
+                TempData["ErrorMessage"] = result.ErrorMessage ?? "Unable to load drafts.";
+
+                return View(new OperatorTransactionsIndexViewModel
+                {
+                    TotalCount = 0,
+                    DisplayedCount = 0,
+                    Filters = new TransactionFiltersViewModel
+                    {
+                        SearchTerm = request.SearchTerm,
+                        IncludeAdjustments = request.IncludeAdjustments,
+                        IncludeTransfers = request.IncludeTransfers,
+                        IncludeIssues = request.IncludeIssues,
+                        IncludeReturns = request.IncludeReturns,
+                        DateFrom = request.DateFrom,
+                        DateTo = request.DateTo,
+                    },
+                    Pagination = new PaginationViewModel
+                    {
+                        CurrentPage = 1,
+                        TotalPages = 1,
+                        PageSize = request.PageSize,
+                        Controller = "Transactions",
+                        Action = "Drafts"
+                    }
+                });
+            }
+            return View("Index", result.Data);
+        }
+
         [HttpGet]
         public async Task<IActionResult> Create(CancellationToken cancellationToken)
         {

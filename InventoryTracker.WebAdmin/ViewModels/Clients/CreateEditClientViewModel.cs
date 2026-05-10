@@ -8,7 +8,6 @@ namespace InventoryTracker.WebAdmin.ViewModels.Clients
 {
     public class CreateEditClientViewModel
     {
-        [Key]
         public Guid? ClientId { get; set; }
 
         [Required(ErrorMessage = "Client name is required")]

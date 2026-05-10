@@ -9,6 +9,7 @@ namespace InventoryTracker.WebOperator.Interfaces
     {
         Task<ServiceResult<OperatorTransactionsIndexViewModel>> GetAllAsync(GetTransactionsRequest request, CancellationToken cancellationToken);
         Task<ServiceResult<CreateEditTransactionViewModel>> GetByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<ServiceResult<OperatorTransactionsIndexViewModel>> GetUsersDraftsAsync(GetTransactionsRequest request, CancellationToken cancellationToken);
         Task<ServiceResult<CreateTransactionResponse>> CreateTransactionAsync(CreateTransactionRequest request, CancellationToken cancellationToken);
         Task<ServiceResult<CreateTransactionResponse>> UpdateTransactionAsync(Guid id, UpdateTransactionRequest request, CancellationToken cancellationToken);
         Task<ServiceResult<Guid>> CancelTransactionAsync(Guid id, CancellationToken cancellationToken);

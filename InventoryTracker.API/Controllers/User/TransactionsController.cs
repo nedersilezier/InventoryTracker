@@ -3,6 +3,7 @@ using InventoryTracker.Application.Features.Transactions.Commands.CreateTransact
 using InventoryTracker.Application.Features.Transactions.Commands.UpdateTransaction;
 using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions;
 using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions.GetAll;
+using InventoryTracker.Application.Features.Transactions.Queries.GetTransactions.GetUsersDrafts;
 using InventoryTracker.Contracts.Requests.Transactions;
 using InventoryTracker.Contracts.Responses.Common;
 using InventoryTracker.Contracts.Responses.Transactions;
@@ -27,6 +28,49 @@ namespace InventoryTracker.API.Controllers.User
         public async Task<IActionResult> GetAllTransactions([FromQuery] GetTransactionsRequest request, CancellationToken cancellationToken)
         {
             var query = new GetTransactionsQuery
+            {
+                SearchTerm = request.SearchTerm,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                IncludeAdjustments = request.IncludeAdjustments,
+                IncludeTransfers = request.IncludeTransfers,
+                IncludeIssues = request.IncludeIssues,
+                IncludeReturns = request.IncludeReturns,
+                DateFrom = request.DateFrom,
+                DateTo = request.DateTo
+            };
+            var transactionsPaged = await _mediator.Send(query, cancellationToken);
+            var response = new PagedResponse<TransactionListDTO>
+            {
+                Items = transactionsPaged.Items.Select(transaction => new TransactionListDTO
+                {
+                    TransactionId = transaction.TransactionId,
+                    Type = transaction.Type,
+                    Status = transaction.Status,
+                    TransactionDate = transaction.TransactionDate,
+                    ClientId = transaction.ClientId,
+                    ClientName = transaction.ClientName,
+                    SourceWarehouseId = transaction.SourceWarehouseId,
+                    DestinationWarehouseId = transaction.DestinationWarehouseId,
+                    SourceWarehouseNameSnapshot = transaction.SourceWarehouseNameSnapshot,
+                    DestinationWarehouseNameSnapshot = transaction.DestinationWarehouseNameSnapshot,
+                    ReferenceNumber = transaction.ReferenceNumber,
+                    FromDisplay = transaction.FromDisplay,
+                    ToDisplay = transaction.ToDisplay
+                }).ToList(),
+                TotalPages = transactionsPaged.TotalPages,
+                PageNumber = transactionsPaged.PageNumber,
+                PageSize = transactionsPaged.PageSize,
+                TotalCount = transactionsPaged.TotalCount
+            };
+            return Ok(response);
+        }
+
+        [HttpGet]
+        [Route("drafts")]
+        public async Task<IActionResult> GetCurrentUsersDrafts([FromQuery] GetTransactionsRequest request, CancellationToken cancellationToken)
+        {
+            var query = new GetUsersDraftsQuery
             {
                 SearchTerm = request.SearchTerm,
                 PageNumber = request.PageNumber,

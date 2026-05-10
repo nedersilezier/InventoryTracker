@@ -11,5 +11,6 @@ namespace InventoryTracker.Application.Common.Interfaces
         Task<PagedResult<TransactionListDTO>> GetAllTransactionsAsync(GetTransactionsParameters parameters, CancellationToken cancellationToken);
         Task<TransactionDTO?> GetTransactionByIdAsync(Guid id, CancellationToken cancellationToken);
         Task<IReadOnlyList<TransactionListDTO>> GetRecentTransactionsAsync(int count, CancellationToken cancellationToken);
+        Task<PagedResult<TransactionListDTO>> GetCurrentUsersDraftsAsync(GetUsersDraftsParameters parameters, CancellationToken cancellationToken);
     }
 }
