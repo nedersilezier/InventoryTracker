@@ -69,99 +69,101 @@
                             </td>
 
                             <td class="py-4 px-6 text-right">
-                                    <details class="opacity-0 group-hover:opacity-100 transition-opacity relative transaction-actions" data-transaction-actions>
-                                        <summary class="list-none cursor-pointer px-3 py-1 rounded-full bg-slate-50 text-black text-sm font-semibold shadow hover:bg-slate-200 transition flex justify-center gap-2 select-none" data-transaction-actions-toggle>
-                                            <span class="text-base leading-none text-center hover:text-blue-400">Manage</span>
-                                        </summary>
-                                        <div class="w-40 bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden transaction-actions-menu" data-transaction-actions-menu>
-                                            <form asp-controller="Transactions"
-                                                  asp-action="Edit"
-                                                  method="get"
-                                                  target="_blank"
-                                                  class="block w-full">
+                                <details class="opacity-0 group-hover:opacity-100 transition-opacity relative transaction-actions" data-transaction-actions>
+                                    <summary class="list-none cursor-pointer px-3 py-1 rounded-full bg-slate-50 text-black text-sm font-semibold shadow hover:bg-slate-200 transition flex justify-center gap-2 select-none" data-transaction-actions-toggle>
+                                        <span class="text-base leading-none text-center hover:text-blue-400">Manage</span>
+                                    </summary>
+                                    <div class="w-40 bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden transaction-actions-menu" data-transaction-actions-menu>
+                                        <form asp-controller="Transactions"
+                                              asp-action="Edit"
+                                              method="get"
+                                              target="_blank"
+                                              class="block w-full">
     
-                                                @Html.AntiForgeryToken()
+                                            @Html.AntiForgeryToken()
 
-                                                <input type="hidden" name="id" value="@t.TransactionId" />
-                                                <button type="submit"
-                                                        class="w-full p-2 hover:bg-slate-100 rounded-lg group">
-                                                    <div class="flex items-center justify-end gap-1">
-                                                        <div class="material-symbols-outlined text-[18px] text-blue-600">
-                                                            edit
-                                                        </div>
-                                                        <div>
-                                                            Edit
-                                                        </div>
+                                            <input type="hidden" name="id" value="@t.TransactionId" />
+                                            <button type="submit"
+                                                    class="w-full p-2 hover:bg-slate-100 rounded-lg group">
+                                                <div class="flex items-center justify-end gap-1">
+                                                    <div class="material-symbols-outlined text-[18px] text-blue-600">
+                                                        edit
                                                     </div>
+                                                    <div>
+                                                        Edit
+                                                    </div>
+                                                </div>
                                                     
-                                                </button>
-                                            </form>
-                                            <form asp-controller="Transactions"
-                                                  asp-action="Approve"
-                                                  method="post"
-                                                  class="block w-full">
+                                            </button>
+                                        </form>
+                                        <form asp-controller="Transactions"
+                                              asp-action="Approve"
+                                              method="post"
+                                              class="block w-full">
     
-                                                @Html.AntiForgeryToken()
+                                            @Html.AntiForgeryToken()
 
-                                                <input type="hidden" name="id" value="@t.TransactionId" />
-                                                <button type="submit"
-                                                        class="w-full p-2 hover:bg-slate-100 rounded-lg group"
-                                                        onclick="return confirm('Are you sure you want to approve this transaction?')">
-                                                    <div class="flex items-center justify-end gap-1">
-                                                        <div class="material-symbols-outlined text-[18px] text-green-600">
-                                                            Check
-                                                        </div>
-                                                        <div>
-                                                            Approve
-                                                        </div>
+                                            <input type="hidden" name="id" value="@t.TransactionId" />
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <button type="submit"
+                                                    class="w-full p-2 hover:bg-slate-100 rounded-lg group"
+                                                    onclick="return confirm('Are you sure you want to approve this transaction?')">
+                                                <div class="flex items-center justify-end gap-1">
+                                                    <div class="material-symbols-outlined text-[18px] text-green-600">
+                                                        Check
                                                     </div>
+                                                    <div>
+                                                        Approve
+                                                    </div>
+                                                </div>
                                                     
-                                                </button>
-                                            </form>
-                                            <form asp-controller="Transactions"
-                                                  asp-action="Cancel"
-                                                  method="post"
-                                                  class="block w-full">
+                                            </button>
+                                        </form>
+                                        <form asp-controller="Transactions"
+                                              asp-action="Cancel"
+                                              method="post"
+                                              class="block w-full">
     
-                                                @Html.AntiForgeryToken()
+                                            @Html.AntiForgeryToken()
 
-                                                <input type="hidden" name="id" value="@t.TransactionId" />
-                                                <button type="submit"
-                                                        class="w-full p-2 hover:bg-slate-100 rounded-lg group"
-                                                        onclick="return confirm('Are you sure you want to approve this transaction?')">
-                                                    <div class="flex items-center justify-end gap-1">
-                                                        <div class="material-symbols-outlined text-[18px] text-red-600">
-                                                            cancel
-                                                        </div>
-                                                        <div>
-                                                            Cancel
-                                                        </div>
+                                            <input type="hidden" name="id" value="@t.TransactionId" />
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <button type="submit"
+                                                    class="w-full p-2 hover:bg-slate-100 rounded-lg group"
+                                                    onclick="return confirm('Are you sure you want to approve this transaction?')">
+                                                <div class="flex items-center justify-end gap-1">
+                                                    <div class="material-symbols-outlined text-[18px] text-red-600">
+                                                        cancel
                                                     </div>
+                                                    <div>
+                                                        Cancel
+                                                    </div>
+                                                </div>
                                                     
-                                                </button>
-                                            </form>
-                                            <form asp-controller="Transactions"
-                                                  asp-action="ShowDocument"
-                                                  method="get"
-                                                  class="block w-full">
+                                            </button>
+                                        </form>
+                                        <form asp-controller="Transactions"
+                                              asp-action="ShowDocument"
+                                              method="get"
+                                              class="block w-full">
     
-                                                @Html.AntiForgeryToken()
+                                            @Html.AntiForgeryToken()
 
-                                                <input type="hidden" name="id" value="@t.TransactionId" />
-                                                <button type="submit"
-                                                        class="w-full p-2 hover:bg-slate-100 rounded-lg group">
-                                                    <div class="flex items-center justify-end gap-1">
-                                                        <div class="material-symbols-outlined text-[18px] text-slate-600">
-                                                            article
-                                                        </div>
-                                                        <div>
-                                                            Document
-                                                        </div>
+                                            <input type="hidden" name="id" value="@t.TransactionId" />
+                                            <button type="submit"
+                                                    class="w-full p-2 hover:bg-slate-100 rounded-lg group">
+                                                <div class="flex items-center justify-end gap-1">
+                                                    <div class="material-symbols-outlined text-[18px] text-slate-600">
+                                                        article
                                                     </div>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </details>
+                                                    <div>
+                                                        Document
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </details>
                             </td>
                         </tr>
                     }

@@ -409,7 +409,7 @@ namespace InventoryTracker.WebAdmin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Approve(Guid id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Approve(Guid id, string returnUrl, CancellationToken cancellationToken)
         {
             var result = await _transactionsService.ApproveTransactionAsync(id, cancellationToken);
 
@@ -425,12 +425,14 @@ namespace InventoryTracker.WebAdmin.Controllers
             {
                 TempData["SuccessMessage"] = $"Transaction '{result.Data!}' approved successfully.";
             }
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Cancel(Guid id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Cancel(Guid id, string returnUrl, CancellationToken cancellationToken)
         {
             var result = await _transactionsService.CancelTransactionAsync(id, cancellationToken);
 
@@ -446,6 +448,8 @@ namespace InventoryTracker.WebAdmin.Controllers
             {
                 TempData["SuccessMessage"] = $"Transaction '{result.Data!}' cancelled successfully.";
             }
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
             return RedirectToAction(nameof(Index));
         }
 
