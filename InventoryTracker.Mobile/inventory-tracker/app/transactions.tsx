@@ -36,6 +36,7 @@ export default function TransactionsScreen() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [transactionsVisible, setTransactionsVisible] = useState(true);
   const [filterVisible, setFilterVisible] = useState(false);
   const [searchVisible, setSearchVisible] = useState(false);
   //active filters used for api requests
@@ -144,6 +145,7 @@ export default function TransactionsScreen() {
   //open search modal
   const handleOpenSearch = () => {
     setDraftFilters(filters);
+    setTransactionsVisible(false);
     setSearchVisible(true);
   };
   //apply filters + reset list and fetch new data
@@ -172,6 +174,7 @@ export default function TransactionsScreen() {
     try {
       setApplyingSearch(true);
       setSearchVisible(false);
+      setTransactionsVisible(true);
       setFilters(nextFilters);
       setItems([]);
       setPageNumber(1);
@@ -254,7 +257,10 @@ export default function TransactionsScreen() {
         filters={draftFilters}
         onChange={setDraftFilters}
         onApply={handleApplySearch}
-        onClose={() => setSearchVisible(false)}
+        onClose={() => {
+          setSearchVisible(false);
+          setTransactionsVisible(true);
+        }}
       />
       {/* bottom navigation view */}
       <View style={styles.bottomNav}>
@@ -267,7 +273,7 @@ export default function TransactionsScreen() {
         <BottomNavItem
           icon="receipt-outline"
           label="Transactions"
-          active
+          active={transactionsVisible}
           onOpen={() => router.replace("/transactions")}
         />
         <BottomNavItem
