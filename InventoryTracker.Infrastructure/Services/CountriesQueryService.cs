@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryTracker.Infrastructure.Services
 {
-    public class CountriesService : ICountriesService
+    public class CountriesQueryService : ICountriesQueryService
     {
         private readonly AppDbContext _context;
-        public CountriesService(AppDbContext context)
+        public CountriesQueryService(AppDbContext context)
         {
             _context = context;
         }
@@ -76,57 +76,6 @@ namespace InventoryTracker.Infrastructure.Services
             if (country == null)
                 throw new RecordNotFoundException(nameof(Country), id);
             return country;
-        }
-        public async Task<CountryCreatedDTO> CreateCountryAsync(CreateCountryParameters parameters, CancellationToken cancellationToken)
-        {
-            var countryCodeExists = await _context.Countries.AnyAsync(c => c.Code == parameters.Code, cancellationToken);
-            if (countryCodeExists)
-                throw new BusinessException($"Country with code {parameters.Code} already exists.");
-            var country = new Country
-            {
-                CountryId = Guid.NewGuid(),
-                Name = parameters.Name,
-                Code = parameters.Code
-            };
-
-            _context.Countries.Add(country);
-            await _context.SaveChangesAsync(cancellationToken);
-            return new CountryCreatedDTO
-            {
-                CountryId = country.CountryId,
-                Name = country.Name,
-            };
-        }
-        public async Task<CountryDTO?> UpdateCountryAsync(UpdateCountryParameters parameters, CancellationToken cancellationToken)
-        {
-            var country = await _context.Countries.FirstOrDefaultAsync(x => x.CountryId == parameters.CountryId, cancellationToken);
-            if (country == null)
-                return null;
-
-            var codeExists = await _context.Countries.AnyAsync(x => x.Code == parameters.Code && x.CountryId != parameters.CountryId, cancellationToken);
-            if (codeExists)
-                throw new BusinessException($"Another country with code {parameters.Code} already exists.");
-
-            country.Name = parameters.Name;
-            country.Code = parameters.Code;
-            await _context.SaveChangesAsync(cancellationToken);
-            return new CountryDTO
-            {
-                CountryId = country.CountryId,
-                Name = country.Name,
-                Code = country.Code
-            };
-        }
-        public async Task DeleteCountryAsync(Guid id, CancellationToken cancellationToken)
-        {
-            var country = await _context.Countries.FirstOrDefaultAsync(x => x.CountryId == id, cancellationToken);
-            if (country == null)
-                return;
-            var addressesDepend = await _context.Addresses.AnyAsync(a => a.CountryId == id, cancellationToken);
-            if (addressesDepend)
-                throw new ConflictException($"Country with name {country.Name} is used by addresses and cannot be deleted.");
-            _context.Countries.Remove(country);
-            await _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -121,7 +121,7 @@ builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IUsersService, UsersService>();
 
 // register countries service
-builder.Services.AddScoped<ICountriesService, CountriesService>();
+builder.Services.AddScoped<ICountriesQueryService, CountriesQueryService>();
 
 // register clients service
 builder.Services.AddScoped<IClientsQueryService, ClientsQueryService>();

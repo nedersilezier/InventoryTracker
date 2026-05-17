@@ -7,8 +7,8 @@ namespace InventoryTracker.Application.Features.Countries.Queries.GetCountries
 {
     public class GetCountryByIdQueryHandler : IRequestHandler<GetCountryByIdQuery, CountryDTO?>
     {
-        private readonly ICountriesService _countriesService;
-        public GetCountryByIdQueryHandler(ICountriesService countriesService)
+        private readonly ICountriesQueryService _countriesService;
+        public GetCountryByIdQueryHandler(ICountriesQueryService countriesService)
         {
             _countriesService = countriesService;
         }

@@ -21,9 +21,13 @@ namespace InventoryTracker.Infrastructure.Repositories
         {
             return await _context.Addresses.AnyAsync(a => a.AddressId == id, cancellationToken);
         }
-         public async Task<Address?> GetAddressByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<Address?> GetAddressByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == id, cancellationToken);
+        }
+        public async Task<bool> HasAnyForCountryAsync(Guid countryId, CancellationToken cancellationToken)
+        {
+            return await _context.Addresses.AnyAsync(a => a.CountryId == countryId, cancellationToken);
         }
     }
 }
