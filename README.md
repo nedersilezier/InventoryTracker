@@ -16,11 +16,12 @@ The project focuses on backend architecture, secure API design, reusable client/
 - Transaction-based stock control instead of direct stock editing
 - Reusable API client layer for MVC clients
 - WebAdmin MVC client with CRUD, pagination, filtering, search, and transaction approval/cancellation
+- WebOperator MVC client
 - React Native / Expo mobile client for operator transaction workflows
 
 ## Current Status
 
-The backend API, WebAdmin MVP, and selected mobile transaction flows are functional.
+The backend API, WebAdmin MVP, WebOperator MVP and Mobile MVP are functional.
 
 Implemented:
 
@@ -35,7 +36,6 @@ Implemented:
 
 In progress:
 
-- WebOperator client
 - Additional mobile features
 - Client balance support
 - Transaction document generation
@@ -188,7 +188,7 @@ dotnet run --project InventoryTracker.WebAdmin
 ```bash
 cd InventoryTracker.Mobile/inventory-tracker
 npm install
-npx expo start
+npx expo start -c
 ```
 
 ## Screenshots
@@ -223,17 +223,26 @@ npx expo start
 
 ![Mobile New Transaction - Review](Screenshots/mobile_new_transaction4.png)
 
+### WebOperator
+
+![WebOperator Main](Screenshots/weboperator_transactions.png)
+
+![WebOperator Create](Screenshots/weboperator_create1.png)
+
+![WebOperator Create](Screenshots/weboperator_create2.png)
+
 ## Roadmap
 
 - Add automated unit and integration tests
 - Add GitHub Actions build/test workflow
-- Complete WebOperator client
-- Expand mobile operator workflows
-- Add client balance support
+- Complete web and mobile clients
+- Expand db model and domain dictionaries
+- Add Client balance support
 - Add transaction document generation
+- Add storage support for uploading photos while creating transactions
 - Improve deployment configuration
 - Move production-like secrets fully out of committed configuration
 
 ## Notes
 
-This is an active learning and portfolio project. The current focus is backend architecture, secure API design, client/API integration, and realistic inventory workflows.
+This is an active learning and portfolio project. The current focus is backend architecture, API design, client/API integration, and realistic inventory workflows.
